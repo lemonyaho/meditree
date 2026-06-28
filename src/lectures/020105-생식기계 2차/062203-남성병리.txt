@@ -1,0 +1,39 @@
+# 고환,음낭,음경 병리학
+@date 26.06.22.34
+@prof 정운용P
+@color red
+@ref 1: None
+
+01 Penis
+01.1 Benign
+01.1.1 Condyloma Acuminatum (HPV 6,11)
+01.2 Malignant
+01.2.1 CIS (HPV 16)
+01.2.1.1 Bowen dz.
+01.2.1.2 Bowenoid Papulosis
+01.2.2 Invasive SqCC (HPV 16,18)
+
+02 Testis, Epididymis
+02.1 Cryptorchidism
+02.2 Atrophy (9 Causes)
+02.3 Inflammation
+02.4 Vascular dz.
+02.4.1 Torsion
+02.5 Testicular tumor (60% mixed)
+02.5.1 GCNIS-related
+02.5.1.1 Germ cell neoplasia in situ
+02.5.1.2 Seminoma (m/c: pure)
+02.5.1.3 Nonseminoma
+02.5.1.3.1 Embryonal Carcinoma (m/c: mixed)
+02.5.1.3.2 Postpubertal Yolk Sac Tumor (=Endodermal Sinus Tumor)
+02.5.1.3.3 Postpubertal Teratoma (malig)
+02.5.1.3.4 Choriocarcinoma
+02.5.2 GCNIS-unrelated
+02.5.2.1 Prepubertal Teratoma (benign)
+02.5.2.2 Prepubertal Yolk Sac Tumor (=Endodermal Sinus Tumor)
+02.5.2.3 Spermatocytic Tumor
+02.5.3 Stromal (Sex cord) Tumor
+02.5.3.1 Leydig
+02.5.3.2 Sertoli
+02.5.4 Testicular Lymphoma
+02.5.4.1 DLBL > Burkitt > NK/T
