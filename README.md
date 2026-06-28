@@ -1,55 +1,64 @@
-# Tree Study Note MVP
+# MediTree
 
-의학 공부용 인터랙티브 트리형 노트 웹앱입니다.
+MediTree is an infinite-depth interactive study note built with React + Vite.
 
-## 기능
-
-- React + Vite 기반 정적 웹앱
-- 무한 깊이 recursive tree 구조
-- node 클릭 시 접기/펼치기
-- 여러 node 동시 펼치기
-- Back 버튼: 직전 펼침 상태로 복귀
-- Reset 버튼: 전체 접기
-- References 항상 전체 표시
-- 모바일/태블릿/노트북 반응형 UI
-
-## 실행 방법
+## Run locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-브라우저에서 표시되는 local URL로 접속합니다.
-
-## 빌드
+## Build
 
 ```bash
 npm run build
 ```
 
-`dist` 폴더가 생성됩니다.
+## Lecture text files
 
-## 노트 수정 방법
+Put lecture `.txt` files in:
 
-`src/data/noteData.js` 파일을 수정하면 됩니다.
-
-각 node는 다음 구조를 가질 수 있습니다.
-
-```js
-{
-  id: 'unique-id',
-  title: 'Node Title',
-  content: '선택 사항: 펼쳤을 때 보일 설명',
-  referenceIds: [1, 2],
-  children: []
-}
+```txt
+src/lectures/
 ```
 
-참고문헌은 `references` 배열에 추가합니다.
+Register lecture files in:
 
-```js
-references: [
-  { id: 1, text: 'Kim et al. (2024), Cancers, pp.204-208.' }
-]
+```txt
+src/data/lectures.js
 ```
+
+## Text format
+
+```txt
+# Embryology
+@date 26.02.06
+@prof 김원규P
+@ref 1: Kim et al. (2024), Cancers, pp.204-208.
+@ref 2: FIGO Committee Report (2023).
+
+01 Disease 1
+01.1 Dx.
+01.2 Tx.
+01.2.1 Medical @ref1
+-> Triptan or propranolol
+01.2.2 Surgical
+01.2.2.1 simple hysterectomy
+01.2.2.2 Radical hysterectomy
+
+02 Disease 2
+02.1 Etiology
+02.1.1 Risk factors (8) @ref2
+-> Smoking, DM, HTN, PCOS, nulliparity, early menarche, late menopause, family history
+```
+
+## Reference rules
+
+```txt
+@ref 1: ...   References list에 표시되는 문헌 정의
+@ref1         node 옆 위첨자 ¹ 표시
+@ref1,2       node 옆 위첨자 ¹,² 표시
+```
+
+Numbers such as `01.2.1` are used only to determine tree hierarchy. They are not displayed in the rendered note.

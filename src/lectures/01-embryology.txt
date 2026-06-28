@@ -1,0 +1,19 @@
+# Embryology
+@date 26.02.06
+@prof 김원규P
+@ref 1: Kim et al. (2024), Cancers, pp.204-208.
+@ref 2: FIGO Committee Report (2023).
+
+01 Disease 1
+01.1 Dx.
+01.2 Tx.
+01.2.1 Medical @ref1
+-> Triptan or propranolol
+01.2.2 Surgical
+01.2.2.1 simple hysterectomy
+01.2.2.2 Radical hysterectomy
+
+02 Disease 2
+02.1 Etiology
+02.1.1 Risk factors (8) @ref2
+-> Smoking, DM, HTN, PCOS, nulliparity, early menarche, late menopause, family history

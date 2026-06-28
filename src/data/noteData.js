@@ -1,6 +1,6 @@
 const noteData = {
-  lectureTitle: 'Embryology',
-  date: '26.06.28',
+  lectureTitle: 'Lecture 101',
+  date: '26.06.22',
   subtitle: 'Interactive Tree Study Note',
   tree: [
     {
