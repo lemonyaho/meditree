@@ -90,34 +90,35 @@
 
 
 01 Early Kidney Development
-→ Origin: intermediate mesoderm
-→ Major structure: urogenital ridge
-→ Location: both sides of primitive aorta
-→ Urogenital ridge components: nephrogenic ridge, genital ridge
-→ Duct: opens into cloaca
+01.1 Overview
+01.1.1 Origin: intermediate mesoderm
+01.1.2 Major structure: urogenital ridge
+01.1.3 Location: both sides of primitive aorta
+01.1.4 Urogenital ridge components: nephrogenic ridge, genital ridge
+01.1.5 Duct: opens into cloaca
 
-01.1 Pronephros
-01.1.1 Location
+01.2 Pronephros
+01.2.1 Location
 → Cervical region
 
-01.1.2 Key structure
+01.2.2 Key structure
 → Nephrotome
 
-01.2 Mesonephros
-01.2.1 Timing
+01.3 Mesonephros
+01.3.1 Timing
 → Middle of 2nd month
 
-01.2.2 Morphology
+01.3.2 Morphology
 → Large ovoid organ
 
-01.2.3 Fate
+01.3.3 Fate
 → Usually degenerates during 1st trimester
 
-01.2.4 Mesonephric Duct (Wolffian Duct)
-01.2.4.1 Opening site
+01.3.4 Mesonephric Duct (Wolffian Duct)
+01.3.4.1 Opening site
 → Urogenital sinus
 
-01.2.4.2 Derivatives
+01.3.4.2 Derivatives
 → Male genital ducts
 
 
