@@ -91,11 +91,16 @@
 
 01 Early Kidney Development
 01.1 Overview
-01.1.1 Origin: intermediate mesoderm
-01.1.2 Major structure: urogenital ridge
-01.1.3 Location: both sides of primitive aorta
-01.1.4 Urogenital ridge components: nephrogenic ridge, genital ridge
-01.1.5 Duct: opens into cloaca
+01.1.1 Origin
+→ intermediate mesoderm
+01.1.2 Major structure
+→ urogenital ridge
+01.1.3 Location
+→ both sides of primitive aorta
+01.1.4 Urogenital ridge components
+→ nephrogenic ridge, genital ridge
+01.1.5 Duct
+→ opens into cloaca
 
 01.2 Pronephros
 01.2.1 Location
