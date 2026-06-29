@@ -90,53 +90,401 @@
 
 
 01 Early Kidney Development
+→ Origin: intermediate mesoderm
+→ Major structure: urogenital ridge
+→ Location: both sides of primitive aorta
+→ Urogenital ridge components: nephrogenic ridge, genital ridge
+→ Duct: opens into cloaca
+
 01.1 Pronephros
+01.1.1 Location
+→ Cervical region
+
+01.1.2 Key structure
+→ Nephrotome
+
 01.2 Mesonephros
-01.2.1 Mesonephric Duct (Wolffian Duct)
+01.2.1 Timing
+→ Middle of 2nd month
+
+01.2.2 Morphology
+→ Large ovoid organ
+
+01.2.3 Fate
+→ Usually degenerates during 1st trimester
+
+01.2.4 Mesonephric Duct (Wolffian Duct)
+01.2.4.1 Opening site
+→ Urogenital sinus
+
+01.2.4.2 Derivatives
+→ Male genital ducts
+
 
 02 Late Kidney Development
-02.1 Sources
-02.1.1 Ureteric Bud
-02.1.2 Metanephric Mesoderm (Metanephric Blastema)
+02.1 Metanephros
+02.1.1 Identity
+→ Permanent kidney
+
+02.1.2 Appearance timing
+→ Early 5th week
+
+02.1.3 Function timing
+→ Early 9th week
+
+02.2 Sources
+02.2.1 Ureteric Bud
+02.2.1.1 Synonym
+→ Metanephric diverticulum
+
+02.2.1.2 Origin
+→ Outgrowth of mesonephric duct
+
+02.2.1.3 Derivatives
+→ Collecting system
+
+02.2.1.3.1 Ureter
+→ Derivative of ureteric bud
+
+02.2.1.3.2 Renal pelvis
+→ Derivative of ureteric bud
+
+02.2.1.3.3 Calices
+→ Derivative of ureteric bud
+
+02.2.1.3.4 Collecting tubule
+→ Derivative of ureteric bud
+
+02.2.1.4 Function
+→ Induction of metanephric mesoderm
+
+02.2.2 Metanephric Mesoderm (Metanephric Blastema)
+02.2.2.1 Induced structure
+→ Renal vesicle
+
+02.2.2.2 Intermediate structure
+→ Metanephric tubule
+
+02.2.2.3 Proximal end
+→ Bowman's capsule
+
+02.2.2.4 Distal end
+→ Nephron
+
+02.2.2.5 Nephron components
+→ Proximal convoluted tubule
+→ Loop of Henle
+→ Distal convoluted tubule
+
+02.3 Uriniferous Tubule
+02.3.1 Components
+→ Nephron
+→ Collecting tubule
+
 
 03 Molecular Regulation
 03.1 GDNF
-03.2 FGF-2, BMP-7, Wnt-11
-03.3 Wnt-4
+03.1.1 Abbreviation
+→ Glial cell-derived neurotropic factor
 
-04 Further Kidney Development 
+03.1.2 Expressed by
+→ Mesenchymal cell of metanephric blastema
+
+03.1.3 Function
+→ Induces outgrowth of ureteric bud
+→ Binds to c-Ret in epithelial cell membrane of ureteric bud
+
+03.1.4 Controlled by
+→ WT-1
+
+03.2 FGF-2, BMP-7, Wnt-11
+03.2.1 Expressed in
+→ Epithelial cell of ureteric bud tip
+
+03.2.2 Function
+→ Transform surrounding mesenchymal cell into epithelial tubular cell
+
+03.3 Wnt-4
+03.3.1 Function
+→ Tubule formation
+
+
+04 Further Kidney Development
 04.1 Delobulation
+04.1.1 Initial morphology
+→ Lobulation at birth
+
+04.1.2 Fate
+→ Disappears during childhood
+
+04.1.3 Mechanism
+→ Growth of nephron
+
 04.2 Position
+04.2.1 Initial position
+→ Pelvic region
+
+04.2.2 Final position
+→ Cranial part of abdomen
+
+04.2.3 Mechanism
+→ Diminution of body curvature
+→ Growth of lumbar and sacral region
+
 04.3 Blood Supply
+04.3.1 Initial blood supply
+→ Pelvic branch of aorta in pelvis
+
+04.3.2 Final blood supply
+→ Renal artery
+
 
 05 Bladder & Urethra
-05.1 Primitive Urogenital Sinus
-05.1.1 Vesical part
-05.1.2 Pelvic part
-05.1.3 Phallic part
-05.2 Ejaculatory Duct
-05.3 Trigone
-05.4 Prostate gland
-05.5 Urethra
-05.5.1 Female Urethra
-05.5.1.1 Cranial part
-05.5.2 Male
-05.5.2.1 Distal Male Urethra
-05.5.2.2 Penile Urethra
-05.5.2.3 Glandular Urethra
+05.1 Cloaca Division
+05.1.1 Timing
+→ Week 4~7
+
+05.1.2 Dividing structure
+→ Urorectal septum
+
+05.1.3 Anterior derivative
+→ Primitive urogenital sinus
+
+05.1.4 Posterior derivative
+→ Anal canal
+
+05.2 Primitive Urogenital Sinus
+05.2.1 Vesical Part
+05.2.1.1 Position / size
+→ Upper and largest part
+
+05.2.1.2 Derivative
+→ Urinary bladder
+
+05.2.1.3 Connection
+→ Continuous with allantois
+
+05.2.2 Pelvic Part
+05.2.2.1 Morphology
+→ Narrow canal
+
+05.2.2.2 Male derivatives
+→ Prostatic urethra
+→ Membranous urethra
+
+05.2.2.3 Female derivative
+→ Entire urethra of female
+
+05.2.3 Phallic Part
+05.2.3.1 Direction of growth
+→ Grows to genital tubercle
+
+05.3 Mesonephric Duct Incorporation
+05.3.1 Key event
+→ Absorption of caudal end of mesonephric duct into urinary bladder
+
+05.3.2 Result
+→ Ureters enter the bladder separately
+
+05.3.3 Ureter orifice position
+→ Cranial to mesonephric duct opening
+
+05.3.4 Cause of ureter orifice position
+→ Ascent of kidney
+
+05.4 Ejaculatory Duct
+05.4.1 Origin
+→ Mesonephric duct
+
+05.5 Trigone
+05.5.1 Initial origin
+→ Mesoderm origin mucosa
+
+05.5.2 Initially lined by
+→ Mesonephric duct and its outgrowth ureter
+
+05.5.3 Final epithelium
+→ Endodermal epithelium
+
+05.5.4 Key point
+→ Trigone's final epithelium is endodermal epithelium
+
+05.6 Prostate Gland
+05.6.1 Timing
+→ End of 3rd month
+
+05.6.2 Origin
+→ Outbuddings of prostatic urethra
+
+05.7 Urethra
+05.7.1 Female Urethra
+05.7.1.1 Derivative of pelvic part
+→ Entire female urethra
+
+05.7.1.2 Cranial part
+→ Urethral glands
+→ Paraurethral glands
+
+05.7.2 Male Urethra
+05.7.2.1 Prostatic urethra
+→ Derived from pelvic part of primitive urogenital sinus
+
+05.7.2.2 Membranous urethra
+→ Derived from pelvic part of primitive urogenital sinus
+
+05.7.2.3 Distal Male Urethra
+05.7.2.3.1 Origin
+→ Ectodermal glandular plate
+
+05.7.2.3.2 Derivative
+→ Glandular urethra
+
+05.7.2.4 Penile Urethra
+05.7.2.4.1 Timing
+→ End of 3rd month
+
+05.7.2.4.2 Formation mechanism
+→ Fusion of urethral folds
+
+05.7.2.4.3 Limitation
+→ Does not reach tip of phallus
+
+05.7.2.5 Glandular Urethra
+05.7.2.5.1 Location
+→ Most distal portion of male urethra
+
+05.7.2.5.2 Origin
+→ Glandular plate originated from epithelial cord
+
+05.7.2.5.3 Lumen formation
+→ Obtains a lumen during 4th month
+
+05.8 Development of Male Urethra
+05.8.1 Genital tubercle
+05.8.1.1 Hormonal control
+→ Androgen
+
+05.8.1.2 Morphologic change
+→ Rapid elongation
+
+05.8.1.3 New name
+→ Phallus
+
+05.8.2 Urethral folds
+05.8.2.1 Movement
+→ Pulled forward
+
+05.8.2.2 Result
+→ Urethral groove
+
+05.8.2.3 Fusion result
+→ Penile urethra
+
 
 06 External Genitalia
 06.1 Indifferent Stage
+06.1.1 Genital tubercle
+→ Future phallus / glans-related structure
+
+06.1.2 Genital swelling
+→ Future scrotal swelling in male
+
+06.1.3 Cloacal fold
+→ Region related to urethral and anal folds
+
+06.1.4 Cloacal membrane
+→ Divided region related to urogenital and anal openings
+
+06.1.5 Urethral folds
+→ Fuse to form penile urethra in male
+
+06.1.6 Anal fold
+→ Anal region fold
+
 06.2 Male
+06.2.1 Phallus
+→ Elongated genital tubercle
+
+06.2.2 Urethral plate
+→ Related to urethral groove formation
+
+06.2.3 Urethral groove
+→ Formed by movement of urethral folds
+
+06.2.4 Urethral folds
+→ Fuse to form penile urethra
+
+06.2.5 Penile urethra
+→ Formed by fusion of urethral folds
+
+06.2.6 Solid epithelial cord
+→ Source of glandular part of urethra
+
+06.2.7 Glandular part of urethra
+→ Most distal male urethra
+
+06.2.8 Glans penis
+→ Distal penile structure
+
+06.2.9 Scrotal swellings
+→ Fuse to form scrotum
+
+06.2.10 Line of fusion of urethral folds
+→ Ventral fusion line related to penile urethra
+
+06.2.11 Line of fusion of scrotal swellings
+→ Midline scrotal fusion line
+
+06.2.12 Scrotal septum
+→ Internal partition of scrotum
+
 
 07 Congenital Anomalies
 07.1 Hypospadia
 07.1.1 Definition
+→ Abnormal openings of urethra along inferior aspect of penis
+
+07.1.2 Developmental mechanism
+→ Incomplete fusion of urethral folds
+
+07.1.3 Incidence
+→ 3~5 / 1000
+
+07.1.4 Etiology / risk factors
+→ Unknown
+→ Environmental factors
+→ Estrogens
+→ Endocrine disruptors
+
 07.2 Epispadia
 07.2.1 Definition
-07.2.2 Most Often Associated with 
+→ Urethral meatus on dorsum of penis
+
+07.2.2 Incidence
+→ 1 / 30,000
+
+07.2.3 Developmental mechanism
+→ Genital tubercle forms in region of urorectal septum
+
+07.2.4 Cloacal membrane position
+→ Cranial to genital tubercle
+
+07.2.5 Most Often Associated with
+→ Exstrophy of bladder
+
 07.3 Exstrophy of the Bladder
 07.3.1 Definition
+→ Bladder mucosa exposed to the outside
+
+07.3.2 Anatomical defect
+→ Defect of abdominal wall ventral to bladder
+
+07.3.3 Developmental mechanism
+→ Failure of migration of primitive streak mesoderm to around cloacal membrane
+
+07.3.4 Associated anomaly
+→ Epispadia
+
 07.4 Exstrophy of the Cloaca
-
-
+07.4.1 Related spectrum
+→ Epispadia and exstrophy of cloaca

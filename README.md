@@ -1,4 +1,4 @@
-# MediTree v14.7
+# MediTree v14.8
 
 계통을 고르고, 강의를 열고, 필요한 node를 제한없이 펼쳐보는 개인 학습 지도입니다.
 
@@ -89,7 +89,7 @@ npm run dev
 ```bash
 npm run build
 git add .
-git commit -m "Update MediTree v14.7"
+git commit -m "Update MediTree v14.8"
 git push
 ```
 
@@ -104,3 +104,10 @@ git push
 ## v14.7
 - Summary의 `→` 설명 box는 별도 클릭 없이 해당 node가 보일 때 같이 표시됩니다.
 - 설명 box의 x-position을 해당 node title과 맞추었습니다.
+
+
+## v14.8
+
+- Contents에서도 `→`, `->`, `=>` 줄을 바로 위 node의 answer box로 파싱합니다.
+- Contents의 answer box는 해당 node를 클릭해 펼쳤을 때만 보입니다.
+- Summary의 note box 동작은 기존처럼 node가 보일 때 함께 표시됩니다.

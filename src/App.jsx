@@ -287,9 +287,15 @@ function parseLecture(rawLecture) {
       continue
     }
 
-    // v10.2부터는 내용 박스 대신 모든 정보를 node로 정리한다.
-    // 기존 파일에 남아 있는 -> 문장은 무시한다.
-    if (/^(?:->|→|=>)\s*(.+)$/.test(line)) {
+    const noteMatch = line.match(/^(?:->|→|=>)\s*(.+)$/)
+    if (noteMatch) {
+      const parent = stack[stack.length - 1]
+      const noteText = noteMatch[1].trim()
+
+      if (parent && noteText) {
+        if (!parent.notes) parent.notes = []
+        parent.notes.push(noteText)
+      }
       continue
     }
 
@@ -735,12 +741,12 @@ function LectureList({ lectures, onSelectLecture, emptyText }) {
   )
 }
 
-function TreeNode({ node, depth, expandedIds, matchedIds, activeBranchIds, activeBranchRootDepth, onToggle }) {
+function TreeNode({ node, depth, expandedIds, matchedIds, activeBranchIds, activeBranchRootDepth, onToggle, noteMode = 'toggle' }) {
   const expanded = expandedIds.has(node.id)
   const hasChildren = node.children.length > 0
   const hasNotes = Array.isArray(node.notes) && node.notes.length > 0
-  const canExpand = hasChildren
-  const shouldShowNotes = hasNotes && (!hasChildren || expanded)
+  const canExpand = hasChildren || (noteMode === 'toggle' && hasNotes)
+  const shouldShowNotes = hasNotes && (noteMode === 'auto' ? (!hasChildren || expanded) : expanded)
   const indicator = canExpand ? (expanded ? '▼' : '▶') : '•'
 
   return (
@@ -779,6 +785,7 @@ function TreeNode({ node, depth, expandedIds, matchedIds, activeBranchIds, activ
                 activeBranchIds={activeBranchIds}
                 activeBranchRootDepth={activeBranchRootDepth}
                 onToggle={onToggle}
+                noteMode={noteMode}
               />
             ))
             : null}
@@ -813,6 +820,7 @@ function SummaryTree({ summary, expandedIds, activeBranchRootId, onToggle }) {
           activeBranchIds={activeBranchIds}
           activeBranchRootDepth={activeBranchRootDepth}
           onToggle={(targetNode) => onToggle(summary.id, targetNode)}
+          noteMode="auto"
         />
       ))}
     </div>
@@ -857,7 +865,7 @@ function LectureView({ lecture, onBackToSystem, onBackToLibrary }) {
   }
 
   const toggleNode = (node) => {
-    const canExpand = node.children.length > 0
+    const canExpand = node.children.length > 0 || (Array.isArray(node.notes) && node.notes.length > 0)
     if (!canExpand) return
 
     pushHistorySnapshot()
@@ -984,7 +992,7 @@ function LectureView({ lecture, onBackToSystem, onBackToLibrary }) {
         <h2 className="panel-heading">Contents</h2>
         {lecture.tree.length ? (
           lecture.tree.map((node) => (
-            <TreeNode key={node.id} node={node} depth={0} expandedIds={visibleExpandedIds} matchedIds={treeSearch.matchedIds} activeBranchIds={activeBranchIds} activeBranchRootDepth={activeBranchRootDepth} onToggle={toggleNode} />
+            <TreeNode key={node.id} node={node} depth={0} expandedIds={visibleExpandedIds} matchedIds={treeSearch.matchedIds} activeBranchIds={activeBranchIds} activeBranchRootDepth={activeBranchRootDepth} onToggle={toggleNode} noteMode="toggle" />
           ))
         ) : (
           <p className="empty-list">이 강의에는 아직 node가 없습니다.</p>
