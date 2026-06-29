@@ -117,6 +117,81 @@ function combineSystemLabel(rawLecture, systemValue) {
   return `${subject} (${rawLecture.systemAcademicLabel})`
 }
 
+
+function cleanSummaryTitle(value) {
+  return String(value || '')
+    .replace(/\s*\(=.*?\)\s*$/g, '')
+    .trim()
+}
+
+function isSummaryDelimiter(line) {
+  return /^['\"]{3}/.test(String(line || '').trim())
+}
+
+function isInlineComment(line) {
+  return /^\(=.*\)$/.test(String(line || '').trim())
+}
+
+function parseSummaryTree(summaryMeta, summaryLines, rawLecture) {
+  const tree = []
+  const stack = []
+  let nodeIndex = 0
+
+  for (const rawLine of summaryLines) {
+    const line = rawLine.trim()
+    if (!line || isInlineComment(line)) continue
+
+    const noteMatch = line.match(/^(?:->|→|=>)\s*(.+)$/)
+    if (noteMatch) {
+      const parent = stack[stack.length - 1]
+      const noteNode = {
+        id: `${rawLecture.slug}-summary-${summaryMeta.id}-note-${nodeIndex++}`,
+        code: '',
+        title: noteMatch[1].trim(),
+        referenceIds: [],
+        children: [],
+      }
+
+      if (parent) parent.children.push(noteNode)
+      else tree.push(noteNode)
+      continue
+    }
+
+    const nodeMatch = line.match(/^(\d+(?:\.\d+)*)\s+(.+)$/)
+    if (!nodeMatch) continue
+
+    const code = nodeMatch[1]
+    const rawTitle = nodeMatch[2].trim()
+    const referenceIds = extractInlineReferenceIds(rawTitle)
+    const title = removeInlineReferences(rawTitle)
+    const level = code.split('.').length
+    const node = {
+      id: `${rawLecture.slug}-summary-${summaryMeta.id}-${code.replace(/\./g, '-')}-${nodeIndex++}`,
+      code,
+      title,
+      referenceIds,
+      children: [],
+    }
+
+    if (level === 1) {
+      tree.push(node)
+    } else {
+      const parent = stack[level - 2]
+      if (parent) parent.children.push(node)
+      else tree.push(node)
+    }
+
+    stack[level - 1] = node
+    stack.length = level
+  }
+
+  return {
+    id: summaryMeta.id,
+    title: cleanSummaryTitle(summaryMeta.title) || `Summary ${summaryMeta.id}`,
+    tree,
+  }
+}
+
 function parseLecture(rawLecture) {
   const lines = rawLecture.raw.replace(/\r\n/g, '\n').split('\n')
   const meta = {
@@ -128,12 +203,37 @@ function parseLecture(rawLecture) {
     color: DEFAULT_THEME.name,
   }
   const references = []
+  const summaries = []
   const tree = []
   const stack = []
+  let pendingSummary = null
+  let inSummaryBlock = false
+  let summaryLines = []
 
   for (const rawLine of lines) {
     const line = rawLine.trim()
-    if (!line) continue
+
+    if (inSummaryBlock) {
+      if (isSummaryDelimiter(line)) {
+        summaries.push(parseSummaryTree(pendingSummary, summaryLines, rawLecture))
+        pendingSummary = null
+        summaryLines = []
+        inSummaryBlock = false
+      } else {
+        summaryLines.push(rawLine)
+      }
+      continue
+    }
+
+    if (pendingSummary) {
+      if (isSummaryDelimiter(line)) {
+        inSummaryBlock = true
+        summaryLines = []
+      }
+      continue
+    }
+
+    if (!line || isInlineComment(line) || isSummaryDelimiter(line)) continue
 
     if (line.startsWith('# ')) {
       meta.title = line.replace(/^#\s+/, '').trim()
@@ -178,6 +278,12 @@ function parseLecture(rawLecture) {
       continue
     }
 
+    const sumMatch = line.match(/^@sum\s+(\d+)\s*:\s*(.+)$/i)
+    if (sumMatch) {
+      pendingSummary = { id: Number(sumMatch[1]), title: sumMatch[2].trim() }
+      continue
+    }
+
     const refMatch = line.match(/^@(ref|reference)\s+(\d+)\s*:\s*(.+)$/i)
     if (refMatch) {
       references.push({ id: Number(refMatch[2]), text: refMatch[3].trim() })
@@ -218,6 +324,10 @@ function parseLecture(rawLecture) {
     }
   }
 
+  if (pendingSummary && summaryLines.length) {
+    summaries.push(parseSummaryTree(pendingSummary, summaryLines, rawLecture))
+  }
+
   return {
     ...rawLecture,
     lectureTitle: meta.title,
@@ -227,6 +337,7 @@ function parseLecture(rawLecture) {
     period: meta.period,
     color: normalizeColor(meta.color),
     tree,
+    summaries: summaries.filter((summary) => summary.tree.length),
     references: references.sort((a, b) => a.id - b.id),
   }
 }
@@ -264,6 +375,30 @@ function getDescendantIds(node) {
 
   walk(node)
   return ids
+}
+
+function cloneExpandedMap(map) {
+  return new Map([...map.entries()].map(([key, value]) => [key, new Set(value)]))
+}
+
+function findNodeById(nodes, nodeId) {
+  for (const node of nodes) {
+    if (node.id === nodeId) return node
+    const found = findNodeById(node.children, nodeId)
+    if (found) return found
+  }
+
+  return null
+}
+
+function findNodeDepth(nodes, nodeId, depth = 0) {
+  for (const node of nodes) {
+    if (node.id === nodeId) return depth
+    const foundDepth = findNodeDepth(node.children, nodeId, depth + 1)
+    if (foundDepth !== -1) return foundDepth
+  }
+
+  return -1
 }
 
 function normalizeSearch(value) {
@@ -602,15 +737,15 @@ function LectureList({ lectures, onSelectLecture, emptyText }) {
   )
 }
 
-function TreeNode({ node, depth, expandedIds, matchedIds, onToggle }) {
+function TreeNode({ node, depth, expandedIds, matchedIds, activeBranchIds, activeBranchRootDepth, onToggle }) {
   const expanded = expandedIds.has(node.id)
   const hasChildren = node.children.length > 0
   const indicator = hasChildren ? (expanded ? '▼' : '▶') : '•'
 
   return (
-    <div className={`tree-node depth-${depth}`} style={{ '--depth': depth }}>
+    <div className={`tree-node depth-${depth}`} style={{ '--depth': depth, '--branch-depth': activeBranchRootDepth >= 0 ? activeBranchRootDepth : depth, '--branch-extra-indent': `${Math.max(depth - (activeBranchRootDepth >= 0 ? activeBranchRootDepth : depth), 0) * 29}px` }}>
       <button
-        className={`node-row ${expanded ? 'is-expanded' : ''} ${matchedIds?.has(node.id) ? 'is-match' : ''} ${!hasChildren ? 'terminal-node' : ''}`}
+        className={`node-row ${expanded ? 'is-expanded' : ''} ${activeBranchIds?.has(node.id) ? 'is-active-branch' : ''} ${matchedIds?.has(node.id) ? 'is-match' : ''} ${!hasChildren ? 'terminal-node' : ''}`}
         onClick={() => onToggle(node)}
         type="button"
       >
@@ -632,6 +767,8 @@ function TreeNode({ node, depth, expandedIds, matchedIds, onToggle }) {
               depth={depth + 1}
               expandedIds={expandedIds}
               matchedIds={matchedIds}
+              activeBranchIds={activeBranchIds}
+              activeBranchRootDepth={activeBranchRootDepth}
               onToggle={onToggle}
             />
           ))}
@@ -641,9 +778,43 @@ function TreeNode({ node, depth, expandedIds, matchedIds, onToggle }) {
   )
 }
 
+function SummaryTree({ summary, expandedIds, activeBranchRootId, onToggle }) {
+  const activeBranchIds = useMemo(() => {
+    if (!activeBranchRootId || !expandedIds.has(activeBranchRootId)) return new Set()
+    const activeNode = findNodeById(summary.tree, activeBranchRootId)
+    if (!activeNode) return new Set()
+    return new Set(getDescendantIds(activeNode))
+  }, [activeBranchRootId, expandedIds, summary.tree])
+
+  const activeBranchRootDepth = useMemo(() => {
+    if (!activeBranchRootId || !expandedIds.has(activeBranchRootId)) return -1
+    return findNodeDepth(summary.tree, activeBranchRootId)
+  }, [activeBranchRootId, expandedIds, summary.tree])
+
+  return (
+    <div className="summary-tree">
+      {summary.tree.map((node) => (
+        <TreeNode
+          key={node.id}
+          node={node}
+          depth={0}
+          expandedIds={expandedIds}
+          matchedIds={new Set()}
+          activeBranchIds={activeBranchIds}
+          activeBranchRootDepth={activeBranchRootDepth}
+          onToggle={(targetNode) => onToggle(summary.id, targetNode)}
+        />
+      ))}
+    </div>
+  )
+}
+
 function LectureView({ lecture, onBackToSystem, onBackToLibrary }) {
   const [expandedIds, setExpandedIds] = useState(() => new Set())
   const [history, setHistory] = useState([])
+  const [activeBranchRootId, setActiveBranchRootId] = useState('')
+  const [summaryExpandedMap, setSummaryExpandedMap] = useState(() => new Map())
+  const [summaryActiveMap, setSummaryActiveMap] = useState(() => new Map())
   const [treeQuery, setTreeQuery] = useState('')
   const treeSearchRef = useRef(null)
   const treeSearch = useMemo(() => searchTree(lecture.tree, treeQuery), [lecture.tree, treeQuery])
@@ -652,22 +823,81 @@ function LectureView({ lecture, onBackToSystem, onBackToLibrary }) {
     return new Set([...expandedIds, ...treeSearch.ancestorIds])
   }, [expandedIds, treeQuery, treeSearch.ancestorIds])
 
+  const activeBranchIds = useMemo(() => {
+    if (!activeBranchRootId || !visibleExpandedIds.has(activeBranchRootId)) return new Set()
+    const activeNode = findNodeById(lecture.tree, activeBranchRootId)
+    if (!activeNode) return new Set()
+    return new Set(getDescendantIds(activeNode))
+  }, [activeBranchRootId, lecture.tree, visibleExpandedIds])
+
+  const activeBranchRootDepth = useMemo(() => {
+    if (!activeBranchRootId || !visibleExpandedIds.has(activeBranchRootId)) return -1
+    return findNodeDepth(lecture.tree, activeBranchRootId)
+  }, [activeBranchRootId, lecture.tree, visibleExpandedIds])
+
+  const makeHistorySnapshot = () => ({
+    expandedIds: new Set(expandedIds),
+    activeBranchRootId,
+    summaryExpandedMap: cloneExpandedMap(summaryExpandedMap),
+    summaryActiveMap: new Map(summaryActiveMap),
+  })
+
+  const pushHistorySnapshot = () => {
+    setHistory((oldHistory) => [...oldHistory, makeHistorySnapshot()])
+  }
+
   const toggleNode = (node) => {
     const canExpand = node.children.length > 0
     if (!canExpand) return
 
+    pushHistorySnapshot()
     setExpandedIds((previous) => {
-      setHistory((oldHistory) => [...oldHistory, new Set(previous)])
       const next = new Set(previous)
 
       if (next.has(node.id)) {
         next.delete(node.id)
-        getDescendantIds(node).forEach((id) => next.delete(id))
+        const descendantIds = getDescendantIds(node)
+        descendantIds.forEach((id) => next.delete(id))
+        setActiveBranchRootId((current) => (current === node.id || descendantIds.includes(current) ? '' : current))
       } else {
         next.add(node.id)
+        setActiveBranchRootId(node.id)
       }
 
       return next
+    })
+  }
+
+  const toggleSummaryNode = (summaryId, node) => {
+    const canExpand = node.children.length > 0
+    if (!canExpand) return
+
+    pushHistorySnapshot()
+    setSummaryExpandedMap((previous) => {
+      const nextMap = new Map(previous)
+      const next = new Set(nextMap.get(summaryId) || [])
+
+      if (next.has(node.id)) {
+        next.delete(node.id)
+        const descendantIds = getDescendantIds(node)
+        descendantIds.forEach((id) => next.delete(id))
+        setSummaryActiveMap((currentMap) => {
+          const updated = new Map(currentMap)
+          const current = updated.get(summaryId) || ''
+          if (current === node.id || descendantIds.includes(current)) updated.delete(summaryId)
+          return updated
+        })
+      } else {
+        next.add(node.id)
+        setSummaryActiveMap((currentMap) => {
+          const updated = new Map(currentMap)
+          updated.set(summaryId, node.id)
+          return updated
+        })
+      }
+
+      nextMap.set(summaryId, next)
+      return nextMap
     })
   }
 
@@ -675,16 +905,23 @@ function LectureView({ lecture, onBackToSystem, onBackToLibrary }) {
     setHistory((previousHistory) => {
       if (previousHistory.length === 0) return previousHistory
       const nextHistory = [...previousHistory]
-      const previousExpandedState = nextHistory.pop()
-      setExpandedIds(previousExpandedState)
+      const previousState = nextHistory.pop()
+      setExpandedIds(new Set(previousState.expandedIds))
+      setActiveBranchRootId(previousState.activeBranchRootId || '')
+      setSummaryExpandedMap(cloneExpandedMap(previousState.summaryExpandedMap || new Map()))
+      setSummaryActiveMap(new Map(previousState.summaryActiveMap || new Map()))
       return nextHistory
     })
   }
 
   const resetAll = () => {
-    if (expandedIds.size === 0) return
-    setHistory((oldHistory) => [...oldHistory, new Set(expandedIds)])
+    const hasSummaryOpen = [...summaryExpandedMap.values()].some((ids) => ids.size > 0)
+    if (expandedIds.size === 0 && !hasSummaryOpen) return
+    pushHistorySnapshot()
     setExpandedIds(new Set())
+    setActiveBranchRootId('')
+    setSummaryExpandedMap(new Map())
+    setSummaryActiveMap(new Map())
   }
 
   return (
@@ -705,6 +942,7 @@ function LectureView({ lecture, onBackToSystem, onBackToLibrary }) {
         <div className="title-row">
           <h1>{lecture.lectureTitle}</h1>
         </div>
+        <p className="lecture-guide">목차를 보며 아는 내용을 떠올리고, node를 펼쳐 강의록과 비교해보세요.</p>
         <div className="lecture-meta-grid">
           <span className="lecture-system-label">{getHumanSystemLabel(lecture.systemLabel)}</span>
           {getLectureDatePeriod(lecture) ? <span>{getLectureDatePeriod(lecture)}</span> : null}
@@ -718,10 +956,25 @@ function LectureView({ lecture, onBackToSystem, onBackToLibrary }) {
         />
       </header>
 
-      <section className="tree-panel" aria-label="lecture tree">
+      {lecture.summaries?.length
+        ? lecture.summaries.map((summary) => (
+          <section className="summary-panel" key={summary.id}>
+            <h2>Summary: {summary.title}</h2>
+            <SummaryTree
+              summary={summary}
+              expandedIds={summaryExpandedMap.get(summary.id) || new Set()}
+              activeBranchRootId={summaryActiveMap.get(summary.id) || ''}
+              onToggle={toggleSummaryNode}
+            />
+          </section>
+        ))
+        : null}
+
+      <section className="tree-panel contents-panel" aria-label="lecture tree">
+        <h2 className="panel-heading">Contents</h2>
         {lecture.tree.length ? (
           lecture.tree.map((node) => (
-            <TreeNode key={node.id} node={node} depth={0} expandedIds={visibleExpandedIds} matchedIds={treeSearch.matchedIds} onToggle={toggleNode} />
+            <TreeNode key={node.id} node={node} depth={0} expandedIds={visibleExpandedIds} matchedIds={treeSearch.matchedIds} activeBranchIds={activeBranchIds} activeBranchRootDepth={activeBranchRootDepth} onToggle={toggleNode} />
           ))
         ) : (
           <p className="empty-list">이 강의에는 아직 node가 없습니다.</p>
@@ -800,7 +1053,7 @@ export default function App() {
   if (!lectures.length) {
     return (
       <main className="app-shell">
-        <section className="note-page empty-page">src/lectures 폴더에 txt 파일을 추가해주세요.</section>
+        <section className="note-page empty-page">_lectures_ 폴더에 txt 파일을 추가해주세요.</section>
       </main>
     )
   }

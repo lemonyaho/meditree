@@ -1,4 +1,4 @@
-const lectureModules = import.meta.glob('../lectures/**/*.txt', {
+const lectureModules = import.meta.glob('../../_lectures_/**/*.txt', {
   query: '?raw',
   import: 'default',
   eager: true,
@@ -86,7 +86,7 @@ function getSystemDisplayLabel(prefix, systemName) {
 }
 
 function parsePath(path) {
-  const cleanPath = path.replace(/^\.\.\/lectures\//, '')
+  const cleanPath = path.replace(/^\.\.\/\.\.\/_lectures_\//, '')
   const parts = cleanPath.split('/')
   const fileName = parts.pop() || 'untitled.txt'
   const systemFolderName = parts[0] || 'general'

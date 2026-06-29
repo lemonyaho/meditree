@@ -1,0 +1,139 @@
+# 발생학 Embryology
+@date 26.06.29.2
+@prof 김원규P
+@color red
+@ref 1: None
+
+@sum 1: Origin-based Urological Embryology
+'''
+1 Endoderm
+1.1 Cloaca
+1.1.1 Primitive urogenital sinus
+1.1.1.1 Vesical part
+1.1.1.1.1 Urinary bladder
+
+1.1.1.2 Allantois
+1.1.1.2.1 Urachus
+1.1.1.2.1.1 Median umbilical ligament
+
+1.1.1.3 Pelvic part
+1.1.1.3.1 Male prostatic urethra
+1.1.1.3.2 Male membranous urethra
+1.1.1.3.3 Female entire urethra
+
+1.1.1.4 Phallic part
+1.1.1.4.1 Penile urethra, except glandular urethra
+
+1.2 Prostatic urethra
+1.2.1 Endodermal outbudding
+1.2.1.1 Prostate gland
+
+1.3 Cranial part of female urethra
+1.3.1 Endodermal outbudding
+1.3.1.1 Urethral gland
+1.3.1.2 Paraurethral gland
+
+1.4 Trigone final epithelium
+1.4.1 Endodermal epithelium replaces original mesodermal lining
+
+2 Mesoderm
+2.1 Intermediate mesoderm
+2.1.1 Urogenital ridge
+2.1.1.1 Nephrogenic ridge
+2.1.1.1.1 Pronephros
+2.1.1.1.1.1 Degenerates
+
+2.1.1.1.2 Mesonephros
+2.1.1.1.2.1 Mostly degenerates
+
+2.1.1.1.3 Metanephros
+2.1.1.1.3.1 Permanent kidney
+
+2.2 Mesonephric duct / Wolffian duct
+2.2.1 Ureteric bud / Metanephric diverticulum
+2.2.1.1 Collecting system
+2.2.1.1.1 Ureter
+2.2.1.1.2 Renal pelvis
+2.2.1.1.3 Major calyx
+2.2.1.1.4 Minor calyx
+2.2.1.1.5 Collecting tubule / Collecting duct
+
+2.3 Metanephric mesoderm / Metanephric blastema
+2.3.1 Renal vesicle
+2.3.1.1 Metanephric tubule
+2.3.1.1.1 Nephron
+2.3.1.1.1.1 Bowman’s capsule
+2.3.1.1.1.2 Glomerulus / renal corpuscle
+2.3.1.1.1.3 Proximal convoluted tubule
+2.3.1.1.1.4 Loop of Henle
+2.3.1.1.1.5 Distal convoluted tubule
+
+2.4 Caudal mesonephric duct + ureteric bud incorporation
+2.4.1 Posterior wall of urinary bladder
+2.4.1.1 Trigone, initial mesodermal lining
+2.4.1.1.1 Later replaced by endodermal epithelium
+
+
+3 Ectoderm
+3.1 Ectodermal glandular plate / epithelial cord
+3.1.1 Distal male urethra
+3.1.1.1 Glandular urethra
+3.1.1.1.1 Navicular fossa
+
+3.2 Cloacal membrane surface ectoderm
+3.2.1 Cloacal membrane
+
+'''
+
+
+01 Early Kidney Development
+01.1 Pronephros
+01.2 Mesonephros
+01.2.1 Mesonephric Duct (Wolffian Duct)
+
+02 Late Kidney Development
+02.1 Sources
+02.1.1 Ureteric Bud
+02.1.2 Metanephric Mesoderm (Metanephric Blastema)
+
+03 Molecular Regulation
+03.1 GDNF
+03.2 FGF-2, BMP-7, Wnt-11
+03.3 Wnt-4
+
+04 Further Kidney Development 
+04.1 Delobulation
+04.2 Position
+04.3 Blood Supply
+
+05 Bladder & Urethra
+05.1 Primitive Urogenital Sinus
+05.1.1 Vesical part
+05.1.2 Pelvic part
+05.1.3 Phallic part
+05.2 Ejaculatory Duct
+05.3 Trigone
+05.4 Prostate gland
+05.5 Urethra
+05.5.1 Female Urethra
+05.5.1.1 Cranial part
+05.5.2 Male
+05.5.2.1 Distal Male Urethra
+05.5.2.2 Penile Urethra
+05.5.2.3 Glandular Urethra
+
+06 External Genitalia
+06.1 Indifferent Stage
+06.2 Male
+
+07 Congenital Anomalies
+07.1 Hypospadia
+07.1.1 Definition
+07.2 Epispadia
+07.2.1 Definition
+07.2.2 Most Often Associated with 
+07.3 Exstrophy of the Bladder
+07.3.1 Definition
+07.4 Exstrophy of the Cloaca
+
+

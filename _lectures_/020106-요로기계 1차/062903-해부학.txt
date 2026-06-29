@@ -1,0 +1,79 @@
+# 해부학 Anatomy
+@date 26.06.29.34
+@prof 김원규P
+@color red
+@ref 1: None
+
+02 Renal Fascia
+02.1 Gerota’s fascia
+02.2 Perinephric fat
+02.3 Paranephric fat
+
+03 Kidney Anatomy
+03.1 General structure
+03.2 Surface anatomy ★
+03.3 Relationship
+03.4 External structure
+03.5 Internal structure
+
+04 Renal Vasculature
+04.1 Artery
+04.1.1 Renal Artery
+04.1.1.1 Extrarenal br.
+04.1.1.2 Intrarenal br.
+04.1.1.2.1 Segmental arteries (Renal vascular segments)
+04.1.1.2.1.1 Anterior Division
+04.1.1.2.1.2 Posterior Division
+04.2 Vein
+04.2.1 Right renal vein
+04.2.2 Left renal vein
+04.2.2.1 Lt. Suprarenal vein
+04.2.2.2 Lt. gonadal vein
+04.2.2.3 Lt. inf. Phrenic vein
+ 
+05 Kidney Innervation & Lymphatics
+05.1 Renal nerve plexus
+05.1 Functions
+05.2 Sympathetic pathway
+05.2.1 T11-L2
+05.2.2 Sympathetic Chain Ganglia
+05.2.3 Least Splanchnic n.
+05.2.4 Aorticorenal Ganglion
+05.3 Parasympathetic pathway
+05.3.1 Posterior Vagal Trunk
+05.3 Pain afferent pathway
+05.3.1 T11-L2
+05.4 Lymphatic drainage of kidney
+05.4.1 Renal Vein → Rt,Lt lumbar node
+05.5 Lymphatic drainage of ureter
+05.5.1 Sup
+05.5.2 Middle
+05.5.3 Inf
+
+06 Ureter
+06.1 General structure
+06.2 Course of ureter
+06.3 Male vs female pelvic course
+06.4 Three constrictions 
+06.4.1 Imaging: AP pyelogram
+06.5 Arterial supply
+06.6 Innervation
+
+07 Urinary Bladder
+07.1 General structure and distensibility
+07.2 Empty bladder and Retropubic space
+07.3 External structure
+07.4 Internal structure
+07.5 Trigone
+07.6 Supports of bladder
+07.7 Arterial supply and venous drainage
+07.8 Innervation and micturition reflex
+
+08 Urethra
+08.1 Female urethra
+08.2 Female external urethral sphincter
+08.3 Male urethra overview
+08.4 Prostatic urethra
+08.5 Membranous urethra
+08.6 Spongy urethra
+08.7 Male urethral blood supply, venous drainage, innervation

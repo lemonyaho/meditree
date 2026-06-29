@@ -1,5 +1,0 @@
-# 해부학 Anatomy
-@date 26.06.29.34
-@prof 김원규P
-@color red
-@ref 1: None
