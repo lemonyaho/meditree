@@ -1,4 +1,4 @@
-# MediTree v14.5
+# MediTree v14.7
 
 계통을 고르고, 강의를 열고, 필요한 node를 제한없이 펼쳐보는 개인 학습 지도입니다.
 
@@ -60,6 +60,23 @@ _lectures_/
 - `@sum` block 지원
 - Reference box와 비슷한 Summary box 추가
 
+## v14.7 변경점
+
+- Summary block 안의 `→`, `->`, `=>` 줄을 terminal node로 만들지 않고, 바로 위 node의 note box로 표시합니다.
+- 예: `1.1.1.1.1 Urinary bladder` 다음 줄의 `→ trigone...`은 Urinary bladder를 펼쳤을 때 설명 box로 나타납니다.
+
+```txt
+@sum 1: Origin-based Urological Embryology
+'''
+1 Endoderm
+1.1 Cloaca
+1.1.1 Primitive urogenital sinus
+1.1.1.1 Vesical part
+1.1.1.1.1 Urinary bladder
+→ trigone의 final epithelium은 endodermal epithelium이다.
+'''
+```
+
 ## 실행
 
 ```bash
@@ -72,7 +89,7 @@ npm run dev
 ```bash
 npm run build
 git add .
-git commit -m "Update MediTree v14.4"
+git commit -m "Update MediTree v14.7"
 git push
 ```
 
@@ -82,3 +99,8 @@ git push
 - Summary blocks are rendered before Contents.
 - Each `@sum` block becomes a separate panel titled `Summary: <title>`.
 - Contents heading is visually strengthened.
+
+
+## v14.7
+- Summary의 `→` 설명 box는 별도 클릭 없이 해당 node가 보일 때 같이 표시됩니다.
+- 설명 box의 x-position을 해당 node title과 맞추었습니다.

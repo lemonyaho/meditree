@@ -4,85 +4,88 @@
 @color red
 @ref 1: None
 
-@sum 1: Origin-based Urological Embryology
+@sum 1: Origin - Urology Only
 '''
 1 Endoderm
 1.1 Cloaca
 1.1.1 Primitive urogenital sinus
+
 1.1.1.1 Vesical part
-1.1.1.1.1 Urinary bladder
+1.1.1.1.1 (adult) Urinary bladder
+→ trigone의 final epithelium은 endodermal epithelium이다.
 
-1.1.1.2 Allantois
-1.1.1.2.1 Urachus
-1.1.1.2.1.1 Median umbilical ligament
+1.1.1.2 Pelvic part
+1.1.1.2.1 Prostatic urethral epithelium
+1.1.1.2.1.1 (adult male) Prostatic urethra
+1.1.1.2.1.2 Prostatic epithelial outbudding
+1.1.1.2.1.2.1 (adult male) Prostate gland
 
-1.1.1.3 Pelvic part
-1.1.1.3.1 Male prostatic urethra
-1.1.1.3.2 Male membranous urethra
-1.1.1.3.3 Female entire urethra
+1.1.1.2.2 Membranous urethral epithelium
+1.1.1.2.2.1 (adult male) Membranous urethra
 
-1.1.1.4 Phallic part
-1.1.1.4.1 Penile urethra, except glandular urethra
+1.1.1.2.3 Female urethral epithelium
+1.1.1.2.3.1 (adult female) Entire urethra
+1.1.1.2.3.2 Cranial female urethral epithelium
+1.1.1.2.3.2.1 (adult female) Urethral gland
+1.1.1.2.3.2.2 (adult female) Paraurethral gland
 
-1.2 Prostatic urethra
-1.2.1 Endodermal outbudding
-1.2.1.1 Prostate gland
+1.1.1.3 Phallic part
+1.1.1.3.1 Urethral plate / urethral groove
+1.1.1.3.1.1 (adult male) Penile urethra, except glandular urethra
+→ glandular urethra는 ectoderm 기원이다.
 
-1.3 Cranial part of female urethra
-1.3.1 Endodermal outbudding
-1.3.1.1 Urethral gland
-1.3.1.2 Paraurethral gland
+1.2 Allantois
+1.2.1 Urachus
+1.2.1.1 (adult) Median umbilical ligament
+→ allantois는 vesical part와 continuous하다.
 
-1.4 Trigone final epithelium
-1.4.1 Endodermal epithelium replaces original mesodermal lining
 
 2 Mesoderm
 2.1 Intermediate mesoderm
 2.1.1 Urogenital ridge
 2.1.1.1 Nephrogenic ridge
+
 2.1.1.1.1 Pronephros
-2.1.1.1.1.1 Degenerates
+2.1.1.1.1.1 Nephrotome
+2.1.1.1.1.1.1 Degenerates
 
 2.1.1.1.2 Mesonephros
-2.1.1.1.2.1 Mostly degenerates
+2.1.1.1.2.1 Mesonephric tubule
+2.1.1.1.2.1.1 Mostly degenerates
 
-2.1.1.1.3 Metanephros
-2.1.1.1.3.1 Permanent kidney
+2.1.1.1.2.2 Mesonephric duct / Wolffian duct
+2.1.1.1.2.2.1 Ureteric bud / Metanephric diverticulum
+2.1.1.1.2.2.1.1 (adult) Ureter
+2.1.1.1.2.2.1.2 (adult) Renal pelvis
+2.1.1.1.2.2.1.3 (adult) Major calyx
+2.1.1.1.2.2.1.4 (adult) Minor calyx
+2.1.1.1.2.2.1.5 (adult) Collecting tubule / Collecting duct
+→ ureteric bud 계열 = collecting system이다.
 
-2.2 Mesonephric duct / Wolffian duct
-2.2.1 Ureteric bud / Metanephric diverticulum
-2.2.1.1 Collecting system
-2.2.1.1.1 Ureter
-2.2.1.1.2 Renal pelvis
-2.2.1.1.3 Major calyx
-2.2.1.1.4 Minor calyx
-2.2.1.1.5 Collecting tubule / Collecting duct
+2.1.1.1.2.2.2 Caudal mesonephric duct + ureteric bud / ureter incorporation
+2.1.1.1.2.2.2.1 Initial trigone mesodermal mucosa
+2.1.1.1.2.2.2.1.1 Replaced by endodermal epithelium
+→ adult trigone final epithelium은 endoderm 쪽이다.
 
-2.3 Metanephric mesoderm / Metanephric blastema
-2.3.1 Renal vesicle
-2.3.1.1 Metanephric tubule
-2.3.1.1.1 Nephron
-2.3.1.1.1.1 Bowman’s capsule
-2.3.1.1.1.2 Glomerulus / renal corpuscle
-2.3.1.1.1.3 Proximal convoluted tubule
-2.3.1.1.1.4 Loop of Henle
-2.3.1.1.1.5 Distal convoluted tubule
-
-2.4 Caudal mesonephric duct + ureteric bud incorporation
-2.4.1 Posterior wall of urinary bladder
-2.4.1.1 Trigone, initial mesodermal lining
-2.4.1.1.1 Later replaced by endodermal epithelium
-
+2.1.1.1.3 Metanephric mesoderm / Metanephric blastema
+2.1.1.1.3.1 Renal vesicle
+2.1.1.1.3.1.1 Metanephric tubule
+2.1.1.1.3.1.1.1 (adult) Nephron
+2.1.1.1.3.1.1.1.1 (adult) Bowman’s capsule
+2.1.1.1.3.1.1.1.2 (adult) Proximal convoluted tubule
+2.1.1.1.3.1.1.1.3 (adult) Loop of Henle
+2.1.1.1.3.1.1.1.4 (adult) Distal convoluted tubule
+→ metanephric blastema 계열 = nephron.
+→ uriniferous tubule = nephron + collecting tubule.
+→ ureteric bud + metanephric blastema = metanephros / permanent kidney.
 
 3 Ectoderm
-3.1 Ectodermal glandular plate / epithelial cord
-3.1.1 Distal male urethra
-3.1.1.1 Glandular urethra
-3.1.1.1.1 Navicular fossa
-
-3.2 Cloacal membrane surface ectoderm
-3.2.1 Cloacal membrane
-
+3.1 Distal tip of phallus ectoderm
+3.1.1 Epithelial cord
+3.1.1.1 Ectodermal glandular plate
+3.1.1.1.1 Canalization / lumen formation
+3.1.1.1.1.1 (adult male) Glandular urethra
+3.1.1.1.1.1.1 (adult male) Navicular fossa
 '''
 
 

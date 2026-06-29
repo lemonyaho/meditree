@@ -144,16 +144,12 @@ function parseSummaryTree(summaryMeta, summaryLines, rawLecture) {
     const noteMatch = line.match(/^(?:->|→|=>)\s*(.+)$/)
     if (noteMatch) {
       const parent = stack[stack.length - 1]
-      const noteNode = {
-        id: `${rawLecture.slug}-summary-${summaryMeta.id}-note-${nodeIndex++}`,
-        code: '',
-        title: noteMatch[1].trim(),
-        referenceIds: [],
-        children: [],
-      }
+      const noteText = noteMatch[1].trim()
 
-      if (parent) parent.children.push(noteNode)
-      else tree.push(noteNode)
+      if (parent && noteText) {
+        if (!parent.notes) parent.notes = []
+        parent.notes.push(noteText)
+      }
       continue
     }
 
@@ -170,6 +166,7 @@ function parseSummaryTree(summaryMeta, summaryLines, rawLecture) {
       code,
       title,
       referenceIds,
+      notes: [],
       children: [],
     }
 
@@ -308,6 +305,7 @@ function parseLecture(rawLecture) {
         code,
         title,
         referenceIds,
+        notes: [],
         children: [],
       }
 
@@ -740,16 +738,19 @@ function LectureList({ lectures, onSelectLecture, emptyText }) {
 function TreeNode({ node, depth, expandedIds, matchedIds, activeBranchIds, activeBranchRootDepth, onToggle }) {
   const expanded = expandedIds.has(node.id)
   const hasChildren = node.children.length > 0
-  const indicator = hasChildren ? (expanded ? '▼' : '▶') : '•'
+  const hasNotes = Array.isArray(node.notes) && node.notes.length > 0
+  const canExpand = hasChildren
+  const shouldShowNotes = hasNotes && (!hasChildren || expanded)
+  const indicator = canExpand ? (expanded ? '▼' : '▶') : '•'
 
   return (
     <div className={`tree-node depth-${depth}`} style={{ '--depth': depth, '--branch-depth': activeBranchRootDepth >= 0 ? activeBranchRootDepth : depth, '--branch-extra-indent': `${Math.max(depth - (activeBranchRootDepth >= 0 ? activeBranchRootDepth : depth), 0) * 29}px` }}>
       <button
-        className={`node-row ${expanded ? 'is-expanded' : ''} ${activeBranchIds?.has(node.id) ? 'is-active-branch' : ''} ${matchedIds?.has(node.id) ? 'is-match' : ''} ${!hasChildren ? 'terminal-node' : ''}`}
+        className={`node-row ${expanded ? 'is-expanded' : ''} ${activeBranchIds?.has(node.id) ? 'is-active-branch' : ''} ${matchedIds?.has(node.id) ? 'is-match' : ''} ${!canExpand ? 'terminal-node' : ''}`}
         onClick={() => onToggle(node)}
         type="button"
       >
-        <span className={`node-indicator ${hasChildren ? 'expandable-indicator' : 'terminal-indicator'}`} aria-hidden="true">
+        <span className={`node-indicator ${canExpand ? 'expandable-indicator' : 'terminal-indicator'}`} aria-hidden="true">
           {indicator}
         </span>
         <span className="node-title">
@@ -758,20 +759,29 @@ function TreeNode({ node, depth, expandedIds, matchedIds, activeBranchIds, activ
         </span>
       </button>
 
-      {expanded && hasChildren ? (
+      {(expanded && canExpand) || shouldShowNotes ? (
         <div className="node-body">
-          {node.children.map((child) => (
-            <TreeNode
-              key={child.id}
-              node={child}
-              depth={depth + 1}
-              expandedIds={expandedIds}
-              matchedIds={matchedIds}
-              activeBranchIds={activeBranchIds}
-              activeBranchRootDepth={activeBranchRootDepth}
-              onToggle={onToggle}
-            />
-          ))}
+          {shouldShowNotes ? (
+            <div className="node-note-list">
+              {node.notes.map((note, index) => (
+                <div className="node-note-box" key={`${node.id}-note-${index}`}>{note}</div>
+              ))}
+            </div>
+          ) : null}
+          {expanded && canExpand
+            ? node.children.map((child) => (
+              <TreeNode
+                key={child.id}
+                node={child}
+                depth={depth + 1}
+                expandedIds={expandedIds}
+                matchedIds={matchedIds}
+                activeBranchIds={activeBranchIds}
+                activeBranchRootDepth={activeBranchRootDepth}
+                onToggle={onToggle}
+              />
+            ))
+            : null}
         </div>
       ) : null}
     </div>

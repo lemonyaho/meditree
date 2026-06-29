@@ -756,3 +756,34 @@ button {
 .summary-panel .summary-tree {
   padding-top: 0;
 }
+
+/* v14.7: summary arrow notes attach to the node and align with its title */
+.node-note-list {
+  width: calc(100% - var(--indent) - 39px);
+  margin: 5px 0 11px calc(var(--indent) + 39px);
+  display: grid;
+  gap: 8px;
+}
+
+.node-note-box {
+  width: min(860px, 100%);
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-softer);
+  color: #344054;
+  font-size: 17px;
+  line-height: 1.62;
+  font-weight: 600;
+}
+
+@media (max-width: 720px) {
+  .node-note-list {
+    width: calc(100% - var(--indent) - 28px);
+    margin-left: calc(var(--indent) + 28px);
+  }
+
+  .node-note-box {
+    font-size: 15px;
+  }
+}
