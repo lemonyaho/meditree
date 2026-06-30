@@ -28,7 +28,7 @@
 10.1 Urothelium
 '''
 
-@sum2: Components by Location
+@sum2: Components by Location (edited)
 '''
 01 Medullary Ray
 01.1 Collecting Tubule & Duct
