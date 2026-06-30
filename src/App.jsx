@@ -275,7 +275,7 @@ function parseLecture(rawLecture) {
       continue
     }
 
-    const sumMatch = line.match(/^@sum\s+(\d+)\s*:\s*(.+)$/i)
+    const sumMatch = line.match(/^@sum\s*(\d+)\s*:\s*(.+)$/i)
     if (sumMatch) {
       pendingSummary = { id: Number(sumMatch[1]), title: sumMatch[2].trim() }
       continue

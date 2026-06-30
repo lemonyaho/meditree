@@ -1,4 +1,4 @@
-# MediTree v14.8
+# MediTree v14.9
 
 계통을 고르고, 강의를 열고, 필요한 node를 제한없이 펼쳐보는 개인 학습 지도입니다.
 
@@ -89,7 +89,7 @@ npm run dev
 ```bash
 npm run build
 git add .
-git commit -m "Update MediTree v14.8"
+git commit -m "Update MediTree v14.9"
 git push
 ```
 
@@ -111,3 +111,26 @@ git push
 - Contents에서도 `→`, `->`, `=>` 줄을 바로 위 node의 answer box로 파싱합니다.
 - Contents의 answer box는 해당 node를 클릭해 펼쳤을 때만 보입니다.
 - Summary의 note box 동작은 기존처럼 node가 보일 때 함께 표시됩니다.
+
+
+## Summary block 작성
+
+Summary는 여러 개 넣을 수 있습니다. 아래 두 형식을 모두 지원합니다.
+
+```txt
+@sum 1: Epithelium
+'''
+01 Bowman’s Capsule
+→ Simple Squamous epi.
+'''
+
+@sum2: Components by Location
+'''
+01 Medullary Ray
+01.1 Collecting Tubule & Duct
+→ eosinophilic (연한 색)
+'''
+```
+
+- `@sum 2:`와 `@sum2:` 모두 가능
+- Summary 안의 `→` 줄은 바로 위 node의 설명 box로 표시됩니다.

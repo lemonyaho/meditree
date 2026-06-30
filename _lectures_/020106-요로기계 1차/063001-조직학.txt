@@ -4,868 +4,191 @@
 @color red
 @ref 1: None
 
+@sum 1: Epithelium
+'''
+01 Bowman’s Capsule (Parietal Layer)
+01.1 Simple Squamous epi.
+02 Proximal Convoluted Tubule
+02.1 Simple Cuboidal epi. w/ brush border
+03 Loop of Henle (Thick desc.) = Proximal Straight Tubule
+03.1 Simple Cuboidal epi. w/ less microvilli
+04 Loop of Henle (Thin) 
+04.1 Simple Squamous epi.
+05 Loop of Henle (Thick asc.) = Distal Straight Tubule 
+05.1 Simple Cuboidal epi.
+06 Distal Convoluted Tubule 
+06.1 Simple Cuboidal epi.
+07 Collecting Tubule & Duct 
+07.1 Simple Cuboidal epi.
+08 Ureter
+08.1 Urothelium
+09 Bladder
+09.1 Urothelium
+10 Urethra
+10.1 Urothelium
+'''
+
+@sum2: Components by Location
+'''
+01 Medullary Ray
+01.1 Collecting Tubule & Duct
+01.1.1 eosinophilic (연한 색)
+01.1.2 cell membrane 명확, 핵이 촘촘하게 배열
+01.2 PST = Thick desc. Henle
+01.2.1 (진한 색)
+01.2.2 cell membrane 불명확, 핵이 듬성듬성 배열
+01.2.3 Brush border
+01.3 DST = Thick asc. Henle
+01.3.1
+
+02 Medulla
+02.1 Collecting Tubule & Duct
+02.1.1 eosinophilic (연한 색)
+02.1.2 cell membrane 명확, 핵이 촘촘하게 배열
+02.2 Thick asc. Henle = DST
+02.2.1 (진한 색) 
+02.3 Thin Henle
+02.3.1 Simple Squamous, 둥근 핵
+02.4 Vasa Recta
+02.4.1 Simple Squamous, 납작한 핵
+
+03 Cortical Labyrinth
+03.1 Renal Corpuscle
+03.2 PCT
+03.3 DCT
+'''
+
+00 Clinical Points
+00.1 Proteinuria
+00.1.1 Diagnosis
+00.1.2 임상적 의의
+00.2 Hereditary Nephritis, Alport Syndrome
+00.2.1 Definition
+00.2.2 Pathophysiology 
+00.3 Renal Cell Carcinoma
+00.3.1 Etiology
+00.3.2 Pathophysiology
+00.3.3 Treatment
+
 01 Kidney
-
-01.1 Clinical Points
-01.1.1 Proteinuria
-01.1.1.1 Definition
-→ Proteinuria >150 mg/dl
-
-01.1.1.2 Clinical point
-→ 콩팥질환의 중요한 진단 징후
-
-01.1.2 Alport Syndrome
-01.1.2.1 Definition
-→ Hereditary nephritis
-
-01.1.2.2 Cause
-→ Type IV collagen 유전자 변이
-
-01.1.2.3 Pathology
-→ Glomerular basement membrane 비정상 구조
-
-01.1.2.4 Clinical findings (2)
-→ Hematuria
-→ Proteinuria
-
-01.1.3 Renal Cell Carcinoma
-01.1.3.1 Origin
-→ Proximal tubule epithelium
-
-01.1.3.2 Frequency
-→ 악성 콩팥종양의 90% 이상
-
-01.1.3.3 Clinical point
-→ 전이 후 방사선치료나 화학요법치료에 불응적
-
-
-01.2 Functions
-01.2.1 Urine Formation
-01.2.1.1 Processes (3)
-→ Filtration
-→ Reabsorption
-→ Secretion
-
-01.2.1.2 Filtered volume
-→ 약 180 L/day
-
-01.2.1.3 Urine output
-→ 약 1~2 L/day
-
-01.2.2 Homeostasis
-01.2.2.1 Regulation targets (3)
-→ Water-electrolyte balance
-→ Acid-base balance
-→ Total body water
-
-01.2.3 Excretion
-01.2.3.1 Targets (2)
-→ Metabolic wastes
-→ Bioactive substances, drugs
-
-01.2.4 Blood Pressure Regulation
-01.2.4.1 Hormone
-→ Renin
-
-01.2.4.2 Pathway
-→ Angiotensinogen → Angiotensin I
-
-01.2.5 Erythropoietin
-01.2.5.1 Trigger
-→ 혈액 산소량 부족
-
-01.2.5.2 Function
-→ Erythropoiesis 촉진
-
-01.2.6 Vitamin D Activation
-01.2.6.1 Conversion
-→ Vitamin D → 1,25-hydroxyvitamin D3
-
-01.2.7 Gluconeogenesis
-01.2.7.1 Timing
-→ 장기 기아 상태
-
-01.2.7.2 Pathway
-→ Amino acid → glucose
-
-01.2.7.3 Role
-→ 간 기능 보조
-
-
-01.3 Gross Structure
-01.3.1 Location
-01.3.1.1 Anatomical position
-→ Retroperitoneal organ
-
-01.3.2 Size
-01.3.2.1 Dimension
-→ 10 cm × 4~5 cm × 2~3 cm
-
-01.3.3 Renal Capsule
-01.3.3.1 Tissue type
-→ Dense fibrous connective tissue
-
-01.3.3.2 Thickness
-→ Very thin
-
-01.3.3.3 Components (2)
-→ Collagen fibers
-→ Fibroblasts
-
-01.3.3.4 Layers (2)
-→ Outer fibrous layer
-→ Inner cellular layer
-
-01.3.3.5 Inner layer feature
-→ Myofibroblast 풍부
-
-01.3.4 Renal Parenchyma
-01.3.4.1 Components (2)
-→ Cortex
-→ Medulla
-
-01.3.4.2 Boundary
-→ Cortico-medullary junction
-
-01.3.5 Renal Lobe
-01.3.5.1 Definition
-→ Renal pyramid + 주변 조직
-
-01.3.6 Renal Pyramid
-01.3.6.1 Drainage pathway (5)
-→ Renal papilla
-→ Minor calyx
-→ Major calyx
-→ Renal pelvis
-→ Ureter
-
-01.3.6.2 Minor calyx number
-→ 8~12개
-
-01.3.6.3 Major calyx number
-→ 2~3개
-
-01.3.7 Hilum
-01.3.7.1 Passing structures (4)
-→ Renal artery
-→ Renal vein
-→ Lymphatics
-→ Ureter
-
-01.3.8 Renal Sinus
-01.3.8.1 Components (2)
-→ Loose connective tissue
-→ Fat cells
-
-
-01.4 Renal Parenchyma: Microanatomy
-01.4.1 Cortex
-01.4.1.1 Main structures (3)
-→ Renal corpuscle
-→ Proximal tubules
-→ Distal tubules
-
-01.4.1.2 Connective tissue
-→ 극히 적음
-
-01.4.1.3 Cortical labyrinth
-01.4.1.3.1 Components (2)
-→ Renal corpuscle
-→ Convoluted tubules
-
-01.4.1.4 Medullary ray
-01.4.1.4.1 Components (2)
-→ Straight tubule
-→ Collecting duct
-
-01.4.1.4.2 Number
-→ 400~500개
-
-01.4.2 Medulla
-01.4.2.1 Renal pyramid number
-→ 8~12개/kidney
-
-01.4.2.2 Main structures (3)
-→ Straight tubule
-→ Collecting duct
-→ Vasa recta
-
-01.4.2.3 Renal lobule
-→ 하나의 medullary ray와 주변 조직
-
-01.4.2.4 Renal papilla
-01.4.2.4.1 Location
-→ Renal pyramid의 꼭대기
-
-01.4.2.4.2 Direction
-→ Minor calyx로 튀어나옴
-
-01.4.2.5 Renal column
-01.4.2.5.1 Location
-→ Renal pyramid 사이
-
-01.4.2.5.2 Definition
-→ Cortex가 renal pyramid 사이로 연장된 조직
-
-01.4.2.6 Minor calyx
-01.4.2.6.1 Shape
-→ Renal papilla를 둘러싸는 컵 모양 구조
-
-01.4.2.6.2 Next pathway
-→ Major calyx → renal pelvis → ureter
-
-
-01.5 Renal Vasculature
-01.5.1 Blood Supply
-01.5.1.1 Amount
-→ 심박출량의 약 25%
-
-01.5.1.2 Distribution
-→ Cortex >> medulla
-
-01.5.1.3 Cortex-medulla difference
-→ Cortex가 medulla보다 약 10배 많음
-
-01.5.2 Capillary Networks
-01.5.2.1 Types (2)
-→ Glomerular capillary network
-→ Peritubular capillary network
-
-01.5.2.2 Glomerular capillary function
-→ Filtration
-
-01.5.2.3 Peritubular capillary function (2)
-→ Reabsorption
-→ Secretion
-
-01.5.3 Renal Cortex Microvasculature
-01.5.3.1 Components (4)
-→ Interlobular arteries
-→ Afferent arterioles
-→ Glomerulus
-→ Peritubular capillaries
-
-
-01.6 Uriniferous Tubule
-01.6.1 Components (2)
-→ Nephron
-→ Collecting duct system
-
-01.6.2 Nephron
-01.6.2.1 Definition
-→ Structural and functional unit of kidney
-
-01.6.2.2 Number
-→ 약 100만 개/kidney
-
-01.6.2.3 Components (2)
-→ Renal corpuscle
-→ Renal tubule
-
-01.6.2.4 Types (2)
-→ Cortical nephron
-→ Juxtamedullary nephron
-
-01.6.2.5 Proportion
-→ Cortical nephron 6/7, juxtamedullary nephron 1/7
-
-01.6.2.6 Functions (3)
-→ Urine production
-→ Secretion
-→ Final concentration
-
-01.6.3 Renal Tubule
-01.6.3.1 Components (4)
-→ Proximal tubule
-→ Henle's loop
-→ Distal tubule
-→ Connecting tubule
-
-
-01.7 Renal Corpuscle
-01.7.1 Synonym
-→ Malpighian corpuscle
-
-01.7.2 Components (2)
-→ Glomerulus
-→ Bowman capsule
-
-01.7.3 Location
-→ Cortex에만 분포
-
-01.7.4 Size
-→ 직경 약 200 μm
-
-01.7.5 Functional adaptation (3)
-→ Glomerular filtration
-→ Transport
-→ Permeability
-
-01.7.6 Glomerulus
-01.7.6.1 Definition
-→ Glomerular capillary
-
-01.7.6.2 Structure
-→ 20~40 capillary loops or plexus
-
-01.7.6.3 Blood flow (3)
-→ Afferent arteriole
-→ Glomerular capillary
-→ Efferent arteriole
-
-01.7.7 Bowman Capsule
-01.7.7.1 Structure
-→ Double-layered epithelial cup
-
-01.7.7.2 Parietal layer
-→ Simple squamous epithelium
-
-01.7.7.3 Visceral layer
-→ Podocytes
-
-01.7.7.4 Visceral layer relationship
-→ Glomerular basement membrane과 접함
-
-01.7.8 Bowman Space
-01.7.8.1 Synonym
-→ Urinary space
-
-01.7.8.2 Location
-→ Bowman capsule 두 층 사이
-
-01.7.8.3 Connection
-→ Proximal tubule lumen과 이어짐
-
-01.7.9 Poles
-01.7.9.1 Vascular pole
-→ Afferent/efferent arteriole이 드나드는 부위
-
-01.7.9.2 Urinary pole
-→ Bowman space가 proximal tubule lumen으로 이어지는 부위
-
-
-01.8 Renal Filtration Barrier
-01.8.1 Components (3)
-→ Fenestrated endothelium
-→ Glomerular basement membrane
-→ Visceral layer of Bowman capsule
-
-01.8.2 Fenestrated Endothelium
-01.8.2.1 Type
-→ Fenestrated capillary endothelium
-
-01.8.2.2 Fenestration
-→ 70~90 nm, no diaphragm
-
-01.8.2.3 Channel
-→ AQP-1
-
-01.8.2.4 Function (2)
-→ 물 투과성 높음
+01.1 Functions (7)
+01.2 Gross Structure
+01.2.1 Renal Capsule
+01.2.1.1 Outer Fibrous Layer
+01.2.1.1.1 Dense Fibrous CT
+01.2.1.2 Inner Cellular Layer
+01.2.1.2.1 Dense Fibrous CT
+01.2.1.2.2 Myofibroblast 풍부
+01.2.2 Renal Parenchyma
+01.2.2.1 Cortex
+01.2.2.1.1 Cortical Labyrinth
+01.2.2.1.1.1 Renal Corpuscle
+01.2.2.1.1.2 Proximal Convoluted Tubule
+01.2.2.1.1.3 Distal Convoluted Tubule
+01.2.2.1.2 Medullary Ray
+01.2.2.1.2.1 Straight Tubule
+01.2.2.1.2.2 Collecting Duct
+01.2.2.2 Medulla
+01.2.2.3 Renal Lobe
+01.2.2.3.1 Renal Pyramid
+01.2.2.3.2 Renal Column
+01.3 Renal Vasculature
+
+01.4 Nephron
+01.4.1 Renal Corpuscle (=Malphigian Corpuscle)
+01.4.1.1 Glomerulus
+01.4.1.2 Bowman Capsule
+01.4.1.3 Renal Filtration Apparatus
+01.4.1.3.1 Endothelium of Glomerular Capillary
 → 혈구, 혈소판 이동 제한
-
-01.8.3 Glomerular Basement Membrane
-01.8.3.1 Thickness
-→ 300~350 nm
-
-01.8.3.2 Origin
-→ Fusion of two basement membranes
-
-01.8.3.3 Stain
-→ PAS positive
-
-01.8.3.4 Adhesive molecules (2)
-→ Laminin
-→ Fibronectin
-
-01.8.3.5 Charge barrier
-→ Polyanionic glycosaminoglycans
-
-01.8.3.6 Size barrier (2)
-→ Type IV collagen
-→ Large proteoglycans
-
-01.8.3.7 Restricted molecules
-→ >70 kDa 또는 반지름 >3.6 nm 분자
-
-01.8.3.8 Clinical point (2)
-→ Albuminuria
-→ Hematuria
-
-01.8.4 Podocyte
-01.8.4.1 Synonyms (2)
-→ Visceral epithelial cell
-→ 발세포
-
-01.8.4.2 Processes (3)
-→ Primary process
-→ Secondary process
-→ Pedicel
-
-01.8.4.3 Filtration slit
-→ Pedicel 사이 틈
-
-01.8.4.4 Cytoskeleton
-→ Actin filament 풍부
-
-01.8.5 Slit Diaphragm
-01.8.5.1 Synonym
-→ Slit membrane
-
-01.8.5.2 Location
-→ Filtration slit을 채움
-
-01.8.5.3 Thickness
-→ 7~10 nm
-
-01.8.5.4 Function
-→ 작은 단백질 통과 방지
-
-01.8.6 Filtration Process
-01.8.6.1 Filtered fraction
-→ 혈장의 약 20%
-
-01.8.6.2 Destination
-→ Bowman space
-
-01.8.6.3 Initial filtrate
-→ 단백질 제외 시 혈장과 유사
-
-01.8.6.4 GFR
-→ 125 mL/min, 약 180 L/day
-
-01.8.6.5 GFR control
-→ Afferent/efferent arteriole muscle 수축 조절
-
-01.8.7 Medical Application
-01.8.7.1 Glomerulonephritis
-01.8.7.1.1 Definition
-→ Inflammation within glomeruli
-
-01.8.7.1.2 Mechanism
-→ Immune complex deposition
-
-01.8.7.2 Proteinuria
-01.8.7.2.1 Mechanism
-→ Glomerular filtration apparatus dysfunction
-
-01.8.7.2.2 Clinical point
-→ 여러 kidney disorder의 indicator
-
-
-01.9 Mesangium
-01.9.1 Components (2)
-→ Mesangial cells
-→ ECM
-
-01.9.2 Mesangial Cell
-01.9.2.1 Location
-→ 모세혈관 사이
-
-01.9.2.2 Origin
-→ Smooth muscle cell precursor 가능
-
-01.9.2.3 Similar cell
-→ Pericyte
-
-01.9.3 Functions (4)
-→ Structural support
-→ Phagocytosis
-→ Contractile function
-→ Secretion
-
-01.9.4 Secretion products (3)
-→ IL-1
-→ PDGF
-→ Prostaglandin
-
-
-01.10 Juxtaglomerular Apparatus
-01.10.1 Main function
-→ RAAS 활성화
-
-01.10.2 Physiologic role (2)
-→ 혈압 조절
-→ 일정 GFR 유지
-
-01.10.3 Location
-→ Vascular pole 근처
-
-01.10.4 Components (3)
-→ Macula densa
-→ Juxtaglomerular cell
-→ Extraglomerular mesangial cell
-
-01.10.5 Macula Densa
-01.10.5.1 Location
-→ Distal convoluted tubule 시작 지점
-
-01.10.5.2 Cell type
-→ Tall cuboidal cells
-
-01.10.5.3 Sensor (2)
-→ Na+
-→ Cl-
-
-01.10.5.4 Low NaCl response
-→ Renin 분비 촉진 신호
-
-01.10.6 Juxtaglomerular Cell
-01.10.6.1 Synonyms (2)
-→ JG cell
-→ 사구체곁세포
-
-01.10.6.2 Origin
-→ Afferent arteriole smooth muscle 변형
-
-01.10.6.3 Granule
-→ Renin secretory granule
-
-01.10.6.4 Function
-→ 혈압 낮을 때 renin 분비
-
-01.10.7 Extraglomerular Mesangial Cell
-01.10.7.1 Synonym
-→ Lacis cell
-
-01.10.7.2 Function
-→ 신호 전달, 지지, 수축 등 혈압조절 보조 역할 추정
-
-
-01.11 Renal Tubules
-01.11.1 Classification Criteria (4)
-→ Path
-→ Position
-→ Wall thickness
-→ Direction
-
-01.11.2 Segments (7)
-→ Proximal convoluted tubule
-→ Proximal straight tubule
-→ Loop of Henle
-→ Distal straight tubule
-→ Distal convoluted tubule
-→ Collecting tubule
-→ Collecting duct
-
-01.11.3 Functions (3)
-→ Reabsorption
-→ Secretion
-→ Urine concentration
-
-01.11.4 Proximal Convoluted Tubule
-01.11.4.1 Main function
-→ 주된 재흡수 장소
-
-01.11.4.2 Reabsorbed substances (6)
-→ Water
-→ Amino acids
-→ Glucose
-→ Bicarbonate
-→ Vitamins
-→ Proteins
-
-01.11.4.3 Reabsorbed fraction
-→ 사구체 여과액의 >60%
-
-01.11.4.4 Secreted substances (4)
-→ Organic anions
-→ Organic cations
-→ H+
-→ NH4+
-
-01.11.4.5 Epithelium
-→ Simple cuboidal epithelium
-
-01.11.4.6 Histologic features (4)
-→ Brush border
-→ Vesicles/canaliculi
-→ Many mitochondria
-→ Basal striation
-
-01.11.4.7 Transport proteins (2)
-→ Na+/K+-ATPase
-→ AQP-1
-
-01.11.5 Loop of Henle
-01.11.5.1 Thin segment location
-→ Renal medulla
-
-01.11.5.2 Thin segment epithelium
-→ Simple squamous epithelium
-
-01.11.5.3 Thin segment features (3)
-→ Lens-shaped nucleus
-→ Interdigitating cell processes
-→ Tight junction/desmosome
-
-01.11.5.4 Function
-→ Countercurrent multiplier
-
-01.11.5.5 Thin descending limb
-→ Water permeable
-
-01.11.5.6 Thin ascending limb
-→ Water impermeable
-
-01.11.6 Distal Straight Tubule
-01.11.6.1 Synonym
-→ Thick ascending limb
-
-01.11.6.2 Location
-→ Medullary portion + cortical portion
-
-01.11.6.3 Epithelium
-→ Simple cuboidal epithelium
-
-01.11.6.4 Histologic feature
-→ Cell border가 뚜렷하지 않음
-
-01.11.7 Distal Convoluted Tubule
-01.11.7.1 Location
-→ Cortical labyrinth
-
-01.11.7.2 Epithelium
-→ Simple cuboidal epithelium
-
-01.11.7.3 Histologic features (4)
-→ 넓은 lumen
-→ Brush border 없음
-→ 덜 acidophilic
-→ 핵이 lumen 가까이 위치
-
-01.11.7.4 Aldosterone response
-→ Na+ 흡수, K+ 분비
-
-01.11.7.5 Acid-base regulation
-→ HCO3- 흡수, H+ 분비
-
-01.11.8 Collecting Tubule & Collecting Duct
-01.11.8.1 Functions (3)
-→ 소변이동통로
-→ 수분 재흡수 및 소변농축
-→ 산-염기평형 조절
-
-01.11.8.2 Epithelium
-→ Simple cuboidal epithelium
-
-01.11.8.3 Histologic features (4)
-→ Larger lumen
-→ 세포 경계 뚜렷
-→ 세포 배열 규칙적
-→ 세포질 옅게 염색
-
-01.11.8.4 Cell types (2)
-→ Principal cell
-→ Intercalated cell
-
-01.11.8.5 Principal cell
-01.11.8.5.1 Synonym
-→ Light cell
-
-01.11.8.5.2 Main channel
-→ AQP-2
-
-01.11.8.5.3 Hormonal response (2)
-→ ADH
-→ Aldosterone
-
-01.11.8.6 Intercalated cell
-01.11.8.6.1 Synonym
-→ Dark cell
-
-01.11.8.6.2 Feature
-→ Microvilli
-
-01.11.8.6.3 Function (3)
-→ H+ 분비
-→ HCO3- 분비
-→ K+ 재흡수
-
-
-01.12 Countercurrent System
-01.12.1 Countercurrent Multiplier
-01.12.1.1 Structure
-→ Loop of Henle
-
-01.12.1.2 Principle
-→ 삼투압 차이 증폭
-
-01.12.1.3 Result
-→ Medulla에 고삼투압 형성
-
-01.12.2 Countercurrent Exchanger
-01.12.2.1 Structure
-→ Vasa recta
-
-01.12.2.2 Function
-→ 고삼투 환경 유지
-
-01.12.3 Segment Properties
-01.12.3.1 Descending limb
-→ 물 투과성 높음
-
-01.12.3.2 Thin ascending limb
-→ 물 투과성 낮음, NaCl 수동 재흡수
-
-01.12.3.3 Thick ascending limb
-→ 물 투과성 거의 없음, NaCl 능동 재흡수
-
-01.12.3.4 Collecting duct
-→ ADH 의존적 물 재흡수
-
-01.12.3.5 Vasa recta
-→ 물·용질 수동 교환
+01.4.1.3.2 Fused Basement Membrane
+→ Polyanionic GAG: Organic Anion 여과 제한
+→ Meshwork of crosslinked type IV collagen & large proteoglycan: MW > 70 kDa, Radius > 3.6mm 이동 제한
+01.4.1.3.3 Visceral Layer of Bowman Capsule
+→ Slit Membrane (=Slit Diaphragm): 분자량 작은 단백질 통과 제한
+01.4.2 Renal Tubule
+01.4.2.1 Proximal Convoluted Tubule
+01.4.2.1.1 Function
+01.4.2.1.2 Epithelium
+01.4.2.1.3 Histology (4)
+01.4.2.1.4 Protein (2)
+01.4.2.2 Loop of Henle
+01.4.2.2.1 Thin Descending
+01.4.2.2.1.1 Epithelium
+01.4.2.2.1.2 Function 
+01.4.2.2.2 Thin Ascending
+01.4.2.2.1.1 Epithelium
+01.4.2.2.1.2 Function
+01.4.2.2.3 Thick Ascending = Distal Straight Tubule
+01.4.2.2.3.1 Epithelium
+01.4.3 Distal Convoluted Tubule
+01.4.3.1 Function
+01.4.3.2 Histology: Proximal Tubule 대비 (4) 
+01.4.4 Collecting Tubule & Duct
+01.4.4.1 Epithelium
+01.4.4.2 Histology (4)
+01.4.4.3 Cells
+01.4.4.3.1 Light (principal)
+01.4.4.3.1.1 Characteristic
+01.4.4.3.1.2 Function
+01.4.4.3.2 Dark (Intercalated)
+01.4.4.3.2.1 Characteristic
+01.4.4.3.2.2 Function
+01.5 Mesangium
+01.5.1 Composition
+01.5.2 Functions (4)
+01.6 Juxtaglomerular Apparatus
+01.6.1 Composition
+01.6.1.1 Macula Densa
+01.6.1.1.1 Location
+01.6.1.1.2 Function
+01.6.1.2 Juxtaglomerular cell
+01.6.1.2.1 Location
+01.6.1.2.2 Function
+01.6.1.3 Extraglomerular Mesangial cell = Lacis cell
+01.6.1.3.1 Function
+01.6.2 Function
 
 02 Ureter
-02.1 General Structure
-02.1.1 Size
-02.1.1.1 Diameter
-→ 3~4 mm
-02.1.1.2 Length
-→ 25~30 cm
-02.1.2 Urine concentration
-02.1.2.1 Feature
-→ 소변 농도 일정
-02.2 Mucosa
-02.2.1 Urothelium
-02.2.1.1 Synonym (2)
-→ Transitional epithelium
-→ 이행상피
-02.2.1.2 Upper ureter thickness
-→ 2~3층
-02.2.1.3 Lower ureter thickness
-→ 4~5층
-02.2.1.4 Permeability
-→ 수분이나 이온 투과성 거의 없음
-02.2.2 Lamina propria
-02.2.2.1 Submucosa distinction
-→ Submucosa 층을 따로 나누지 않음
-02.3 Tunica Muscularis
-02.3.1 Muscle type
-→ Smooth muscle
-02.3.2 Layers (2)
-→ Inner longitudinal layer
-→ Outer circular layer
-02.3.3 Distal end feature
-→ Longitudinal layer 하나 더 있음
-02.4 Tunica Adventitia
-02.4.1 Tissue type
-→ Loose connective tissue
-02.4.2 Components (3)
-→ Adipose tissue
-→ Vessels
-→ Nerves
+02.1 Layer
+02.1.1 Mucosa
+02.1.1.1 Urothelium (=Transitional Epithelium)
+02.1.1.2 Lamina Propria
+02.1.2 Tunica Muscularis
+02.1.2.1 Inner Longitudinal Layer
+02.1.2.2 Outer Circular Layer
+02.1.2.3 Longitudinal Layer at distal end
+02.1.3 Tunica Adventitia (Serosa)
 
-03 Bladder
+03 Urinary Bladder
 03.1 Mucosa
 03.1.1 Urothelium
-03.1.1.1 Synonym
-→ Transitional epithelium
-03.1.1.2 Thickness change factor
-→ 팽창 정도
-03.1.1.3 Contracted thickness
-→ 6~8층
-03.1.1.4 Distended thickness
-→ 3~4층
-03.1.1.5 Cell types (3)
-→ Basal cells
-→ Columnar cells
-→ Umbrella cells
-03.1.2 Umbrella cells
-03.1.2.1 Location
-→ Superficial layer
-03.1.2.2 Morphology (2)
-→ Large
-→ Bulbous
-03.1.2.3 Function
-→ Hypertonic urine 독성으로부터 아래층 세포 보호
-03.1.3 Lamina propria
-03.1.3.1 Tissue type
-→ Fibroelastic connective tissue
-03.1.3.2 Vascularity
-→ Highly vascularized
-03.2 Tunica Muscularis
-03.2.1 Name
-→ Detrusor muscle
-03.2.2 Layers (3)
-→ Inner longitudinal layer
-→ Middle circular layer
-→ Outer longitudinal layer
-03.2.3 Internal sphincter
-03.2.3.1 Origin
-→ Middle circular layer
-03.3 Outer Layer
-03.3.1 Anterior surface
-→ Serosa
-03.3.2 Posterior surface
-→ Loose connective tissue
+03.1.1.1 Cells
+03.1.1.1.1 Basal cell
+03.1.1.1.2 Columnar cell
+03.1.1.1.3 Umbrella cell
+03.2 Tunica Musclaris
+03.2.1 Inner Longitudinal
+03.2.2 Middle Circular
+03.2.3 Outer Longitudinal
+03.3 Tunica Adventitia
+03.3.1 Anterior: Serosa
+03.3.2 Posterior: Loose CT
 
-04 Urethra
-04.1 Male Urethra
-04.1.1 Total length
-→ 15~20 cm
-04.1.2 Parts (3)
-→ Prostatic urethra
-→ Membranous urethra
-→ Spongy urethra
-04.2 Prostatic Urethra
-04.2.1 Length
-→ 3.5 cm
-04.2.2 Location
-→ Urinary bladder ~ prostate gland
-04.2.3 Epithelium
-→ Transitional epithelium
-04.3 Membranous Urethra
-04.3.1 Length
-→ 1~1.5 cm
-04.3.2 Course
-→ Urogenital membrane 통과
-04.3.3 Epithelium
-→ Stratified columnar epithelium
-04.3.4 Wall components (2)
-→ Skeletal muscle layer
-→ Adventitia
-04.4 Spongy Urethra
-04.4.1 Synonym
-→ Penile urethra
-04.4.2 Length
-→ 15 cm
-04.4.3 Surrounding structure
-→ Corpus spongiosum
-04.4.4 Mucosa
-04.4.4.1 Epithelium
-→ Stratified columnar epithelium
-04.4.4.2 Distal end epithelium
-→ Stratified squamous epithelium
-04.4.5 Lamina propria
-04.4.5.1 Components (3)
-→ Urogenital gland
-→ Vascular plexus
-→ Corpus spongiosum
-04.4.5.2 Named glands (2)
-→ Littre gland
-→ Bulbourethral gland
-04.5 Female Urethra
-04.5.1 Size
-04.5.1.1 Length
-→ 3~5 cm
-04.5.1.2 Diameter
-→ 8 mm
-04.5.2 Mucosa
-04.5.2.1 Fold
-→ Longitudinal fold
-04.5.2.2 Epithelium transition
-→ Transitional epithelium → Stratified squamous epithelium
-04.5.3 Lamina propria
-04.5.3.1 Tissue type
-→ Highly vascularized connective tissue
-04.5.3.2 Resemblance
-→ Male corpus spongiosum과 유사
-04.5.3.3 Urethral glands location
-→ Proximal part of urethra
-04.5.4 Muscle Layer
-04.5.4.1 Layers (2)
-→ Inner longitudinal layer
-→ Outer circular layer
-04.5.5 Adventitia
+04 Male Urethra
+04.1 Prostatic Urethra
+04.1.1 Epithelium
+04.2 Membranous Urethra
+04.2.1 Epithelium
+04.3 Spongy Urethra  = Penile Urethra
+04.3.1 Epithelium
+04.3.2 Lamina Propria
+
+05 Female Urethra
+05.1 Mucosa
+05.1.1 Epithelium
+05.1.2 Lamina Propria
+05.2 Muscle layer
+05.2.1 Inner Longitudinal
+05.2.2 Outer Circular
+05.3 Adventitia
