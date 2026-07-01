@@ -1,0 +1,142 @@
+# 영상의학
+@date 2026.07.01.89
+@prof 이철민P
+@color red
+
+01 Anatomy
+
+02 Modality
+02.1 KUB - Plain Radiography ★
+02.1.1 Abbreviation
+→ Kidney, Ureter, Bladder
+02.1.2 Evaluation (4)
+02.1.3 소견 (4)
+02.1.4 D/Dx.
+02.1.4.1 LN Calcification
+02.1.4.2 Renal Stone
+02.2 IVP
+02.2.1 Abbreviation
+02.2.2 Evaluation
+02.2.3 D/Dx.
+02.3 USG
+02.3.1 정상소견 (4)
+02.3.2 Color Doppler US
+02.3.2.1 RI
+02.3.2.1.1 Increased
+02.3.2.1.2 Decreased
+02.4 CT
+02.4.1 Phase
+02.4.1.1 Non-contrast
+02.4.1.2 Corticomedullary
+02.4.1.3 Nephrographic
+02.4.1.4 Excretory
+02.5 MRI
+
+03 Congenital Anomaly
+03.1 Renal Form
+03.1.1 Structural
+03.1.1.1 Persistent fetal lobulation
+03.1.1.2 Hypertrophied Column of Bertin
+→ Color Doppler상 mass에의한 혈관 밀림 없음
+03.1.1.3 Dromedary hump
+→ Color Doppler상 mass에의한 혈관 밀림 없음
+03.1.2 Fusion
+03.1.2.1 Horseshoe Kidney
+03.2 Renal Position
+03.2.1 Renal Malrotation
+03.2.2 Ectopic Kidney
+03.2.1 Simple Renal Ectopia
+03.2.2 Crossed Renal Ectopia
+03.3 Renal Number
+03.3.1 Renal Agenesis
+03.3.2 Supernumary Kidney
+03.4 Development of Urinary Collecting System
+03.4.1 Pyelocaliceal Diverticulum
+03.4.2 Megacalycosis
+03.4.3 Ureteropelvic Jx. Obstruction
+03.4.4 Ureteral Duplication
+03.4.4.1 m/c Congenital Ureteral abnormality
+03.4.4.2 Types
+
+04 Tumor
+04.1 Algorithm
+04.2 RCC ★
+04.2.1 Etiology
+→ m/c Renal Malignancy (85-90%)
+→ Solid tumor는 다른 증거가 없으면 일단 RCC로 간주
+→ Any age, but most > 40yr (m/c 60-70)
+04.2.2 Risk Factors
+04.2.3 Pathology
+→ Clear cell (m/c, 70%)
+04.2.2 Non-CE CT
+04.2.3 CE-CT
+04.2.4 AJCC 8th TNM Stage
+04.2.5 D/Dx.
+04.3 Renal Lymphoma
+04.4 Angiomyolipoma AML
+04.4.1 Etiology
+→ m/c Benign Tumor of Kidney
+04.4.2 Association with
+04.4.3 USG
+04.4.4 Complication
+04.5 Urothelial Carcinoma UCC ★
+04.5.1 Etiology
+04.5.2 Characteristics
+04.5.3 Image Feature
+
+05 GU infection
+05.1 Acute Pyelonephritis APN
+05.2 Abscess
+05.3 Emphysematous Pyelonephritis
+05.3.1
+05.3.2 Types
+05.3.2.1 Type1
+05.3.2.2 Type2
+05.4 Chronic Pyelonephritis CPN
+
+06 Calcification
+06.1 Nephrocalcinosis
+06.1.1 Cortical
+06.1.2 Medullary
+06.2 Urolithiasis ★
+
+07 Renal Cystic dz.
+07.1 Simple Cyst
+07.2 Complex Cyst
+07.2.2 Bosniak Classification 2019
+07.2.2.1 Class I
+07.2.2.2 Class II
+07.2.2.3 Class IIF
+07.2.2.4 Class III
+07.2.2.5 Class IV
+07.3 AD-Polycystic Kidney dz. ADPKD
+07.4 Acquired Cystic Renal dz. ACRD = uremic cystic dz.
+
+08 Medical Renal dz.
+08.1 Algorithm
+08.2 CKD
+
+09 Vascular dz.
+09.1 Renal Artery Stenosis RAS
+09.1.1 Etiology
+09.1.2 Imaging Features
+09.1.2.1 USG
+09.1.2.2 CT
+09.1.3 Treatment
+09.2 Fibromuscular Dysplasia FMD
+09.2.1 Etiology
+09.2.2 Imaging Features
+09.2.3 Treatment
+09.3 Infarction
+09.3.1 Pathology
+09.3.2 Imaging Features
+
+10 Testis & Epididymis
+10.1 Testicular Torsion
+10.2 Epididymitis & Epididymo-orchitis
+10.3 Scrotal Tumor
+
+11 Prostate
+11.1 BPH
+11.2 Prostate Cancer
+11.3 PI-RADS ★
