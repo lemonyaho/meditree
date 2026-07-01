@@ -1,0 +1,54 @@
+#산염기생리학
+@date 26.07.01.34
+@prof 신순호P
+@color blue
+@ref 1: None
+
+01 pH Regulation (4)
+01.1 Buffer System (immediate, partial)
+01.1.1 Bicarbonate
+01.1.1.1 pKa
+01.1.1.2 Function
+01.1.2 Phosphate
+01.1.2.1 pKa
+01.1.2.2 Function 
+01.1.3 Protein (Hb, albumin)
+01.1.3.1 체액 완충능
+01.1.4 Tissue Buffers 
+01.2 Pulmonary System (quick, partial)
+01.2.1 Function
+01.2.2 Mechanism (2)
+01.3 Renal System (Slow, complete)
+01.3.1 Mechanism
+01.3.1.1 HCO3- Reabsorption
+01.3.1.2 HCO3- 보충 & 비휘발성산 배설
+01.3.1.3 NH3 배설
+01.4 Release of Carbonate from Bone
+
+02 Acid-Base Disorders
+02.1 Metabolic Acidosis
+02.1.1 Lab
+02.1.1.1 pH
+02.1.1.2 PCO2
+02.1.1.3 HCO3-
+02.1.2 Causes
+02.2 Respiratory Acidosis
+02.2.1 Lab
+02.2.1.1 pH
+02.2.1.2 PCO2
+02.2.1.3 HCO3-
+02.3 Respiratory Alkalosis
+02.3.1 Lab
+02.3.1.1 pH
+02.3.1.2 PCO2
+02.3.1.3 HCO3-
+02.3.2 Causes
+02.4 Metabolic Alkalosis
+02.4.1 Lab
+02.4.1.1 pH
+02.4.1.2 PCO2
+02.4.1.3 HCO3-
+02.4.2 Causes
+02.5 Mixed Acid-Base Disorders
+02.5.1 Salicylate 과잉투여
+02.5.2 Chronic Lung dz. (COPD)

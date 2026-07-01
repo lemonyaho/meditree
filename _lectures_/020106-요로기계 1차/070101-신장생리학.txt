@@ -1,0 +1,98 @@
+# 신장 생리학
+@date 26.07.01.12
+@prof 신순호P
+@color blue
+@ref 1: None
+
+01 신장 혈류역학 & GFR
+01.1 조성 
+01.2 일일 물수지와 탈수
+01.3 GFR
+01.3.1 Equation
+01.4 RBF
+01.5 Autoregulation
+01.5.1 Myogenic Reflex
+01.5.2 Tubuloglomerular Feedback
+01.5.2.1 Mechanism
+01.5.2.2 in DM
+01.6 Aff/Eff arteriole Control
+01.6.1 Afferent Constriction
+01.6.2 Efferent Constriction
+01.6.3 Efferent Dilation
+01.6.2 Triple Whammy
+01.7 Clearance & Creatinine
+
+02 요농축
+02.1 Proximal Ttubule (65%)
+02.2 Loop of Henle (25%)
+02.2.1 Thin desc. Limb
+02.2.2 Thin asc. Limb 
+02.2.3 Thick Asc. Limb
+02.3 DCT & CD (5%)
+02.3.1 DCT
+02.3.2 CD
+02.4 Solutes
+
+03 통합적 조절
+03.1 Water vs Na Balance
+03.2 ADH
+03.2.1 Regulation
+03.2.2 Action
+03.2.3 Use
+03.3 RAAS
+03.3.1 Renin
+03.3.2 Angiotensin II
+03.3.3 Aldosterone
+
+04 Disorders
+04.1 Na, Water
+04.2 Diuretics
+04.2.1 PT D.
+04.2.2 Loop D.
+04.2.3 DCT D.
+04.2.4 CD D. 
+04.3 K
+04.3.1 HyperK
+04.3.1.1 Causes (5)
+04.3.1.2 Clinical (3)
+04.3.1.3 Treatment (3)
+
+05 신장 병태생리
+05.1 AKI
+05.1.1 Definition
+05.1.2 Symptoms
+05.1.3 Classification
+05.1.3.1 Pre-renal
+05.1.3.2 Intrinsic
+05.1.3..2.1 ATN
+05.1.3.3 Post-renal
+05.1.4 Urine Sediment D/Dx.
+05.1.4.1 Muddy Brown Granular Cast
+05.1.4.2 RBC Cast
+05.1.4.3 WBC Cast
+05.1.4.4 Hyaline Cast
+05.1.4.5 Fatty Cast
+05.2 CKD
+05.2.1 Definition
+05.2.2 Slowing Therapy (5)
+05.2.3 Systemic Complications (5)
+05.2.4 ESRD에서 투석 이유 (4)
+05.3 Glomerular dz.
+05.3.1 Proteinuria
+05.3.2 Nephrotic Syndrome
+05.3.3 Hematuria
+05.3.3.1 Classification
+05.3.3.1.1 True RBC
+05.3.3.1.1.1 Glomerular Hematuria
+05.3.3.1.1.1.1 Causes
+05.3.3.1.1.2 Nonglomerular Hematuria
+05.3.3.1.1.2.1 Causes
+05.3.3.1.2 Pseudohematuria
+05.3.3.2 Nephritic Syndrome
+05.3.3.2.1 VS Nephrotic Syndrome
+05.3.4 Diabetic Kidney disease
+
+06 Integrated Cases
+06.1 Case 1
+06.2 Case 2
+06.3 Case 3
