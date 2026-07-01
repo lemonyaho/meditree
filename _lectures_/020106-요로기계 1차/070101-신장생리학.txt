@@ -1,4 +1,4 @@
-# 신장 생리학
+# 신장 생리학 Physiology
 @date 26.07.01.12
 @prof 신순호P
 @color blue
