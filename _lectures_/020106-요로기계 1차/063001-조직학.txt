@@ -2,7 +2,6 @@
 @date 26.06.30.12
 @prof 윤지희P
 @color red
-@ref 1: None
 
 @sum 1: Epithelium
 '''

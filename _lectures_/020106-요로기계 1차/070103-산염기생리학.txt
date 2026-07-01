@@ -2,7 +2,6 @@
 @date 26.07.01.34
 @prof 신순호P
 @color blue
-@ref 1: None
 
 01 pH Regulation (4)
 01.1 Buffer System (immediate, partial)

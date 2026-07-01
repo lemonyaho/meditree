@@ -2,7 +2,6 @@
 @date 26.07.01.12
 @prof 신순호P
 @color blue
-@ref 1: None
 
 01 신장 혈류역학 & GFR
 01.1 조성 

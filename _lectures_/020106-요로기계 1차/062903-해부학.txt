@@ -2,7 +2,6 @@
 @date 26.06.29.34
 @prof 김원규P
 @color red
-@ref 1: None
 
 02 Renal Fascia
 02.1 Gerota’s fascia
