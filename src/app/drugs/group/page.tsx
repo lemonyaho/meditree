@@ -68,6 +68,32 @@ function filterTree(
 function DrugRow({ drug }: { drug: Drug }) {
   const [open, setOpen] = useState(false);
 
+  const detailSections = [
+    ["적응증", drug.indications],
+    ["금기 · 주의", drug.contraindications],
+    ["주요 부작용", drug.adverseEffects],
+  ].filter(([, values]) => (values as string[] | undefined)?.length);
+
+  const hasSources = Boolean(drug.sources?.length);
+  const hasDetails = detailSections.length > 0 || hasSources;
+
+  if (!hasDetails) {
+    return (
+      <div className="flex min-h-[62px] items-center border-t px-4 first:border-t-0">
+        <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,0.75fr)] gap-4">
+          <strong className="truncate text-[16px]">
+            {drug.generic}
+          </strong>
+          {drug.brand && (
+            <span className="truncate text-[14px] text-[#818b85]">
+              {drug.brand}
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="border-t first:border-t-0">
       <button
@@ -79,20 +105,18 @@ function DrugRow({ drug }: { drug: Drug }) {
           <strong className="truncate text-[16px]">
             {drug.generic}
           </strong>
-          <span className="truncate text-[14px] text-[#818b85]">
-            {drug.brand || "—"}
-          </span>
+          {drug.brand && (
+            <span className="truncate text-[14px] text-[#818b85]">
+              {drug.brand}
+            </span>
+          )}
         </div>
         <span>{open ? "↑" : "↓"}</span>
       </button>
 
       {open && (
         <div className="grid gap-3 border-t bg-[#fbfcfb] p-4">
-          {[
-            ["적응증", drug.indications],
-            ["금기 · 주의", drug.contraindications],
-            ["주요 부작용", drug.adverseEffects],
-          ].map(([label, values]) => (
+          {detailSections.map(([label, values]) => (
             <details
               key={label as string}
               className="rounded-[11px] border bg-white"
@@ -102,24 +126,22 @@ function DrugRow({ drug }: { drug: Drug }) {
                 <span className="text-[#168269]">보기</span>
               </summary>
               <div className="border-t px-4 py-3 text-[14px] leading-6 text-[#5f6b64]">
-                {(values as string[] | undefined)?.length
-                  ? (values as string[]).join(", ")
-                  : "비어있음"}
+                {(values as string[]).join(", ")}
               </div>
             </details>
           ))}
 
-          <p className="text-[13px] leading-6 text-[#69716c]">
-            <strong className="font-semibold">근거자료:</strong>{" "}
-            {drug.sources?.length
-              ? drug.sources
-                  .map(
-                    (source, index) =>
-                      `${index + 1}. ${source}`,
-                  )
-                  .join("  ")
-              : "비어있음"}
-          </p>
+          {hasSources && (
+            <p className="text-[13px] leading-6 text-[#69716c]">
+              <strong className="font-semibold">근거자료:</strong>{" "}
+              {drug.sources!
+                .map(
+                  (source, index) =>
+                    `${index + 1}. ${source}`,
+                )
+                .join("  ")}
+            </p>
+          )}
         </div>
       )}
     </div>
