@@ -1,0 +1,55 @@
+.page {
+  min-height: calc(100vh - 90px);
+  background: #f8faf8;
+  color: #17211d;
+}
+
+.shell {
+  width: min(520px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 64px 0 90px;
+}
+
+.card {
+  margin-top: 28px;
+  border: 1px solid #dfe6e2;
+  border-radius: 22px;
+  background: white;
+  padding: 28px;
+  box-shadow: 0 14px 45px rgba(19, 40, 31, 0.06);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand img {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+}
+
+.eyebrow {
+  color: #168269;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.title {
+  margin: 4px 0 0;
+  font-size: 30px;
+  letter-spacing: -0.04em;
+}
+
+.warning {
+  margin-top: 20px;
+  border-radius: 12px;
+  background: #fff5e7;
+  padding: 14px;
+  color: #835d23;
+  font-size: 14px;
+  line-height: 1.6;
+}
