@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import AppFooter from "@/components/AppFooter";
 import CollapseAllController from "@/components/CollapseAllController";
@@ -18,7 +19,9 @@ export default function RootLayout({
       <body>
         <CollapseAllController />
         {children}
-        <AppFooter />
+        <Suspense fallback={null}>
+          <AppFooter />
+        </Suspense>
       </body>
     </html>
   );
