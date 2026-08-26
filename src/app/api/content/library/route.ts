@@ -44,6 +44,7 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {
       library?: TxtLibrary;
+      previousLibrary?: TxtLibrary;
     };
 
     if (!body.library) {
@@ -57,7 +58,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = await saveTxtLibraryToStorage(body.library);
+    const result = await saveTxtLibraryToStorage(
+      body.library,
+      body.previousLibrary,
+    );
 
     return Response.json({
       ok: true,

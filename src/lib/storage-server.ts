@@ -407,17 +407,26 @@ async function downloadText(path: string) {
 }
 
 async function readManifest(): Promise<StorageManifest> {
-  const exists = await objectExists(INDEX_PATH);
+  let raw: string;
 
-  if (!exists) {
-    throw new ContentStorageError(
-      "Supabase Storage가 아직 초기화되지 않았습니다. 기존 Admin 내용을 연 뒤 저장 버튼을 한 번 누르면 실제 TXT 파일이 생성됩니다.",
-      "NOT_INITIALIZED",
-      404,
-    );
+  try {
+    // Direct GET is enough. The old flow did HEAD + GET, adding one network
+    // round-trip to every library load and save.
+    raw = await downloadText(INDEX_PATH);
+  } catch (error) {
+    if (
+      error instanceof ContentStorageError &&
+      error.code === "OBJECT_NOT_FOUND"
+    ) {
+      throw new ContentStorageError(
+        "Supabase Storage가 아직 초기화되지 않았습니다. 기존 Admin 내용을 연 뒤 저장 버튼을 한 번 누르면 실제 TXT 파일이 생성됩니다.",
+        "NOT_INITIALIZED",
+        404,
+      );
+    }
+
+    throw error;
   }
-
-  const raw = await downloadText(INDEX_PATH);
 
   let parsed: StorageManifest | LegacyStorageManifest;
 
@@ -521,7 +530,6 @@ async function mapWithLimit<T, R>(
 }
 
 export async function loadTxtLibraryFromStorage(): Promise<TxtLibrary> {
-  await assertBucketExists();
   const manifest = await readManifest();
 
   async function loadFolder(folder: ManifestFolder): Promise<TxtFolder> {
@@ -585,29 +593,8 @@ async function removeObjects(paths: string[]) {
   }
 }
 
-export async function saveTxtLibraryToStorage(
-  library: TxtLibrary,
-) {
-  await assertBucketExists();
-
-  const manifest = toManifest(library);
-  let previousPaths: string[] = [];
-
-  try {
-    const previous = await readManifest();
-    previousPaths = collectPaths(previous);
-  } catch (error) {
-    if (
-      !(
-        error instanceof ContentStorageError &&
-        error.code === "NOT_INITIALIZED"
-      )
-    ) {
-      throw error;
-    }
-  }
-
-  const jobs: Array<{ path: string; content: string }> = [
+function libraryJobs(library: TxtLibrary) {
+  return [
     ...library.lectures.folders.flatMap((folder) =>
       folder.files.map((file) => ({
         path: lecturePath(folder, file),
@@ -627,8 +614,48 @@ export async function saveTxtLibraryToStorage(
       })),
     ),
   ];
+}
 
-  await mapWithLimit(jobs, 6, (job) =>
+export async function saveTxtLibraryToStorage(
+  library: TxtLibrary,
+  previousLibrary?: TxtLibrary,
+) {
+  const manifest = toManifest(library);
+  let previousPaths: string[] = [];
+
+  try {
+    const previous = await readManifest();
+    previousPaths = collectPaths(previous);
+  } catch (error) {
+    if (
+      !(
+        error instanceof ContentStorageError &&
+        error.code === "NOT_INITIALIZED"
+      )
+    ) {
+      throw error;
+    }
+  }
+
+  const jobs = libraryJobs(library);
+  const previousJobs = previousLibrary
+    ? new Map(
+        libraryJobs(previousLibrary).map((job) => [
+          job.path,
+          job.content,
+        ]),
+      )
+    : null;
+
+  // Upload only TXT files whose path/content actually changed. Folder/file
+  // display-name changes only require index.json, not a TXT re-upload.
+  const changedJobs = previousJobs
+    ? jobs.filter(
+        (job) => previousJobs.get(job.path) !== job.content,
+      )
+    : jobs;
+
+  await mapWithLimit(changedJobs, 6, (job) =>
     uploadText(job.path, job.content),
   );
 
@@ -651,6 +678,7 @@ export async function saveTxtLibraryToStorage(
   return {
     bucket: config().bucket,
     fileCount: jobs.length,
+    uploadedFileCount: changedJobs.length,
     updatedAt: manifest.updatedAt,
   };
 }
