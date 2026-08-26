@@ -8,7 +8,7 @@ export default function FloatingNav() {
   return (
     <nav
       aria-label="빠른 이동"
-      className="fixed right-5 top-1/2 z-40 flex -translate-y-1/2 flex-col overflow-hidden rounded-[18px] border border-[#dfe6e2] bg-white/95 shadow-[0_14px_40px_rgba(19,40,31,0.09)] backdrop-blur-xl max-[720px]:bottom-4 max-[720px]:left-1/2 max-[720px]:right-auto max-[720px]:top-auto max-[720px]:-translate-x-1/2 max-[720px]:translate-y-0 max-[720px]:flex-row"
+      className="fixed right-5 top-[68%] z-40 flex -translate-y-1/2 flex-col overflow-hidden rounded-[18px] border border-[#dfe6e2] bg-white/95 shadow-[0_14px_40px_rgba(19,40,31,0.09)] backdrop-blur-xl max-[720px]:bottom-4 max-[720px]:left-1/2 max-[720px]:right-auto max-[720px]:top-auto max-[720px]:-translate-x-1/2 max-[720px]:translate-y-0 max-[720px]:flex-row"
     >
       <button
         type="button"
