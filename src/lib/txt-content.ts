@@ -238,20 +238,7 @@ const LEGACY_SEED_FILE_IDS = new Set([
 
 export const defaultTxtLibrary: TxtLibrary = {
   lectures: {
-    folders: [
-      {
-        id: "immunology",
-        name: "면역(본2-2)",
-        english: "IMMUNOLOGY",
-        files: [],
-      },
-      {
-        id: "infectious-disease",
-        name: "감염",
-        english: "INFECTIOUS DISEASE",
-        files: [],
-      },
-    ],
+    folders: [],
   },
 
   drugs: {
@@ -259,32 +246,7 @@ export const defaultTxtLibrary: TxtLibrary = {
   },
 
   microbiology: {
-    folders: [
-      {
-        id: "bacteria",
-        name: "세균",
-        english: "BACTERIA",
-        files: [],
-      },
-      {
-        id: "virus",
-        name: "바이러스",
-        english: "VIRUS",
-        files: [],
-      },
-      {
-        id: "fungus",
-        name: "진균",
-        english: "FUNGUS",
-        files: [],
-      },
-      {
-        id: "parasite",
-        name: "기생충",
-        english: "PARASITE",
-        files: [],
-      },
-    ],
+    folders: [],
   },
 };
 
