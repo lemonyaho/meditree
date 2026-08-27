@@ -113,6 +113,100 @@ function filterNodes(
   });
 }
 
+const CLINICAL_BLOCK_ORDER = [
+  "def",
+  "etiol",
+  "patho",
+  "sx",
+  "imaging",
+  "dx",
+  "tx",
+  "prog",
+] as const;
+
+const CLINICAL_BLOCK_RANK =
+  new Map<string, number>(
+    CLINICAL_BLOCK_ORDER.map(
+      (key, index) => [key, index],
+    ),
+  );
+
+function orderClinicalBlocks(
+  blocks: TxtBlock[],
+) {
+  return blocks
+    .map((block, originalIndex) => ({
+      block,
+      originalIndex,
+      rank:
+        CLINICAL_BLOCK_RANK.get(
+          normalizedBlockKey(block.key),
+        ) ?? Number.MAX_SAFE_INTEGER,
+    }))
+    .sort(
+      (a, b) =>
+        a.rank - b.rank ||
+        a.originalIndex - b.originalIndex,
+    )
+    .map(({ block }) => block);
+}
+
+function clinicalSemanticTint(key: string) {
+  const normalized = normalizedBlockKey(key);
+
+  const palette: Record<
+    string,
+    {
+      background: string;
+      border: string;
+      label: string;
+    }
+  > = {
+    def: {
+      background: "#f4f7fb",
+      border: "#dce4ee",
+      label: "#52687b",
+    },
+    etiol: {
+      background: "#f7f5fb",
+      border: "#e3deed",
+      label: "#6b607d",
+    },
+    patho: {
+      background: "#f3f6fc",
+      border: "#dbe2f0",
+      label: "#586a82",
+    },
+    sx: {
+      background: "#fff8ee",
+      border: "#eee0c8",
+      label: "#80643d",
+    },
+    imaging: {
+      background: "#f3f8f7",
+      border: "#d9e7e3",
+      label: "#547269",
+    },
+    dx: {
+      background: "#f1f8fb",
+      border: "#d7e7ee",
+      label: "#4d6f7d",
+    },
+    tx: {
+      background: "#f2f9f5",
+      border: "#d8eadf",
+      label: "#3f6f54",
+    },
+    prog: {
+      background: "#fbf5f7",
+      border: "#ebdce2",
+      label: "#765e67",
+    },
+  };
+
+  return palette[normalized] ?? null;
+}
+
 function drugSemanticTint(key: string) {
   const normalized = normalizedBlockKey(key);
 
@@ -209,6 +303,7 @@ function BlockCards({
   setOpenBlocks,
   forceOpen,
   semanticTint = false,
+  moduleId,
 }: {
   scopeId: string;
   blocks: TxtBlock[];
@@ -219,18 +314,29 @@ function BlockCards({
   >;
   forceOpen: boolean;
   semanticTint?: boolean;
+  moduleId?: ModuleId;
 }) {
   if (!blocks.length) return null;
 
+  const orderedBlocks =
+    moduleId === "clinical" ||
+    moduleId === "lectures"
+      ? orderClinicalBlocks(blocks)
+      : blocks;
+
   return (
     <div className="grid gap-2.5">
-      {blocks.map((block) => {
+      {orderedBlocks.map((block) => {
         const id = `${scopeId}:${block.id}`;
         const open =
           forceOpen || openBlocks.has(id);
-        const tint = semanticTint
-          ? drugSemanticTint(block.key)
-          : null;
+        const tint =
+          semanticTint
+            ? drugSemanticTint(block.key)
+            : moduleId === "clinical" ||
+                moduleId === "lectures"
+              ? clinicalSemanticTint(block.key)
+              : null;
 
         return (
           <div
@@ -439,6 +545,7 @@ function EntityCard({
             setOpenBlocks={setOpenBlocks}
             forceOpen={forceOpen}
             semanticTint={moduleId === "drugs"}
+            moduleId={moduleId}
           />
         </div>
       )}
@@ -584,6 +691,7 @@ function NodeCard({
               setOpenBlocks={setOpenBlocks}
               forceOpen={forceOpen}
               semanticTint={moduleId === "drugs"}
+              moduleId={moduleId}
             />
           )}
 
@@ -1403,6 +1511,7 @@ export default function UniversalDocument({
             setOpenBlocks={setOpenBlocks}
             forceOpen={forceOpen}
             semanticTint={moduleId === "drugs"}
+            moduleId={moduleId}
           />
         </div>
       )}
