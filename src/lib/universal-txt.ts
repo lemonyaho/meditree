@@ -34,6 +34,7 @@ export type ParsedUniversalTxt = {
   date?: string;
   professor?: string;
   color?: ThemeColor;
+  verified?: boolean;
   blocks: TxtBlock[];
   entities: TxtEntity[];
   nodes: TxtNode[];
@@ -45,6 +46,7 @@ const RESERVED_META = new Set([
   "prof",
   "professor",
   "color",
+  "verified",
 ]);
 
 function normalizeBlockKey(key: string) {
@@ -215,6 +217,7 @@ export function parseUniversalTxt(
   let date: string | undefined;
   let professor: string | undefined;
   let color: ThemeColor | undefined;
+  let verified: boolean | undefined;
   let seenContent = false;
 
   const fileBlocks: TxtBlock[] = [];
@@ -315,6 +318,16 @@ export function parseUniversalTxt(
         if (key === "color") {
           color = normalizeColor(inline) ?? color;
         }
+        if (key === "verified") {
+          const normalizedVerified =
+            inline.trim().toLowerCase();
+          verified =
+            normalizedVerified === "o"
+              ? true
+              : normalizedVerified === "x"
+                ? false
+                : undefined;
+        }
 
         index += 1;
         continue;
@@ -399,6 +412,7 @@ export function parseUniversalTxt(
     date,
     professor,
     color,
+    verified,
     blocks: fileBlocks,
     entities: fileEntities,
     nodes: buildTree(flatNodes),
@@ -416,6 +430,7 @@ export function metadataFromTxt(
     date: parsed.date,
     professor: parsed.professor,
     color: parsed.color,
+    verified: parsed.verified,
   };
 }
 
@@ -501,6 +516,7 @@ export function createTxtTemplate(
 ) {
   if (moduleId === "lectures") {
     return `# ${title}
+@verified x
 @english 
 @date 
 @prof 
@@ -513,6 +529,7 @@ export function createTxtTemplate(
 
   if (moduleId === "clinical") {
     return `# ${title}
+@verified x
 @english 
 
 01 큰 목차
@@ -522,6 +539,7 @@ export function createTxtTemplate(
 
   if (moduleId === "drugs") {
     return `# ${title}
+@verified x
 @english 
 
 01 약물 계열
@@ -537,6 +555,7 @@ export function createTxtTemplate(
   }
 
   return `# ${title}
+@verified x
 @english 
 @gram 
 @morph 

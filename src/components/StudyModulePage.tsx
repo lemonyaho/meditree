@@ -333,6 +333,7 @@ export default function StudyModulePage({ moduleId }: { moduleId: ModuleId }) {
           breadcrumbs={fileBreadcrumbs}
           eyebrow={selectedFile.meta.english || currentFolder?.english || module.english}
           title={selectedFile.meta.title}
+          verified={parsed?.verified === true}
           meta={metaParts.length ? metaParts.join("  ·  ") : currentFolder?.description || module.description}
           search={{ value: query, onChange: setQuery, placeholder: "이 TXT 안에서 검색" }}
           accent={selectedFile.meta.color ?? "green"}

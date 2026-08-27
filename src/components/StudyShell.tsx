@@ -21,11 +21,13 @@ export default function StudyShell({
   search,
   children,
   accent = "green",
+  verified = false,
 }: {
   breadcrumbs: Crumb[];
   eyebrow: string;
   title: string;
   meta?: ReactNode;
+  verified?: boolean;
   search?: {
     value: string;
     onChange: (value: string) => void;
@@ -50,9 +52,33 @@ export default function StudyShell({
 
         <header className="mt-10 max-[720px]:mt-7">
           <p className="text-[13px] font-bold tracking-[0.13em]" style={{ color: theme.accent }}>{eyebrow}</p>
-          <h1 className="mt-3 min-h-[58px] text-[clamp(38px,5.2vw,52px)] font-bold leading-[1.06] tracking-[-0.052em] max-[720px]:min-h-0">
-            {title}
-          </h1>
+          <div className="mt-3 flex min-h-[58px] items-center gap-2.5 max-[720px]:min-h-0">
+            <h1 className="text-[clamp(38px,5.2vw,52px)] font-bold leading-[1.06] tracking-[-0.052em]">
+              {title}
+            </h1>
+            {verified && (
+              <span
+                className="inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-[#2f80ed] shadow-[0_2px_8px_rgba(47,128,237,0.24)] max-[720px]:h-[19px] max-[720px]:w-[19px]"
+                title="검수 완료"
+                aria-label="검수 완료"
+              >
+                <svg
+                  viewBox="0 0 20 20"
+                  aria-hidden="true"
+                  className="h-[13px] w-[13px] max-[720px]:h-[11px] max-[720px]:w-[11px]"
+                >
+                  <path
+                    d="M5.2 10.2 8.3 13.3 14.9 6.7"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            )}
+          </div>
           <div className="mt-3 min-h-[26px] text-[15px] leading-6 text-[#7a8580]">{meta}</div>
 
           {search && (

@@ -74,6 +74,7 @@ function viewUrl(moduleId: ModuleId, path: string[], fileId?: string) {
 function moduleTxtExample(moduleId: ModuleId) {
   if (moduleId === "drugs") {
     return `# 엽산 합성 저해제
+@verified x
 @english Folic Acid Synthesis Inhibitor
 
 01 Sulfonamide계열
@@ -95,6 +96,7 @@ Gram +, Gram - bacteria
 
   if (moduleId === "microbiology") {
     return `# 그람양성구균
+@verified x
 @english Gram-Positive Cocci
 @gram +
 @morph Coccus
@@ -108,6 +110,7 @@ Gram +, Gram - bacteria
 
   if (moduleId === "lectures") {
     return `# 감염성 설사 (TBL)
+@verified x
 @english Infectious Diarrhea
 @date 26.08.27.23
 @prof 김봉영
@@ -126,6 +129,7 @@ Vibrio cholerae, Clostridium perfringens, Bacillus cereus, Staphylococcus aureus
   }
 
   return `# 급성 설사
+@verified x
 @english Acute Diarrhea
 
 01 정의
