@@ -151,6 +151,48 @@ function drugSemanticTint(key: string) {
   return null;
 }
 
+function CompositeBlockValue({
+  value,
+  inheritedValue,
+  localValue,
+  inheritanceScope,
+}: {
+  value: string;
+  inheritedValue?: string;
+  localValue?: string;
+  inheritanceScope?: string;
+}) {
+  if (inheritedValue && localValue) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <div className="mb-1.5 inline-flex rounded-full border border-[#dce5e0] bg-[#f7faf8] px-2.5 py-1 text-[11px] font-semibold text-[#69766f]">
+            공통 · {inheritanceScope}
+          </div>
+          <div className="whitespace-pre-wrap text-[15px] leading-7 text-[#53615a]">
+            {inheritedValue}
+          </div>
+        </div>
+
+        <div className="border-t border-[#e8eeea] pt-3">
+          <div className="mb-1.5 inline-flex rounded-full border border-[#dfe6e2] bg-white/75 px-2.5 py-1 text-[11px] font-semibold text-[#69766f]">
+            개별
+          </div>
+          <div className="whitespace-pre-wrap text-[15px] leading-7 text-[#53615a]">
+            {localValue}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="whitespace-pre-wrap text-[15px] leading-7 text-[#53615a]">
+      {value || "내용 없음"}
+    </div>
+  );
+}
+
 function BlockCards({
   scopeId,
   blocks,
@@ -206,7 +248,7 @@ function BlockCards({
             >
               <div className="flex min-w-0 items-center gap-2">
                 <span
-                  className="text-[14px] font-semibold"
+                  className="text-[15px] font-semibold"
                   style={{
                     color: tint?.label ?? "#111713",
                   }}
@@ -214,11 +256,12 @@ function BlockCards({
                   {block.label}
                 </span>
 
-                {block.inheritanceScope && (
-                  <span className="max-w-[230px] truncate rounded-full border border-[#dce5e0] bg-[#f7faf8] px-2 py-0.5 text-[10px] font-semibold text-[#748079]">
-                    공통 · {block.inheritanceScope}
-                  </span>
-                )}
+                {block.inheritanceScope &&
+                  !(block.inheritedValue && block.localValue) && (
+                    <span className="max-w-[260px] truncate rounded-full border border-[#dce5e0] bg-[#f7faf8] px-2.5 py-1 text-[11px] font-semibold text-[#69766f]">
+                      공통 · {block.inheritanceScope}
+                    </span>
+                  )}
               </div>
               <span
                 className="text-[13px] font-semibold"
@@ -230,12 +273,17 @@ function BlockCards({
 
             {open && (
               <div
-                className="whitespace-pre-wrap border-t px-4 py-3 text-[14px] leading-6 text-[#5f6b64]"
+                className="border-t px-4 py-4"
                 style={{
                   borderColor: tint?.border ?? "#edf1ee",
                 }}
               >
-                {block.value || "내용 없음"}
+                <CompositeBlockValue
+                  value={block.value}
+                  inheritedValue={block.inheritedValue}
+                  localValue={block.localValue}
+                  inheritanceScope={block.inheritanceScope}
+                />
               </div>
             )}
           </div>
@@ -272,7 +320,7 @@ function EntityCard({
   >;
   forceOpen: boolean;
 }) {
-  const resolvedBlocks = mergeBlocks(
+  const resolvedBlocks = mergeEntityBlocks(
     inheritedBlocks,
     entity.blocks,
   );
@@ -629,6 +677,58 @@ function mergeBlocks(base: TxtBlock[], additions: TxtBlock[]) {
   return order.map((key) => values.get(key)).filter((block): block is TxtBlock => Boolean(block));
 }
 
+function mergeEntityBlocks(
+  inheritedBlocks: TxtBlock[],
+  localBlocks: TxtBlock[],
+) {
+  const inheritedByKey = new Map<string, TxtBlock>();
+  const localByKey = new Map<string, TxtBlock>();
+  const order: string[] = [];
+
+  for (const block of inheritedBlocks) {
+    const key = normalizedBlockKey(block.key);
+    if (!inheritedByKey.has(key)) order.push(key);
+    inheritedByKey.set(key, block);
+  }
+
+  for (const block of localBlocks) {
+    const key = normalizedBlockKey(block.key);
+    if (!inheritedByKey.has(key) && !localByKey.has(key)) {
+      order.push(key);
+    }
+    localByKey.set(key, block);
+  }
+
+  return order
+    .map((key) => {
+      const inherited = inheritedByKey.get(key);
+      const local = localByKey.get(key);
+
+      if (!inherited) return local;
+      if (!local) return inherited;
+
+      const inheritedValue = inherited.value.trim();
+      const localValue = local.value.trim();
+
+      if (inheritedValue === localValue) {
+        return {
+          ...local,
+          inheritanceScope: inherited.inheritanceScope,
+        };
+      }
+
+      return {
+        ...local,
+        inheritanceScope: inherited.inheritanceScope,
+        inheritedValue,
+        localValue,
+      };
+    })
+    .filter(
+      (block): block is TxtBlock => Boolean(block),
+    );
+}
+
 function splitBrandNames(value: string) {
   return value.split(/[\n,;]+/g).map((item) => item.trim()).filter(Boolean);
 }
@@ -649,6 +749,8 @@ type QuizAnswerRow = {
   value: string;
   key?: string;
   inheritanceScope?: string;
+  inheritedValue?: string;
+  localValue?: string;
 };
 
 type EntityQuizQuestion = {
@@ -671,7 +773,7 @@ function collectEntityQuizQuestions(
     hierarchy: string[],
     inheritedBlocks: TxtBlock[],
   ) => {
-    const entityBlocks = mergeBlocks(
+    const entityBlocks = mergeEntityBlocks(
       inheritableBlocks(inheritedBlocks),
       entity.blocks,
     );
@@ -702,6 +804,8 @@ function collectEntityQuizQuestions(
         value: block.value.trim(),
         key,
         inheritanceScope: block.inheritanceScope,
+        inheritedValue: block.inheritedValue,
+        localValue: block.localValue,
       });
     }
 
@@ -881,21 +985,21 @@ export function EntityRecallQuiz({
           return (
           <div
             key={`${row.label}-${index}`}
-            className="grid min-h-[56px] grid-cols-[150px_minmax(0,1fr)] border-b last:border-b-0 max-[620px]:grid-cols-[112px_minmax(0,1fr)]"
+            className="grid min-h-[68px] grid-cols-[185px_minmax(0,1fr)] border-b last:border-b-0 max-[620px]:grid-cols-[128px_minmax(0,1fr)]"
             style={{
               borderColor: tint?.border ?? "#edf1ee",
               background: tint?.background ?? "transparent",
             }}
           >
             <div
-              className="flex items-center border-r px-4 py-3"
+              className="flex items-center border-r px-5 py-4"
               style={{
                 borderColor: tint?.border ?? "#edf1ee",
               }}
             >
               <div className="min-w-0">
                 <strong
-                  className="text-[13px] font-semibold"
+                  className="text-[15px] font-semibold"
                   style={{
                     color: tint?.label ?? "#53615a",
                   }}
@@ -903,23 +1007,29 @@ export function EntityRecallQuiz({
                   {row.label}
                 </strong>
 
-                {row.inheritanceScope && (
-                  <div className="mt-1 max-w-[128px] truncate text-[9px] font-semibold text-[#78847d]">
-                    공통 · {row.inheritanceScope}
-                  </div>
-                )}
+                {row.inheritanceScope &&
+                  !(row.inheritedValue && row.localValue) && (
+                    <div className="mt-1.5 inline-flex max-w-[160px] truncate rounded-full border border-[#dce5e0] bg-white/65 px-2 py-0.5 text-[10.5px] font-semibold text-[#69766f]">
+                      공통 · {row.inheritanceScope}
+                    </div>
+                  )}
               </div>
             </div>
 
-            <div className="flex min-w-0 items-center px-4 py-3">
+            <div className="flex min-w-0 items-center px-5 py-4">
               {revealed ? (
-                <div className="min-w-0 whitespace-pre-wrap text-[14px] leading-6 text-[#5f6b64]">
-                  {row.value}
+                <div className="min-w-0 flex-1">
+                  <CompositeBlockValue
+                    value={row.value}
+                    inheritedValue={row.inheritedValue}
+                    localValue={row.localValue}
+                    inheritanceScope={row.inheritanceScope}
+                  />
                 </div>
               ) : (
                 <span
                   aria-hidden="true"
-                  className="min-h-[20px]"
+                  className="min-h-[24px]"
                 />
               )}
             </div>

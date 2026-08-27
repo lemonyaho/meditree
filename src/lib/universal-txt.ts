@@ -11,6 +11,8 @@ export type TxtBlock = {
   label: string;
   value: string;
   inheritanceScope?: string;
+  inheritedValue?: string;
+  localValue?: string;
 };
 
 export type TxtEntity = {
