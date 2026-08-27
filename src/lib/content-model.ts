@@ -1,4 +1,4 @@
-export const APP_VERSION = "2.2.3";
+export const APP_VERSION = "2.2.4";
 
 export type ModuleId =
   | "clinical"
@@ -10,7 +10,7 @@ export type ThemeColor = "red" | "yellow" | "blue" | "green";
 
 export type BlockLabelMap = Record<string, string>;
 
-export const BLOCK_LABELS_REVISION = 2;
+export const BLOCK_LABELS_REVISION = 3;
 
 export const DEFAULT_BLOCK_LABELS: Record<ModuleId, BlockLabelMap> = {
   clinical: {
@@ -40,6 +40,7 @@ export const DEFAULT_BLOCK_LABELS: Record<ModuleId, BlockLabelMap> = {
     indi: "적응증",
     contra: "금기증",
     side: "부작용",
+    memo: "메모",
   },
   microbiology: {
     gram: "Gram염색",
@@ -262,6 +263,12 @@ function normalizeBlockLabels(
           : "산소요구도";
     }
     delete labels.oxygen;
+  }
+
+  // v2.2.4: drugs에 @memo를 1회 추가한다.
+  // 이후 사용자가 삭제/수정한 값은 다시 강제로 복구하지 않는다.
+  if (revision < 3 && moduleId === "drugs" && !("memo" in labels)) {
+    labels.memo = "메모";
   }
 
   return {

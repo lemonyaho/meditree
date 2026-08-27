@@ -113,6 +113,44 @@ function filterNodes(
   });
 }
 
+function drugSemanticTint(key: string) {
+  const normalized = normalizedBlockKey(key);
+
+  if (normalized === "indi") {
+    return {
+      background: "#f2f9f5",
+      border: "#d8eadf",
+      label: "#3f6f54",
+    };
+  }
+
+  if (normalized === "contra") {
+    return {
+      background: "#fff4f5",
+      border: "#f0dadd",
+      label: "#8a5058",
+    };
+  }
+
+  if (normalized === "side") {
+    return {
+      background: "#fff8ee",
+      border: "#eee0c6",
+      label: "#82643c",
+    };
+  }
+
+  if (normalized === "memo") {
+    return {
+      background: "#f3f7fb",
+      border: "#dbe6f0",
+      label: "#4d6981",
+    };
+  }
+
+  return null;
+}
+
 function BlockCards({
   scopeId,
   blocks,
@@ -120,6 +158,7 @@ function BlockCards({
   openBlocks,
   setOpenBlocks,
   forceOpen,
+  semanticTint = false,
 }: {
   scopeId: string;
   blocks: TxtBlock[];
@@ -129,6 +168,7 @@ function BlockCards({
     React.SetStateAction<Set<string>>
   >;
   forceOpen: boolean;
+  semanticTint?: boolean;
 }) {
   if (!blocks.length) return null;
 
@@ -138,11 +178,18 @@ function BlockCards({
         const id = `${scopeId}:${block.id}`;
         const open =
           forceOpen || openBlocks.has(id);
+        const tint = semanticTint
+          ? drugSemanticTint(block.key)
+          : null;
 
         return (
           <div
             key={id}
-            className="overflow-hidden rounded-[12px] border border-[#e0e6e2] bg-white"
+            className="overflow-hidden rounded-[12px] border"
+            style={{
+              borderColor: tint?.border ?? "#e0e6e2",
+              background: tint?.background ?? "#ffffff",
+            }}
           >
             <button
               type="button"
@@ -157,7 +204,12 @@ function BlockCards({
               }}
               className="flex min-h-[50px] w-full items-center justify-between gap-3 px-4 text-left"
             >
-              <span className="text-[14px] font-semibold">
+              <span
+                className="text-[14px] font-semibold"
+                style={{
+                  color: tint?.label ?? "#111713",
+                }}
+              >
                 {block.label}
               </span>
               <span
@@ -169,7 +221,12 @@ function BlockCards({
             </button>
 
             {open && (
-              <div className="whitespace-pre-wrap border-t border-[#edf1ee] px-4 py-3 text-[14px] leading-6 text-[#5f6b64]">
+              <div
+                className="whitespace-pre-wrap border-t px-4 py-3 text-[14px] leading-6 text-[#5f6b64]"
+                style={{
+                  borderColor: tint?.border ?? "#edf1ee",
+                }}
+              >
                 {block.value || "내용 없음"}
               </div>
             )}
@@ -188,11 +245,13 @@ function EntityCard({
   openBlocks,
   setOpenBlocks,
   forceOpen,
+  moduleId,
 }: {
   entity: TxtEntity;
   displayNumber: string;
   inheritedBlocks: TxtBlock[];
   theme: Theme;
+  moduleId?: ModuleId;
   openBlocks: Set<string>;
   setOpenBlocks: React.Dispatch<
     React.SetStateAction<Set<string>>
@@ -203,6 +262,20 @@ function EntityCard({
     inheritedBlocks,
     entity.blocks,
   );
+  const brandBlock = entity.blocks.find(
+    (block) =>
+      normalizedBlockKey(block.key) === "brand",
+  );
+  const brands = brandBlock
+    ? splitBrandNames(brandBlock.value)
+    : [];
+  const visibleBlocks =
+    moduleId === "drugs"
+      ? resolvedBlocks.filter(
+          (block) =>
+            normalizedBlockKey(block.key) !== "brand",
+        )
+      : resolvedBlocks;
 
   return (
     <article
@@ -222,20 +295,27 @@ function EntityCard({
         >
           {displayNumber}
         </span>
-        <strong className="text-[15px] font-semibold">
+        <strong className="min-w-0 flex-1 truncate text-[15px] font-semibold">
           {entity.name}
         </strong>
+
+        {moduleId === "drugs" && brands.length > 0 && (
+          <span className="shrink-0 text-right text-[12px] font-medium text-[#7f8a84]">
+            {brands.join(" · ")}
+          </span>
+        )}
       </div>
 
-      {resolvedBlocks.length > 0 && (
+      {visibleBlocks.length > 0 && (
         <div className="p-3">
           <BlockCards
             scopeId={`entity:${entity.id}`}
-            blocks={resolvedBlocks}
+            blocks={visibleBlocks}
             theme={theme}
             openBlocks={openBlocks}
             setOpenBlocks={setOpenBlocks}
             forceOpen={forceOpen}
+            semanticTint={moduleId === "drugs"}
           />
         </div>
       )}
@@ -254,6 +334,7 @@ function NodeCard({
   theme,
   inheritEntityBlocks,
   inheritedEntityBlocks,
+  moduleId,
 }: {
   node: TxtNode;
   depth: number;
@@ -269,6 +350,7 @@ function NodeCard({
   theme: Theme;
   inheritEntityBlocks: boolean;
   inheritedEntityBlocks: TxtBlock[];
+  moduleId?: ModuleId;
 }) {
   const nextInheritedEntityBlocks =
     inheritEntityBlocks
@@ -372,6 +454,7 @@ function NodeCard({
               openBlocks={openBlocks}
               setOpenBlocks={setOpenBlocks}
               forceOpen={forceOpen}
+              semanticTint={moduleId === "drugs"}
             />
           )}
 
@@ -389,6 +472,7 @@ function NodeCard({
                   openBlocks={openBlocks}
                   setOpenBlocks={setOpenBlocks}
                   forceOpen={forceOpen}
+                  moduleId={moduleId}
                 />
               ))}
             </div>
@@ -411,6 +495,7 @@ function NodeCard({
                   theme={theme}
                   inheritEntityBlocks={inheritEntityBlocks}
                   inheritedEntityBlocks={nextInheritedEntityBlocks}
+                  moduleId={moduleId}
                 />
               ))}
             </div>
@@ -512,12 +597,14 @@ type QuizCue = {
 type QuizAnswerRow = {
   label: string;
   value: string;
+  key?: string;
 };
 
 type EntityQuizQuestion = {
   id: string;
   sourceTitle: string;
   entityName: string;
+  brands: string[];
   cues: QuizCue[];
   rows: QuizAnswerRow[];
 };
@@ -540,12 +627,10 @@ function collectEntityQuizQuestions(
     const brandBlock = entity.blocks.find((block) => normalizedBlockKey(block.key) === "brand");
     const brands = brandBlock ? splitBrandNames(brandBlock.value) : [];
 
-    const cues: QuizCue[] = moduleId === "drugs"
-      ? [
-          { text: entity.name, kind: "성분명" },
-          ...brands.map((brand) => ({ text: brand, kind: "상품명" as const })),
-        ]
-      : [{ text: entity.name, kind: "미생물명" }];
+    const cues: QuizCue[] =
+      moduleId === "drugs"
+        ? [{ text: entity.name, kind: "성분명" }]
+        : [{ text: entity.name, kind: "미생물명" }];
 
     const rows: QuizAnswerRow[] = [];
     if (moduleId === "drugs") {
@@ -557,13 +642,22 @@ function collectEntityQuizQuestions(
 
     for (const block of entityBlocks) {
       if (!block.value.trim()) continue;
-      rows.push({ label: block.label, value: block.value.trim() });
+      const key = normalizedBlockKey(block.key);
+      if (moduleId === "drugs" && key === "brand") {
+        continue;
+      }
+      rows.push({
+        label: block.label,
+        value: block.value.trim(),
+        key,
+      });
     }
 
     questions.push({
       id: `${source.id}:${entity.id}`,
       sourceTitle: source.title,
       entityName: entity.name,
+      brands,
       cues,
       rows,
     });
@@ -712,18 +806,47 @@ export function EntityRecallQuiz({
         RANDOM QUIZ {position + 1} / {questions.length}
       </p>
 
-      <h2 className="mt-6 text-[clamp(30px,4.8vw,42px)] font-bold tracking-[-0.045em]">
-        {cue.text}
-      </h2>
+      <div className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <h2 className="text-[clamp(30px,4.8vw,42px)] font-bold tracking-[-0.045em]">
+          {cue.text}
+        </h2>
+
+        {moduleId === "drugs" &&
+          current.brands.length > 0 && (
+            <span className="text-[clamp(14px,2.2vw,18px)] font-medium text-[#7f8a84]">
+              {current.brands.join(" · ")}
+            </span>
+          )}
+      </div>
 
       <div className="mt-6 overflow-hidden rounded-[14px] border border-[#dfe6e2] bg-[#fbfcfb]">
-        {visibleRows.map((row, index) => (
+        {visibleRows.map((row, index) => {
+          const tint =
+            moduleId === "drugs" && row.key
+              ? drugSemanticTint(row.key)
+              : null;
+
+          return (
           <div
             key={`${row.label}-${index}`}
-            className="grid min-h-[56px] grid-cols-[150px_minmax(0,1fr)] border-b border-[#edf1ee] last:border-b-0 max-[620px]:grid-cols-[112px_minmax(0,1fr)]"
+            className="grid min-h-[56px] grid-cols-[150px_minmax(0,1fr)] border-b last:border-b-0 max-[620px]:grid-cols-[112px_minmax(0,1fr)]"
+            style={{
+              borderColor: tint?.border ?? "#edf1ee",
+              background: tint?.background ?? "transparent",
+            }}
           >
-            <div className="flex items-center border-r border-[#edf1ee] px-4 py-3">
-              <strong className="text-[13px] font-semibold text-[#53615a]">
+            <div
+              className="flex items-center border-r px-4 py-3"
+              style={{
+                borderColor: tint?.border ?? "#edf1ee",
+              }}
+            >
+              <strong
+                className="text-[13px] font-semibold"
+                style={{
+                  color: tint?.label ?? "#53615a",
+                }}
+              >
                 {row.label}
               </strong>
             </div>
@@ -741,7 +864,8 @@ export function EntityRecallQuiz({
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
 
         {visibleRows.length === 0 && (
           <div className="p-6 text-[13px] text-[#8a948f]">
@@ -1108,6 +1232,7 @@ export default function UniversalDocument({
             openBlocks={openBlocks}
             setOpenBlocks={setOpenBlocks}
             forceOpen={forceOpen}
+            semanticTint={moduleId === "drugs"}
           />
         </div>
       )}
@@ -1124,6 +1249,7 @@ export default function UniversalDocument({
               openBlocks={openBlocks}
               setOpenBlocks={setOpenBlocks}
               forceOpen={forceOpen}
+              moduleId={moduleId}
             />
           ))}
         </div>
@@ -1143,6 +1269,7 @@ export default function UniversalDocument({
             theme={theme}
             inheritEntityBlocks={inheritEntityBlocks}
             inheritedEntityBlocks={rootInheritedEntityBlocks}
+            moduleId={moduleId}
           />
         ))}
       </div>
