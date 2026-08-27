@@ -242,6 +242,8 @@ function EntityCard({
   displayNumber,
   inheritedBlocks,
   theme,
+  openEntities,
+  setOpenEntities,
   openBlocks,
   setOpenBlocks,
   forceOpen,
@@ -252,6 +254,10 @@ function EntityCard({
   inheritedBlocks: TxtBlock[];
   theme: Theme;
   moduleId?: ModuleId;
+  openEntities: Set<string>;
+  setOpenEntities: React.Dispatch<
+    React.SetStateAction<Set<string>>
+  >;
   openBlocks: Set<string>;
   setOpenBlocks: React.Dispatch<
     React.SetStateAction<Set<string>>
@@ -277,37 +283,95 @@ function EntityCard({
         )
       : resolvedBlocks;
 
+  const hasBody = visibleBlocks.length > 0;
+  const isOpen =
+    hasBody &&
+    (forceOpen || openEntities.has(entity.id));
+
+  const toggleEntity = () => {
+    if (!hasBody || forceOpen) return;
+
+    setOpenEntities((current) => {
+      const next = new Set(current);
+      if (next.has(entity.id)) {
+        next.delete(entity.id);
+      } else {
+        next.add(entity.id);
+      }
+      return next;
+    });
+  };
+
   return (
     <article
       className="overflow-hidden rounded-[13px] border bg-white"
       style={{ borderColor: theme.border }}
     >
-      <div
-        className="flex min-h-[52px] items-center gap-3 border-b px-4"
-        style={{
-          borderColor: theme.border,
-          background: theme.soft2,
-        }}
-      >
-        <span
-          className="shrink-0 font-mono text-[11px] font-bold"
-          style={{ color: theme.accent }}
+      {hasBody ? (
+        <button
+          type="button"
+          onClick={toggleEntity}
+          aria-expanded={isOpen}
+          className="flex min-h-[52px] w-full items-center gap-3 px-4 text-left"
+          style={{
+            background: theme.soft2,
+          }}
         >
-          {displayNumber}
-        </span>
-        <strong className="min-w-0 flex-1 truncate text-[15px] font-semibold">
-          {entity.name}
-        </strong>
-
-        {moduleId === "drugs" && brands.length > 0 && (
-          <span className="shrink-0 text-right text-[12px] font-medium text-[#7f8a84]">
-            {brands.join(" · ")}
+          <span
+            className="shrink-0 font-mono text-[11px] font-bold"
+            style={{ color: theme.accent }}
+          >
+            {displayNumber}
           </span>
-        )}
-      </div>
 
-      {visibleBlocks.length > 0 && (
-        <div className="p-3">
+          <strong className="min-w-0 flex-1 truncate text-[15px] font-semibold">
+            {entity.name}
+          </strong>
+
+          {moduleId === "drugs" && brands.length > 0 && (
+            <span className="shrink-0 text-right text-[12px] font-medium text-[#7f8a84]">
+              {brands.join(" · ")}
+            </span>
+          )}
+
+          <span
+            className="shrink-0 text-[17px]"
+            style={{ color: theme.accent }}
+          >
+            {isOpen ? "↑" : "↓"}
+          </span>
+        </button>
+      ) : (
+        <div
+          className="flex min-h-[52px] items-center gap-3 px-4"
+          style={{
+            background: theme.soft2,
+          }}
+        >
+          <span
+            className="shrink-0 font-mono text-[11px] font-bold"
+            style={{ color: theme.accent }}
+          >
+            {displayNumber}
+          </span>
+
+          <strong className="min-w-0 flex-1 truncate text-[15px] font-semibold">
+            {entity.name}
+          </strong>
+
+          {moduleId === "drugs" && brands.length > 0 && (
+            <span className="shrink-0 text-right text-[12px] font-medium text-[#7f8a84]">
+              {brands.join(" · ")}
+            </span>
+          )}
+        </div>
+      )}
+
+      {isOpen && (
+        <div
+          className="border-t p-3"
+          style={{ borderColor: theme.border }}
+        >
           <BlockCards
             scopeId={`entity:${entity.id}`}
             blocks={visibleBlocks}
@@ -328,6 +392,8 @@ function NodeCard({
   depth,
   openNodes,
   setOpenNodes,
+  openEntities,
+  setOpenEntities,
   openBlocks,
   setOpenBlocks,
   forceOpen,
@@ -340,6 +406,10 @@ function NodeCard({
   depth: number;
   openNodes: Set<string>;
   setOpenNodes: React.Dispatch<
+    React.SetStateAction<Set<string>>
+  >;
+  openEntities: Set<string>;
+  setOpenEntities: React.Dispatch<
     React.SetStateAction<Set<string>>
   >;
   openBlocks: Set<string>;
@@ -469,6 +539,8 @@ function NodeCard({
                   displayNumber={`${node.number}.${index + 1}`}
                   inheritedBlocks={nextInheritedEntityBlocks}
                   theme={theme}
+                  openEntities={openEntities}
+                  setOpenEntities={setOpenEntities}
                   openBlocks={openBlocks}
                   setOpenBlocks={setOpenBlocks}
                   forceOpen={forceOpen}
@@ -489,6 +561,8 @@ function NodeCard({
                   depth={depth + 1}
                   openNodes={openNodes}
                   setOpenNodes={setOpenNodes}
+                  openEntities={openEntities}
+                  setOpenEntities={setOpenEntities}
                   openBlocks={openBlocks}
                   setOpenBlocks={setOpenBlocks}
                   forceOpen={forceOpen}
@@ -1139,6 +1213,8 @@ export default function UniversalDocument({
 
   const [openNodes, setOpenNodes] =
     useState<Set<string>>(() => new Set());
+  const [openEntities, setOpenEntities] =
+    useState<Set<string>>(() => new Set());
   const [openBlocks, setOpenBlocks] =
     useState<Set<string>>(() => new Set());
 
@@ -1177,12 +1253,14 @@ export default function UniversalDocument({
 
   useEffect(() => {
     setOpenNodes(new Set());
+    setOpenEntities(new Set());
     setOpenBlocks(new Set());
   }, [content]);
 
   useEffect(() => {
     const collapse = () => {
       setOpenNodes(new Set());
+      setOpenEntities(new Set());
       setOpenBlocks(new Set());
     };
 
@@ -1246,6 +1324,8 @@ export default function UniversalDocument({
               displayNumber={String(index + 1).padStart(2, "0")}
               inheritedBlocks={rootInheritedEntityBlocks}
               theme={theme}
+              openEntities={openEntities}
+              setOpenEntities={setOpenEntities}
               openBlocks={openBlocks}
               setOpenBlocks={setOpenBlocks}
               forceOpen={forceOpen}
@@ -1263,6 +1343,8 @@ export default function UniversalDocument({
             depth={0}
             openNodes={openNodes}
             setOpenNodes={setOpenNodes}
+            openEntities={openEntities}
+            setOpenEntities={setOpenEntities}
             openBlocks={openBlocks}
             setOpenBlocks={setOpenBlocks}
             forceOpen={forceOpen}
