@@ -94,18 +94,47 @@ Gram +, Gram - bacteria
   }
 
   if (moduleId === "microbiology") {
-    return `# Gram (+) bacteria
-@english Gram-Positive Bacteria
+    return `# 그람양성구균
+@english Gram-Positive Cocci
+@gram +
+@morph Coccus
+@o2 facultative anaerobe
 
-01 Cocci
+01 Catalase (+)
 
+01.1 Staphylococcus spp.
+
+01.1.1 Coagulase (+)
 ## Staphylococcus aureus
-@gram
-Gram (+)
-@morph
-coccus
-@oxygen
-facultative anaerobe`;
+
+01.1.2 Coagulase (-)
+## Staphylococcus epidermidis
+## Staphylococcus saprophyticus
+
+02 Catalase (-)
+
+02.1 Streptococcus spp.
+
+02.1.1 β-hemolysis
+
+02.1.1.1 Group A
+## Streptococcus pyogenes
+
+02.1.1.2 Group B
+## Streptococcus agalactiae
+
+02.1.2 α-hemolysis
+
+02.1.2.1 Optochin sensitive
+## Streptococcus pneumoniae
+
+02.1.2.2 Optochin resistant
+## Viridans streptococci
+
+02.2 Enterococcus spp.
+
+## Enterococcus faecalis
+## Enterococcus faecium`;
   }
 
   if (moduleId === "lectures") {
@@ -207,7 +236,9 @@ function TxtSyntaxGuide({
             TXT 형식 예시
           </strong>
           <p className="mt-1 text-[12px] leading-5 text-[#7b8680]">
-            숫자는 계층, ##는 약물·미생물 개체, @는 현재 계층 또는 ## 개체의 정보 블록입니다.
+            {moduleId === "microbiology"
+              ? "숫자는 분류 계층, ##는 실제 학습 미생물입니다. TXT 상단이나 숫자 계층에 둔 @특성은 하위 ##에 자동 상속되고, 더 가까운 계층 또는 ##의 값이 우선합니다."
+              : "숫자는 계층, ##는 약물·미생물 개체, @는 현재 계층 또는 ## 개체의 정보 블록입니다."}
           </p>
           <pre className="mt-3 overflow-x-auto rounded-[11px] border bg-white p-3 font-mono text-[12px] leading-5 text-[#53615a]">
             {moduleTxtExample(moduleId)}

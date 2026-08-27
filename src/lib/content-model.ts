@@ -1,4 +1,4 @@
-export const APP_VERSION = "2.1.4";
+export const APP_VERSION = "2.2.0";
 
 export type ModuleId =
   | "clinical"
@@ -10,7 +10,7 @@ export type ThemeColor = "red" | "yellow" | "blue" | "green";
 
 export type BlockLabelMap = Record<string, string>;
 
-export const BLOCK_LABELS_REVISION = 1;
+export const BLOCK_LABELS_REVISION = 2;
 
 export const DEFAULT_BLOCK_LABELS: Record<ModuleId, BlockLabelMap> = {
   clinical: {
@@ -42,9 +42,9 @@ export const DEFAULT_BLOCK_LABELS: Record<ModuleId, BlockLabelMap> = {
     side: "부작용",
   },
   microbiology: {
-    oxygen: "산소요구도",
     gram: "Gram염색",
     morph: "형태",
+    o2: "산소요구도",
   },
 };
 
@@ -246,9 +246,21 @@ function normalizeBlockLabels(
     labels[key] = label;
   }
 
-  // v2.1.0 one-time migration: preserve user edits/deletions, add only the new @brand.
+  // v2.1.0: preserve user edits/deletions, add only the new @brand.
   if (revision < 1 && moduleId === "drugs" && !("brand" in labels)) {
     labels.brand = "상품명";
+  }
+
+  // v2.2.0: microbiology key를 @oxygen -> @o2로 정리한다.
+  // 사용자가 기존 @oxygen 표시명을 수정했다면 그 표시명도 그대로 옮긴다.
+  if (revision < 2 && moduleId === "microbiology") {
+    if (!("o2" in labels)) {
+      labels.o2 =
+        typeof labels.oxygen === "string" && labels.oxygen.trim()
+          ? labels.oxygen
+          : "산소요구도";
+    }
+    delete labels.oxygen;
   }
 
   return {

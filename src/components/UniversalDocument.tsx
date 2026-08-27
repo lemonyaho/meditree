@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type {
   BlockLabelMap,
+  ModuleId,
   ThemeColor,
 } from "@/lib/content-model";
 import {
@@ -182,6 +183,7 @@ function BlockCards({
 function EntityCard({
   entity,
   displayNumber,
+  inheritedBlocks,
   theme,
   openBlocks,
   setOpenBlocks,
@@ -189,6 +191,7 @@ function EntityCard({
 }: {
   entity: TxtEntity;
   displayNumber: string;
+  inheritedBlocks: TxtBlock[];
   theme: Theme;
   openBlocks: Set<string>;
   setOpenBlocks: React.Dispatch<
@@ -196,6 +199,11 @@ function EntityCard({
   >;
   forceOpen: boolean;
 }) {
+  const resolvedBlocks = mergeBlocks(
+    inheritedBlocks,
+    entity.blocks,
+  );
+
   return (
     <article
       className="overflow-hidden rounded-[13px] border bg-white"
@@ -219,11 +227,11 @@ function EntityCard({
         </strong>
       </div>
 
-      {entity.blocks.length > 0 && (
+      {resolvedBlocks.length > 0 && (
         <div className="p-3">
           <BlockCards
             scopeId={`entity:${entity.id}`}
-            blocks={entity.blocks}
+            blocks={resolvedBlocks}
             theme={theme}
             openBlocks={openBlocks}
             setOpenBlocks={setOpenBlocks}
@@ -244,6 +252,8 @@ function NodeCard({
   setOpenBlocks,
   forceOpen,
   theme,
+  inheritEntityBlocks,
+  inheritedEntityBlocks,
 }: {
   node: TxtNode;
   depth: number;
@@ -257,7 +267,17 @@ function NodeCard({
   >;
   forceOpen: boolean;
   theme: Theme;
+  inheritEntityBlocks: boolean;
+  inheritedEntityBlocks: TxtBlock[];
 }) {
+  const nextInheritedEntityBlocks =
+    inheritEntityBlocks
+      ? mergeBlocks(
+          inheritedEntityBlocks,
+          inheritableBlocks(node.blocks),
+        )
+      : [];
+
   const hasBody =
     node.children.length > 0 ||
     node.blocks.length > 0 ||
@@ -361,6 +381,7 @@ function NodeCard({
                   key={entity.id}
                   entity={entity}
                   displayNumber={`${node.number}.${index + 1}`}
+                  inheritedBlocks={nextInheritedEntityBlocks}
                   theme={theme}
                   openBlocks={openBlocks}
                   setOpenBlocks={setOpenBlocks}
@@ -385,6 +406,8 @@ function NodeCard({
                   setOpenBlocks={setOpenBlocks}
                   forceOpen={forceOpen}
                   theme={theme}
+                  inheritEntityBlocks={inheritEntityBlocks}
+                  inheritedEntityBlocks={nextInheritedEntityBlocks}
                 />
               ))}
             </div>
@@ -406,6 +429,12 @@ function shuffleIndices(length: number) {
 
 function normalizedBlockKey(key: string) {
   return key.trim().replace(/^@+/, "").toLowerCase();
+}
+
+function inheritableBlocks(blocks: TxtBlock[]) {
+  return blocks.filter(
+    (block) => normalizedBlockKey(block.key) !== "note",
+  );
 }
 
 function mergeBlocks(base: TxtBlock[], additions: TxtBlock[]) {
@@ -458,7 +487,10 @@ function collectEntityQuizQuestions(
     hierarchy: string[],
     inheritedBlocks: TxtBlock[],
   ) => {
-    const entityBlocks = mergeBlocks(inheritedBlocks, entity.blocks);
+    const entityBlocks = mergeBlocks(
+      inheritableBlocks(inheritedBlocks),
+      entity.blocks,
+    );
     const brandBlock = entity.blocks.find((block) => normalizedBlockKey(block.key) === "brand");
     const brands = brandBlock ? splitBrandNames(brandBlock.value) : [];
 
@@ -498,7 +530,10 @@ function collectEntityQuizQuestions(
   const walk = (nodes: TxtNode[], hierarchy: string[], inheritedBlocks: TxtBlock[]) => {
     for (const node of nodes) {
       const nextHierarchy = [...hierarchy, node.title];
-      const nextInherited = mergeBlocks(inheritedBlocks, node.blocks);
+      const nextInherited = mergeBlocks(
+        inheritableBlocks(inheritedBlocks),
+        inheritableBlocks(node.blocks),
+      );
       for (const entity of node.entities) addEntity(entity, nextHierarchy, nextInherited);
       walk(node.children, nextHierarchy, nextInherited);
     }
@@ -903,10 +938,12 @@ export default function UniversalDocument({
   content,
   query,
   blockLabels = {},
+  moduleId,
 }: {
   content: string;
   query: string;
   blockLabels?: BlockLabelMap;
+  moduleId?: ModuleId;
 }) {
   const parsed = useMemo(
     () => parseUniversalTxt(content, blockLabels),
@@ -941,6 +978,12 @@ export default function UniversalDocument({
   const theme =
     THEMES[parsed.color ?? "green"];
   const forceOpen = Boolean(normalizedQuery);
+  const inheritEntityBlocks =
+    moduleId === "microbiology";
+  const rootInheritedEntityBlocks =
+    inheritEntityBlocks
+      ? inheritableBlocks(parsed.blocks)
+      : [];
 
   useEffect(() => {
     setOpenNodes(new Set());
@@ -1007,6 +1050,7 @@ export default function UniversalDocument({
               key={entity.id}
               entity={entity}
               displayNumber={String(index + 1).padStart(2, "0")}
+              inheritedBlocks={rootInheritedEntityBlocks}
               theme={theme}
               openBlocks={openBlocks}
               setOpenBlocks={setOpenBlocks}
@@ -1028,6 +1072,8 @@ export default function UniversalDocument({
             setOpenBlocks={setOpenBlocks}
             forceOpen={forceOpen}
             theme={theme}
+            inheritEntityBlocks={inheritEntityBlocks}
+            inheritedEntityBlocks={rootInheritedEntityBlocks}
           />
         ))}
       </div>

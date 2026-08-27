@@ -360,7 +360,12 @@ export default function StudyModulePage({ moduleId }: { moduleId: ModuleId }) {
               />
             )
           ) : (
-            <UniversalDocument content={content} query={query} blockLabels={module.blockLabels} />
+            <UniversalDocument
+              content={content}
+              query={query}
+              blockLabels={module.blockLabels}
+              moduleId={moduleId}
+            />
           )}
         </StudyShell>
         <ViewActionRail parentHref={pathHref(moduleId, path)} adminHref={adminHref(moduleId, path, selectedFile.id)} />

@@ -51,12 +51,29 @@ function normalizeBlockKey(key: string) {
   return key.trim().replace(/^@+/, "").toLowerCase();
 }
 
+const BLOCK_KEY_ALIASES: Record<string, string> = {
+  oxygen: "o2",
+};
+
+function canonicalBlockKey(
+  key: string,
+  labels: BlockLabelMap,
+) {
+  const normalized = normalizeBlockKey(key);
+  if (normalized in labels) return normalized;
+
+  const alias = BLOCK_KEY_ALIASES[normalized];
+  if (alias && alias in labels) return alias;
+
+  return normalized;
+}
+
 export function blockLabel(
   key: string,
   labels: BlockLabelMap = {},
 ) {
   const raw = key.trim().replace(/^@+/, "");
-  const normalized = normalizeBlockKey(raw);
+  const normalized = canonicalBlockKey(raw, labels);
 
   for (const [registeredKey, registeredLabel] of Object.entries(labels)) {
     if (normalizeBlockKey(registeredKey) === normalized) {
@@ -275,13 +292,14 @@ export function parseUniversalTxt(
       const firstToken = body.match(/^([^\s]+)(?:\s+(.*))?$/);
       const first = firstToken?.[1] ?? body;
       const rest = firstToken?.[2]?.trim() ?? "";
-      const normalizedFirst = normalizeBlockKey(first);
+      const canonicalFirst = canonicalBlockKey(first, labels);
 
       // 등록된 @key만 inline value를 허용한다.
+      // @oxygen은 v2.2.0부터 @o2의 호환 alias로 처리한다.
       // 등록되지 않은 @염증성 설사 같은 문구는 전체 문구가 라벨.
       const isRegisteredKey =
-        registeredKeys.has(normalizedFirst);
-      const key = isRegisteredKey ? normalizedFirst : body;
+        registeredKeys.has(canonicalFirst);
+      const key = isRegisteredKey ? canonicalFirst : body;
       const inline = isRegisteredKey ? rest : "";
 
       const valueLines: string[] = [];
@@ -489,12 +507,12 @@ export function createTxtTemplate(
 
   return `# ${title}
 @english 
+@gram 
+@morph 
+@o2 
 
-01 미생물 분류
-## Microbename
-@oxygen
-@gram
-@morph
+01 분류
+## Genus species
 `;
 }
 
