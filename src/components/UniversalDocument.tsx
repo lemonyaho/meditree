@@ -204,14 +204,22 @@ function BlockCards({
               }}
               className="flex min-h-[50px] w-full items-center justify-between gap-3 px-4 text-left"
             >
-              <span
-                className="text-[14px] font-semibold"
-                style={{
-                  color: tint?.label ?? "#111713",
-                }}
-              >
-                {block.label}
-              </span>
+              <div className="flex min-w-0 items-center gap-2">
+                <span
+                  className="text-[14px] font-semibold"
+                  style={{
+                    color: tint?.label ?? "#111713",
+                  }}
+                >
+                  {block.label}
+                </span>
+
+                {block.inheritanceScope && (
+                  <span className="max-w-[230px] truncate rounded-full border border-[#dce5e0] bg-[#f7faf8] px-2 py-0.5 text-[10px] font-semibold text-[#748079]">
+                    공통 · {block.inheritanceScope}
+                  </span>
+                )}
+              </div>
               <span
                 className="text-[13px] font-semibold"
                 style={{ color: theme.accent }}
@@ -599,35 +607,6 @@ function inheritableBlocks(blocks: TxtBlock[]) {
   );
 }
 
-function topicParticle(label: string) {
-  const trimmed = label.trim();
-  if (!trimmed) return "는";
-
-  const last = trimmed.charCodeAt(trimmed.length - 1);
-
-  // Hangul syllables: use 은 when a final consonant exists, otherwise 는.
-  if (last >= 0xac00 && last <= 0xd7a3) {
-    return (last - 0xac00) % 28 === 0
-      ? "는"
-      : "은";
-  }
-
-  // Latin / abbreviation / punctuation labels read naturally with 는.
-  return "는";
-}
-
-function prefixInheritedValue(
-  sourceLabel: string,
-  value: string,
-) {
-  const source = sourceLabel.trim();
-  const body = value.trim();
-
-  if (!source || !body) return body;
-
-  return `${source}${topicParticle(source)} ${body}`;
-}
-
 function inheritedBlocksFrom(
   blocks: TxtBlock[],
   sourceLabel: string,
@@ -635,10 +614,7 @@ function inheritedBlocksFrom(
   return inheritableBlocks(blocks).map((block) => ({
     ...block,
     id: `${block.id}:inherited:${sourceLabel}`,
-    value: prefixInheritedValue(
-      sourceLabel,
-      block.value,
-    ),
+    inheritanceScope: sourceLabel,
   }));
 }
 
@@ -672,6 +648,7 @@ type QuizAnswerRow = {
   label: string;
   value: string;
   key?: string;
+  inheritanceScope?: string;
 };
 
 type EntityQuizQuestion = {
@@ -724,6 +701,7 @@ function collectEntityQuizQuestions(
         label: block.label,
         value: block.value.trim(),
         key,
+        inheritanceScope: block.inheritanceScope,
       });
     }
 
@@ -915,14 +893,22 @@ export function EntityRecallQuiz({
                 borderColor: tint?.border ?? "#edf1ee",
               }}
             >
-              <strong
-                className="text-[13px] font-semibold"
-                style={{
-                  color: tint?.label ?? "#53615a",
-                }}
-              >
-                {row.label}
-              </strong>
+              <div className="min-w-0">
+                <strong
+                  className="text-[13px] font-semibold"
+                  style={{
+                    color: tint?.label ?? "#53615a",
+                  }}
+                >
+                  {row.label}
+                </strong>
+
+                {row.inheritanceScope && (
+                  <div className="mt-1 max-w-[128px] truncate text-[9px] font-semibold text-[#78847d]">
+                    공통 · {row.inheritanceScope}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex min-w-0 items-center px-4 py-3">

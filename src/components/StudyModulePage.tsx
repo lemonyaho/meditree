@@ -25,7 +25,12 @@ import {
   type ModuleId,
   type ThemeColor,
 } from "@/lib/content-model";
-import { compareLectureFiles, parseLectureDate, parseUniversalTxt } from "@/lib/universal-txt";
+import {
+  compareLectureFiles,
+  contentFingerprint,
+  parseLectureDate,
+  parseUniversalTxt,
+} from "@/lib/universal-txt";
 
 const LED: Record<ThemeColor, { color: string; glow: string }> = {
   red: { color: "#d55d66", glow: "rgba(213,93,102,0.30)" },
@@ -333,7 +338,13 @@ export default function StudyModulePage({ moduleId }: { moduleId: ModuleId }) {
           breadcrumbs={fileBreadcrumbs}
           eyebrow={selectedFile.meta.english || currentFolder?.english || module.english}
           title={selectedFile.meta.title}
-          verified={parsed?.verified === true}
+          verified={
+            content !== null &&
+            selectedFile.meta.verified === true &&
+            Boolean(selectedFile.meta.verifiedHash) &&
+            selectedFile.meta.verifiedHash ===
+              contentFingerprint(content)
+          }
           meta={metaParts.length ? metaParts.join("  ·  ") : currentFolder?.description || module.description}
           search={{ value: query, onChange: setQuery, placeholder: "이 TXT 안에서 검색" }}
           accent={selectedFile.meta.color ?? "green"}

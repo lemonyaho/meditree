@@ -10,6 +10,7 @@ export type TxtBlock = {
   key: string;
   label: string;
   value: string;
+  inheritanceScope?: string;
 };
 
 export type TxtEntity = {
@@ -34,7 +35,6 @@ export type ParsedUniversalTxt = {
   date?: string;
   professor?: string;
   color?: ThemeColor;
-  verified?: boolean;
   blocks: TxtBlock[];
   entities: TxtEntity[];
   nodes: TxtNode[];
@@ -93,6 +93,33 @@ export function blockLabel(
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+export function stripLegacyVerifiedMetadata(text: string) {
+  return text
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .filter(
+      (line) =>
+        !/^\s*@verified(?:\s+.*)?\s*$/i.test(line),
+    )
+    .join("\n");
+}
+
+export function contentFingerprint(text: string) {
+  const normalized = stripLegacyVerifiedMetadata(text)
+    .replace(/\r\n?/g, "\n")
+    .trimEnd();
+
+  let hash = 2166136261;
+  for (let index = 0; index < normalized.length; index += 1) {
+    hash ^= normalized.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return `fnv1a-${(hash >>> 0)
+    .toString(16)
+    .padStart(8, "0")}`;
 }
 
 export function txtTitleFromContent(text: string) {
@@ -217,7 +244,6 @@ export function parseUniversalTxt(
   let date: string | undefined;
   let professor: string | undefined;
   let color: ThemeColor | undefined;
-  let verified: boolean | undefined;
   let seenContent = false;
 
   const fileBlocks: TxtBlock[] = [];
@@ -318,16 +344,6 @@ export function parseUniversalTxt(
         if (key === "color") {
           color = normalizeColor(inline) ?? color;
         }
-        if (key === "verified") {
-          const normalizedVerified =
-            inline.trim().toLowerCase();
-          verified =
-            normalizedVerified === "o"
-              ? true
-              : normalizedVerified === "x"
-                ? false
-                : undefined;
-        }
 
         index += 1;
         continue;
@@ -412,7 +428,6 @@ export function parseUniversalTxt(
     date,
     professor,
     color,
-    verified,
     blocks: fileBlocks,
     entities: fileEntities,
     nodes: buildTree(flatNodes),
@@ -430,7 +445,6 @@ export function metadataFromTxt(
     date: parsed.date,
     professor: parsed.professor,
     color: parsed.color,
-    verified: parsed.verified,
   };
 }
 
@@ -516,7 +530,6 @@ export function createTxtTemplate(
 ) {
   if (moduleId === "lectures") {
     return `# ${title}
-@verified x
 @english 
 @date 
 @prof 
@@ -529,7 +542,6 @@ export function createTxtTemplate(
 
   if (moduleId === "clinical") {
     return `# ${title}
-@verified x
 @english 
 
 01 큰 목차
@@ -539,7 +551,6 @@ export function createTxtTemplate(
 
   if (moduleId === "drugs") {
     return `# ${title}
-@verified x
 @english 
 
 01 약물 계열
@@ -556,7 +567,6 @@ export function createTxtTemplate(
   }
 
   return `# ${title}
-@verified x
 @english 
 @gram 
 @morph 

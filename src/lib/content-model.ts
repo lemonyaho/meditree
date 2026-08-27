@@ -1,4 +1,4 @@
-export const APP_VERSION = "2.2.6";
+export const APP_VERSION = "2.3.1";
 
 export type ModuleId =
   | "clinical"
@@ -56,6 +56,7 @@ export type FileMeta = {
   professor?: string;
   color?: ThemeColor;
   verified?: boolean;
+  verifiedHash?: string;
 };
 
 export type ContentFile = {

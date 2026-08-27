@@ -28,8 +28,10 @@ import {
 } from "@/lib/content-model";
 import {
   compareLectureFiles,
+  contentFingerprint,
   createTxtTemplate,
   metadataFromTxt,
+  stripLegacyVerifiedMetadata,
   replaceTxtTitle,
   txtTitleFromContent,
 } from "@/lib/universal-txt";
@@ -74,7 +76,6 @@ function viewUrl(moduleId: ModuleId, path: string[], fileId?: string) {
 function moduleTxtExample(moduleId: ModuleId) {
   if (moduleId === "drugs") {
     return `# 엽산 합성 저해제
-@verified x
 @english Folic Acid Synthesis Inhibitor
 
 01 Sulfonamide계열
@@ -96,7 +97,6 @@ Gram +, Gram - bacteria
 
   if (moduleId === "microbiology") {
     return `# 그람양성구균
-@verified x
 @english Gram-Positive Cocci
 @gram +
 @morph Coccus
@@ -110,7 +110,6 @@ Gram +, Gram - bacteria
 
   if (moduleId === "lectures") {
     return `# 감염성 설사 (TBL)
-@verified x
 @english Infectious Diarrhea
 @date 26.08.27.23
 @prof 김봉영
@@ -129,7 +128,6 @@ Vibrio cholerae, Clostridium perfringens, Bacillus cereus, Staphylococcus aureus
   }
 
   return `# 급성 설사
-@verified x
 @english Acute Diarrhea
 
 01 정의
@@ -355,6 +353,8 @@ export default function ContentTreeAdmin() {
   const [query, setQuery] = useState("");
   const [modal, setModal] = useState<ModalState>(null);
   const [saving, setSaving] = useState(false);
+  const [verifyPromptOpen, setVerifyPromptOpen] =
+    useState(false);
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
@@ -396,8 +396,16 @@ export default function ContentTreeAdmin() {
     void readContentFile(selectedFile.objectPath)
       .then((content) => {
         if (!active) return;
-        setDrafts((current) => ({ ...current, [selectedFile.id]: content }));
-        setOriginals((current) => ({ ...current, [selectedFile.id]: content }));
+        const cleanContent =
+          stripLegacyVerifiedMetadata(content);
+        setDrafts((current) => ({
+          ...current,
+          [selectedFile.id]: cleanContent,
+        }));
+        setOriginals((current) => ({
+          ...current,
+          [selectedFile.id]: cleanContent,
+        }));
       })
       .catch((error) => {
         if (active) setNotice(error instanceof Error ? error.message : "TXT 읽기 실패");
@@ -508,7 +516,14 @@ export default function ContentTreeAdmin() {
     const title = raw.replace(/\.txt$/i, "");
     const id = makeContentId("file");
     const content = createTxtTemplate(moduleId, title);
-    const file: ContentFile = { id, name: displayName, meta: metadataFromTxt(content, title) };
+    const file: ContentFile = {
+      id,
+      name: displayName,
+      meta: {
+        ...metadataFromTxt(content, title),
+        verified: false,
+      },
+    };
     replaceContainer((current) => ({ ...current, files: [...current.files, file] }));
     setDrafts((current) => ({ ...current, [id]: content }));
     setOriginals((current) => ({ ...current, [id]: "" }));
@@ -543,7 +558,11 @@ export default function ContentTreeAdmin() {
 
       const nextContent = replaceTxtTitle(currentContent, rawTitle);
       const nextName = ensureTxtName(rawTitle);
-      const nextMeta = metadataFromTxt(nextContent, rawTitle);
+      const nextMeta = {
+        ...metadataFromTxt(nextContent, rawTitle),
+        verified: file.meta.verified,
+        verifiedHash: file.meta.verifiedHash,
+      };
 
       setDrafts((current) => ({ ...current, [file.id]: nextContent }));
       replaceContainer((current) => ({
@@ -577,41 +596,175 @@ export default function ContentTreeAdmin() {
     router.replace(adminUrl(moduleId, path, { mode: "manage" }));
   };
 
-  const updateDraft = (file: ContentFile, content: string) => {
-    setDrafts((current) => ({ ...current, [file.id]: content }));
-    const explicitTitle = txtTitleFromContent(content);
-    const fallbackTitle = file.name.replace(/\.txt$/i, "");
-    const meta = metadataFromTxt(content, fallbackTitle);
+  const updateDraft = (
+    file: ContentFile,
+    content: string,
+  ) => {
+    const cleanContent =
+      stripLegacyVerifiedMetadata(content);
+
+    setDrafts((current) => ({
+      ...current,
+      [file.id]: cleanContent,
+    }));
+
+    const explicitTitle =
+      txtTitleFromContent(cleanContent);
+    const fallbackTitle =
+      file.name.replace(/\.txt$/i, "");
+    const parsedMeta =
+      metadataFromTxt(cleanContent, fallbackTitle);
+
     replaceContainer((current) => ({
       ...current,
       files: current.files.map((item) =>
         item.id === file.id
           ? {
               ...item,
-              name: explicitTitle ? ensureTxtName(explicitTitle) : item.name,
-              meta,
+              name: explicitTitle
+                ? ensureTxtName(explicitTitle)
+                : item.name,
+              meta: {
+                ...parsedMeta,
+                verified: item.meta.verified,
+                verifiedHash:
+                  item.meta.verifiedHash,
+              },
             }
           : item,
       ),
     }));
   };
 
-  const save = async () => {
+  const performSave = async (
+    selectedVerifiedChoice?: boolean,
+  ) => {
     if (saving) return;
+
     setSaving(true);
     setNotice("");
+
     try {
-      const result = await writeContentTree(tree, pendingEdits);
+      const cleanEdits: Record<string, string> = {};
+
+      for (const [id, value] of Object.entries(
+        pendingEdits,
+      )) {
+        cleanEdits[id] =
+          stripLegacyVerifiedMetadata(value);
+      }
+
+      let nextTree = tree;
+      const editedIds = new Set(
+        Object.keys(cleanEdits),
+      );
+
+      if (editedIds.size > 0) {
+        const nextModule = updateContainer(
+          tree.modules[moduleId],
+          path,
+          (current) => ({
+            ...current,
+            files: current.files.map((file) => {
+              if (!editedIds.has(file.id)) {
+                return file;
+              }
+
+              const editedContent =
+                cleanEdits[file.id];
+              const appliesChoice =
+                file.id === selectedFile?.id &&
+                typeof selectedVerifiedChoice ===
+                  "boolean";
+              const isVerified =
+                appliesChoice
+                  ? selectedVerifiedChoice
+                  : false;
+
+              return {
+                ...file,
+                meta: {
+                  ...file.meta,
+                  ...metadataFromTxt(
+                    editedContent,
+                    file.name.replace(
+                      /\.txt$/i,
+                      "",
+                    ),
+                  ),
+                  verified: isVerified,
+                  verifiedHash: isVerified
+                    ? contentFingerprint(
+                        editedContent,
+                      )
+                    : undefined,
+                },
+              };
+            }),
+          }),
+        );
+
+        nextTree = {
+          ...tree,
+          modules: {
+            ...tree.modules,
+            [moduleId]: nextModule,
+          },
+        };
+      }
+
+      const result = await writeContentTree(
+        nextTree,
+        cleanEdits,
+      );
+
       setTree(result.tree);
       setSavedTree(JSON.stringify(result.tree));
-      setOriginals((current) => ({ ...current, ...drafts }));
-      setNotice(`저장 완료 · TXT ${result.uploadedFileCount ?? 0}개 업로드`);
-      window.setTimeout(() => setNotice(""), 2400);
+      setOriginals((current) => ({
+        ...current,
+        ...cleanEdits,
+      }));
+      setDrafts((current) => ({
+        ...current,
+        ...cleanEdits,
+      }));
+
+      setNotice(
+        `저장 완료 · TXT ${
+          result.uploadedFileCount ?? 0
+        }개 업로드`,
+      );
+      window.setTimeout(
+        () => setNotice(""),
+        2400,
+      );
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "저장 실패");
+      setNotice(
+        error instanceof Error
+          ? error.message
+          : "저장 실패",
+      );
     } finally {
       setSaving(false);
     }
+  };
+
+  const save = async () => {
+    if (saving) return;
+
+    const selectedTxtChanged =
+      Boolean(
+        selectedFile &&
+          pendingEdits[selectedFile.id] !==
+            undefined,
+      );
+
+    if (selectedTxtChanged) {
+      setVerifyPromptOpen(true);
+      return;
+    }
+
+    await performSave();
   };
 
   const currentTitle = currentFolder?.name ?? module.title;
@@ -933,8 +1086,16 @@ export default function ContentTreeAdmin() {
                     <button
                       type="button"
                       onClick={() => {
-                        const content = drafts[selectedFile.id] ?? "";
-                        const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+                        const content =
+                          stripLegacyVerifiedMetadata(
+                            drafts[selectedFile.id] ?? "",
+                          );
+                        const blob = new Blob(
+                          [content],
+                          {
+                            type: "text/plain;charset=utf-8",
+                          },
+                        );
                         const url = URL.createObjectURL(blob);
                         const anchor = document.createElement("a");
                         anchor.href = url;
@@ -965,6 +1126,50 @@ export default function ContentTreeAdmin() {
       )}
 
       <AdminActionRail saving={saving} onSave={() => void save()} parentHref={parentAdminHref} viewHref={currentViewHref} />
+
+      {verifyPromptOpen && (
+        <div className="fixed inset-0 z-[260] flex items-center justify-center bg-black/20 px-4">
+          <div className="w-full max-w-[380px] rounded-[18px] border border-[#dfe6e2] bg-white p-5 shadow-[0_24px_70px_rgba(20,42,32,0.18)]">
+            <h3 className="text-[22px] font-bold tracking-[-0.035em]">
+              검수 완료?
+            </h3>
+
+            <div className="mt-5 grid gap-2">
+              <button
+                type="button"
+                onClick={async () => {
+                  setVerifyPromptOpen(false);
+                  await performSave(true);
+                }}
+                className="rounded-[11px] border border-[#bcd9ca] bg-[#eef7f1] px-4 py-3 text-[14px] font-semibold text-[#086653]"
+              >
+                검수 완료 저장
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  setVerifyPromptOpen(false);
+                  await performSave(false);
+                }}
+                className="rounded-[11px] border border-[#dfe6e2] bg-white px-4 py-3 text-[14px] font-semibold text-[#46524b]"
+              >
+                검수 미완료 저장
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setVerifyPromptOpen(false)
+                }
+                className="px-4 py-2 text-[13px] font-medium text-[#8a948e]"
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {notice && <div className="fixed bottom-6 left-1/2 z-[220] max-w-[min(640px,calc(100%-32px))] -translate-x-1/2 rounded-[12px] border bg-white px-4 py-3 text-[13px] font-semibold shadow-[0_12px_34px_rgba(20,38,30,0.12)]">{notice}</div>}
 
