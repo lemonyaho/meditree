@@ -340,10 +340,17 @@ export default function StudyModulePage({ moduleId }: { moduleId: ModuleId }) {
           title={selectedFile.meta.title}
           verified={
             content !== null &&
-            selectedFile.meta.verified === true &&
-            Boolean(selectedFile.meta.verifiedHash) &&
-            selectedFile.meta.verifiedHash ===
-              contentFingerprint(content)
+            (
+              (
+                selectedFile.meta.verified === true &&
+                Boolean(
+                  selectedFile.meta.verifiedHash,
+                ) &&
+                selectedFile.meta.verifiedHash ===
+                  contentFingerprint(content)
+              ) ||
+              parsed?.legacyVerified === true
+            )
           }
           meta={metaParts.length ? metaParts.join("  ·  ") : currentFolder?.description || module.description}
           search={{ value: query, onChange: setQuery, placeholder: "이 TXT 안에서 검색" }}

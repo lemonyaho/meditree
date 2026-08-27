@@ -37,6 +37,7 @@ export type ParsedUniversalTxt = {
   date?: string;
   professor?: string;
   color?: ThemeColor;
+  legacyVerified?: boolean;
   blocks: TxtBlock[];
   entities: TxtEntity[];
   nodes: TxtNode[];
@@ -246,6 +247,7 @@ export function parseUniversalTxt(
   let date: string | undefined;
   let professor: string | undefined;
   let color: ThemeColor | undefined;
+  let legacyVerified: boolean | undefined;
   let seenContent = false;
 
   const fileBlocks: TxtBlock[] = [];
@@ -346,6 +348,17 @@ export function parseUniversalTxt(
         if (key === "color") {
           color = normalizeColor(inline) ?? color;
         }
+        if (key === "verified") {
+          const normalizedVerified =
+            inline.trim().toLowerCase();
+
+          legacyVerified =
+            normalizedVerified === "o"
+              ? true
+              : normalizedVerified === "x"
+                ? false
+                : undefined;
+        }
 
         index += 1;
         continue;
@@ -430,6 +443,7 @@ export function parseUniversalTxt(
     date,
     professor,
     color,
+    legacyVerified,
     blocks: fileBlocks,
     entities: fileEntities,
     nodes: buildTree(flatNodes),
