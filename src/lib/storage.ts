@@ -384,13 +384,21 @@ function updateFileMetaByEdits(
         const content = edits[file.id];
         if (content === undefined) return file;
         const explicitTitle = txtTitleFromContent(content);
+        const parsedMeta = metadataFromTxt(
+          content,
+          file.name.replace(/\.txt$/i, ""),
+        );
+
         return {
           ...file,
-          name: explicitTitle ? ensureTxtName(explicitTitle) : file.name,
-          meta: metadataFromTxt(
-            content,
-            file.name.replace(/\.txt$/i, ""),
-          ),
+          name: explicitTitle
+            ? ensureTxtName(explicitTitle)
+            : file.name,
+          meta: {
+            ...parsedMeta,
+            verified: file.meta.verified,
+            verifiedHash: file.meta.verifiedHash,
+          },
         };
       }),
     }));
@@ -404,13 +412,21 @@ function updateFileMetaByEdits(
         const content = edits[file.id];
         if (content === undefined) return file;
         const explicitTitle = txtTitleFromContent(content);
+        const parsedMeta = metadataFromTxt(
+          content,
+          file.name.replace(/\.txt$/i, ""),
+        );
+
         return {
           ...file,
-          name: explicitTitle ? ensureTxtName(explicitTitle) : file.name,
-          meta: metadataFromTxt(
-            content,
-            file.name.replace(/\.txt$/i, ""),
-          ),
+          name: explicitTitle
+            ? ensureTxtName(explicitTitle)
+            : file.name,
+          meta: {
+            ...parsedMeta,
+            verified: file.meta.verified,
+            verifiedHash: file.meta.verifiedHash,
+          },
         };
       }),
     };

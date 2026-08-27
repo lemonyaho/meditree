@@ -1,4 +1,4 @@
-export const APP_VERSION = "2.3.4";
+export const APP_VERSION = "2.3.5";
 
 export type ModuleId =
   | "clinical"
@@ -202,6 +202,15 @@ function normalizeFile(input: unknown): ContentFile | null {
         meta.color === "blue" ||
         meta.color === "green"
           ? meta.color
+          : undefined,
+      verified:
+        typeof meta.verified === "boolean"
+          ? meta.verified
+          : undefined,
+      verifiedHash:
+        typeof meta.verifiedHash === "string" &&
+        meta.verifiedHash.trim()
+          ? meta.verifiedHash.trim()
           : undefined,
     },
   };
