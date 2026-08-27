@@ -250,29 +250,43 @@ function CompositeBlockValue({
   inheritedValue,
   localValue,
   inheritanceScope,
+  largeText = false,
 }: {
   value: string;
   inheritedValue?: string;
   localValue?: string;
   inheritanceScope?: string;
+  largeText?: boolean;
 }) {
   if (inheritedValue && localValue) {
     return (
       <div className="space-y-4">
         <div>
-          <div className="mb-1.5 inline-flex rounded-full border border-[#dce5e0] bg-[#f7faf8] px-2.5 py-1 text-[11px] font-semibold text-[#69766f]">
+          <div className={`mb-1.5 inline-flex rounded-full border border-[#dce5e0] bg-[#f7faf8] px-2.5 py-1 font-semibold text-[#69766f] ${
+              largeText ? "text-[12px]" : "text-[11px]"
+            }`}>
             공통 · {inheritanceScope}
           </div>
-          <div className="whitespace-pre-wrap text-[15px] leading-7 text-[#53615a]">
+          <div className={`whitespace-pre-wrap text-[#53615a] ${
+              largeText
+                ? "text-[17px] leading-8"
+                : "text-[15px] leading-7"
+            }`}>
             {inheritedValue}
           </div>
         </div>
 
         <div className="border-t border-[#e8eeea] pt-3">
-          <div className="mb-1.5 inline-flex rounded-full border border-[#dfe6e2] bg-white/75 px-2.5 py-1 text-[11px] font-semibold text-[#69766f]">
+          <div className={`mb-1.5 inline-flex rounded-full border border-[#dfe6e2] bg-white/75 px-2.5 py-1 font-semibold text-[#69766f] ${
+              largeText ? "text-[12px]" : "text-[11px]"
+            }`}>
             개별
           </div>
-          <div className="whitespace-pre-wrap text-[15px] leading-7 text-[#53615a]">
+          <div className={`whitespace-pre-wrap text-[#53615a] ${
+              largeText
+                ? "text-[17px] leading-8"
+                : "text-[15px] leading-7"
+            }`}>
             {localValue}
           </div>
         </div>
@@ -283,12 +297,18 @@ function CompositeBlockValue({
   return (
     <div>
       {inheritanceScope && (
-        <div className="mb-2 inline-flex rounded-full border border-[#dce5e0] bg-[#f7faf8] px-2.5 py-1 text-[11px] font-semibold text-[#69766f]">
+        <div className={`mb-2 inline-flex rounded-full border border-[#dce5e0] bg-[#f7faf8] px-2.5 py-1 font-semibold text-[#69766f] ${
+          largeText ? "text-[12px]" : "text-[11px]"
+        }`}>
           공통 · {inheritanceScope}
         </div>
       )}
 
-      <div className="whitespace-pre-wrap text-[15px] leading-7 text-[#53615a]">
+      <div className={`whitespace-pre-wrap text-[#53615a] ${
+          largeText
+            ? "text-[17px] leading-8"
+            : "text-[15px] leading-7"
+        }`}>
         {value || "내용 없음"}
       </div>
     </div>
@@ -358,11 +378,19 @@ function BlockCards({
                   return next;
                 });
               }}
-              className="flex min-h-[50px] w-full items-center justify-between gap-3 px-4 text-left"
+              className={`flex w-full items-center justify-between gap-3 px-4 text-left ${
+                moduleId === "lectures"
+                  ? "min-h-[56px]"
+                  : "min-h-[50px]"
+              }`}
             >
               <div className="flex min-w-0 items-center gap-2">
                 <span
-                  className="text-[15px] font-semibold"
+                  className={`font-semibold ${
+                    moduleId === "lectures"
+                      ? "text-[17px]"
+                      : "text-[15px]"
+                  }`}
                   style={{
                     color: tint?.label ?? "#111713",
                   }}
@@ -373,7 +401,11 @@ function BlockCards({
 
               </div>
               <span
-                className="text-[13px] font-semibold"
+                className={`font-semibold ${
+                  moduleId === "lectures"
+                    ? "text-[14px]"
+                    : "text-[13px]"
+                }`}
                 style={{ color: theme.accent }}
               >
                 {open ? "닫기" : "보기"}
@@ -392,6 +424,7 @@ function BlockCards({
                   inheritedValue={block.inheritedValue}
                   localValue={block.localValue}
                   inheritanceScope={block.inheritanceScope}
+                  largeText={moduleId === "lectures"}
                 />
               </div>
             )}
@@ -483,13 +516,23 @@ function EntityCard({
           }}
         >
           <span
-            className="shrink-0 font-mono text-[11px] font-bold"
+            className={`shrink-0 font-mono font-bold ${
+              moduleId === "lectures"
+                ? "text-[13px]"
+                : "text-[11px]"
+            }`}
             style={{ color: theme.accent }}
           >
             {displayNumber}
           </span>
 
-          <strong className="min-w-0 flex-1 truncate text-[15px] font-semibold">
+          <strong
+            className={`min-w-0 flex-1 truncate font-semibold ${
+              moduleId === "lectures"
+                ? "text-[17px]"
+                : "text-[15px]"
+            }`}
+          >
             {entity.name}
           </strong>
 
@@ -514,13 +557,23 @@ function EntityCard({
           }}
         >
           <span
-            className="shrink-0 font-mono text-[11px] font-bold"
+            className={`shrink-0 font-mono font-bold ${
+              moduleId === "lectures"
+                ? "text-[13px]"
+                : "text-[11px]"
+            }`}
             style={{ color: theme.accent }}
           >
             {displayNumber}
           </span>
 
-          <strong className="min-w-0 flex-1 truncate text-[15px] font-semibold">
+          <strong
+            className={`min-w-0 flex-1 truncate font-semibold ${
+              moduleId === "lectures"
+                ? "text-[17px]"
+                : "text-[15px]"
+            }`}
+          >
             {entity.name}
           </strong>
 
@@ -644,13 +697,25 @@ function NodeCard({
         >
           <div className="flex min-w-0 items-center gap-3">
             <span
-              className="shrink-0 font-mono text-[12px] font-bold"
+              className={`shrink-0 font-mono font-bold ${
+                moduleId === "lectures"
+                  ? "text-[13px]"
+                  : "text-[12px]"
+              }`}
               style={{ color: theme.accent }}
             >
               {node.number}
             </span>
             <strong
-              className={`${depth === 0 ? "text-[17px]" : "text-[16px]"} truncate font-semibold tracking-[-0.015em]`}
+              className={`${
+                moduleId === "lectures"
+                  ? depth === 0
+                    ? "text-[20px]"
+                    : "text-[18px]"
+                  : depth === 0
+                    ? "text-[17px]"
+                    : "text-[16px]"
+              } truncate font-semibold tracking-[-0.015em]`}
             >
               {node.title}
             </strong>
@@ -666,12 +731,22 @@ function NodeCard({
       ) : (
         <div className="flex min-h-[60px] items-center gap-3 px-5">
           <span
-            className="shrink-0 font-mono text-[12px] font-bold"
+            className={`shrink-0 font-mono font-bold ${
+              moduleId === "lectures"
+                ? "text-[13px]"
+                : "text-[12px]"
+            }`}
             style={{ color: theme.accent }}
           >
             {node.number}
           </span>
-          <strong className="truncate text-[16px] font-semibold tracking-[-0.015em]">
+          <strong
+            className={`truncate font-semibold tracking-[-0.015em] ${
+              moduleId === "lectures"
+                ? "text-[18px]"
+                : "text-[16px]"
+            }`}
+          >
             {node.title}
           </strong>
         </div>
@@ -1359,29 +1434,29 @@ export function LectureRandomQuiz({
 
   return (
     <div className="rounded-[18px] border border-[#dfe6e2] bg-white p-6">
-      <p className="text-[12px] font-bold tracking-[0.12em] text-[#168269]">
+      <p className="text-[13px] font-bold tracking-[0.12em] text-[#168269]">
         RANDOM QUIZ {position + 1} /{" "}
         {questions.length}
       </p>
 
-      <h2 className="mt-6 text-[clamp(24px,4vw,34px)] font-bold leading-[1.35] tracking-[-0.035em]">
+      <h2 className="mt-6 text-[clamp(28px,4.4vw,38px)] font-bold leading-[1.35] tracking-[-0.035em]">
         {current.prompt}
       </h2>
 
       <div className="mt-6 min-h-[150px] rounded-[14px] border border-[#dfe6e2] bg-[#fbfcfb] p-5">
         {revealed ? (
-          <div className="whitespace-pre-wrap text-[15px] leading-7 text-[#53615a]">
+          <div className="whitespace-pre-wrap text-[17px] leading-8 text-[#53615a]">
             {current.answer}
           </div>
         ) : (
-          <span className="text-[14px] text-[#9aa39e]">
+          <span className="text-[15px] text-[#9aa39e]">
             정답을 떠올린 뒤 확인하세요.
           </span>
         )}
       </div>
 
       {revealed && sources.length > 1 && (
-        <p className="mt-2 text-[11px] text-[#9aa39e]">
+        <p className="mt-2 text-[12px] text-[#9aa39e]">
           강의: {current.sourceTitle}
         </p>
       )}
@@ -1392,7 +1467,7 @@ export function LectureRandomQuiz({
           onClick={() =>
             setRevealed((value) => !value)
           }
-          className="rounded-[10px] border border-[#cfe1d8] bg-[#eef6eb] px-4 py-2.5 text-[14px] font-semibold text-[#075f4e]"
+          className="rounded-[10px] border border-[#cfe1d8] bg-[#eef6eb] px-4 py-2.5 text-[15px] font-semibold text-[#075f4e]"
         >
           {revealed
             ? "정답 숨기기"
@@ -1403,7 +1478,7 @@ export function LectureRandomQuiz({
           type="button"
           onClick={previousQuestion}
           disabled={position === 0}
-          className="rounded-[10px] border bg-white px-4 py-2.5 text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-35"
+          className="rounded-[10px] border bg-white px-4 py-2.5 text-[15px] font-semibold disabled:cursor-not-allowed disabled:opacity-35"
         >
           ← 이전 문제
         </button>
@@ -1411,7 +1486,7 @@ export function LectureRandomQuiz({
         <button
           type="button"
           onClick={nextQuestion}
-          className="rounded-[10px] border bg-white px-4 py-2.5 text-[14px] font-semibold"
+          className="rounded-[10px] border bg-white px-4 py-2.5 text-[15px] font-semibold"
         >
           다음 랜덤 문제 →
         </button>
