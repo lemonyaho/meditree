@@ -187,8 +187,16 @@ function CompositeBlockValue({
   }
 
   return (
-    <div className="whitespace-pre-wrap text-[15px] leading-7 text-[#53615a]">
-      {value || "내용 없음"}
+    <div>
+      {inheritanceScope && (
+        <div className="mb-2 inline-flex rounded-full border border-[#dce5e0] bg-[#f7faf8] px-2.5 py-1 text-[11px] font-semibold text-[#69766f]">
+          공통 · {inheritanceScope}
+        </div>
+      )}
+
+      <div className="whitespace-pre-wrap text-[15px] leading-7 text-[#53615a]">
+        {value || "내용 없음"}
+      </div>
     </div>
   );
 }
@@ -256,12 +264,7 @@ function BlockCards({
                   {block.label}
                 </span>
 
-                {block.inheritanceScope &&
-                  !(block.inheritedValue && block.localValue) && (
-                    <span className="max-w-[260px] truncate rounded-full border border-[#dce5e0] bg-[#f7faf8] px-2.5 py-1 text-[11px] font-semibold text-[#69766f]">
-                      공통 · {block.inheritanceScope}
-                    </span>
-                  )}
+
               </div>
               <span
                 className="text-[13px] font-semibold"
@@ -985,7 +988,7 @@ export function EntityRecallQuiz({
           return (
           <div
             key={`${row.label}-${index}`}
-            className="grid min-h-[68px] grid-cols-[185px_minmax(0,1fr)] border-b last:border-b-0 max-[620px]:grid-cols-[128px_minmax(0,1fr)]"
+            className="grid min-h-[68px] grid-cols-[170px_minmax(0,1fr)] border-b last:border-b-0 max-[620px]:grid-cols-[118px_minmax(0,1fr)]"
             style={{
               borderColor: tint?.border ?? "#edf1ee",
               background: tint?.background ?? "transparent",
@@ -999,20 +1002,13 @@ export function EntityRecallQuiz({
             >
               <div className="min-w-0">
                 <strong
-                  className="text-[15px] font-semibold"
+                  className="block break-keep text-[15px] font-semibold leading-6"
                   style={{
                     color: tint?.label ?? "#53615a",
                   }}
                 >
                   {row.label}
                 </strong>
-
-                {row.inheritanceScope &&
-                  !(row.inheritedValue && row.localValue) && (
-                    <div className="mt-1.5 inline-flex max-w-[160px] truncate rounded-full border border-[#dce5e0] bg-white/65 px-2 py-0.5 text-[10.5px] font-semibold text-[#69766f]">
-                      공통 · {row.inheritanceScope}
-                    </div>
-                  )}
               </div>
             </div>
 
