@@ -55,7 +55,6 @@ function normalizeBlockKey(key: string) {
 
 const BLOCK_KEY_ALIASES: Record<string, string> = {
   oxygen: "o2",
-  특징: "memo",
 };
 
 function canonicalBlockKey(
