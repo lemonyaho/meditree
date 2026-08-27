@@ -274,7 +274,10 @@ function NodeCard({
     inheritEntityBlocks
       ? mergeBlocks(
           inheritedEntityBlocks,
-          inheritableBlocks(node.blocks),
+          inheritedBlocksFrom(
+            node.blocks,
+            node.title,
+          ),
         )
       : [];
 
@@ -437,6 +440,49 @@ function inheritableBlocks(blocks: TxtBlock[]) {
   );
 }
 
+function topicParticle(label: string) {
+  const trimmed = label.trim();
+  if (!trimmed) return "는";
+
+  const last = trimmed.charCodeAt(trimmed.length - 1);
+
+  // Hangul syllables: use 은 when a final consonant exists, otherwise 는.
+  if (last >= 0xac00 && last <= 0xd7a3) {
+    return (last - 0xac00) % 28 === 0
+      ? "는"
+      : "은";
+  }
+
+  // Latin / abbreviation / punctuation labels read naturally with 는.
+  return "는";
+}
+
+function prefixInheritedValue(
+  sourceLabel: string,
+  value: string,
+) {
+  const source = sourceLabel.trim();
+  const body = value.trim();
+
+  if (!source || !body) return body;
+
+  return `${source}${topicParticle(source)} ${body}`;
+}
+
+function inheritedBlocksFrom(
+  blocks: TxtBlock[],
+  sourceLabel: string,
+) {
+  return inheritableBlocks(blocks).map((block) => ({
+    ...block,
+    id: `${block.id}:inherited:${sourceLabel}`,
+    value: prefixInheritedValue(
+      sourceLabel,
+      block.value,
+    ),
+  }));
+}
+
 function mergeBlocks(base: TxtBlock[], additions: TxtBlock[]) {
   const order: string[] = [];
   const values = new Map<string, TxtBlock>();
@@ -523,8 +569,18 @@ function collectEntityQuizQuestions(
     });
   };
 
+  const rootInheritedBlocks =
+    inheritedBlocksFrom(
+      source.parsed.blocks,
+      source.title,
+    );
+
   for (const entity of source.parsed.entities) {
-    addEntity(entity, [source.title], source.parsed.blocks);
+    addEntity(
+      entity,
+      [source.title],
+      rootInheritedBlocks,
+    );
   }
 
   const walk = (nodes: TxtNode[], hierarchy: string[], inheritedBlocks: TxtBlock[]) => {
@@ -532,14 +588,21 @@ function collectEntityQuizQuestions(
       const nextHierarchy = [...hierarchy, node.title];
       const nextInherited = mergeBlocks(
         inheritableBlocks(inheritedBlocks),
-        inheritableBlocks(node.blocks),
+        inheritedBlocksFrom(
+          node.blocks,
+          node.title,
+        ),
       );
       for (const entity of node.entities) addEntity(entity, nextHierarchy, nextInherited);
       walk(node.children, nextHierarchy, nextInherited);
     }
   };
 
-  walk(source.parsed.nodes, [source.title], source.parsed.blocks);
+  walk(
+    source.parsed.nodes,
+    [source.title],
+    rootInheritedBlocks,
+  );
   return questions;
 }
 
@@ -982,7 +1045,10 @@ export default function UniversalDocument({
     moduleId === "microbiology";
   const rootInheritedEntityBlocks =
     inheritEntityBlocks
-      ? inheritableBlocks(parsed.blocks)
+      ? inheritedBlocksFrom(
+          parsed.blocks,
+          parsed.title,
+        )
       : [];
 
   useEffect(() => {

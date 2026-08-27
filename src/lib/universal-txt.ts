@@ -174,6 +174,37 @@ function buildTree(
   return roots;
 }
 
+function matchNumericHeading(value: string) {
+  const match = value.match(
+    /^(\d+(?:\.\d+)*)\s+(.+)$/,
+  );
+  if (!match) return null;
+
+  const number = match[1];
+  const title = match[2].trim();
+
+  // MediTree heading syntax is 01 / 01.1 / 01.1.1 ...
+  // A plain 3+ digit number is much more likely to be a dose/value
+  // (e.g. "160 mg/800 mg") than a section number.
+  if (
+    !number.includes(".") &&
+    Number(number) >= 100
+  ) {
+    return null;
+  }
+
+  // Also reject common dose/unit lines even when the number is 1–2 digits.
+  if (
+    /^(?:mg|mcg|μg|ug|g|kg|ml|mL|L|IU|U|unit|units|mmol|mEq|%)\b/i.test(
+      title,
+    )
+  ) {
+    return null;
+  }
+
+  return match;
+}
+
 export function parseUniversalTxt(
   text: string,
   labels: BlockLabelMap = {},
@@ -196,7 +227,7 @@ export function parseUniversalTxt(
   let entityIndex = 0;
 
   const isHeading = (value: string) =>
-    /^(\d+(?:\.\d+)*)\s+(.+)$/.test(value);
+    Boolean(matchNumericHeading(value));
   const isEntity = (value: string) =>
     /^##\s+(.+)$/.test(value);
   const isAtLine = (value: string) =>
@@ -244,7 +275,7 @@ export function parseUniversalTxt(
       continue;
     }
 
-    const heading = trimmed.match(/^(\d+(?:\.\d+)*)\s+(.+)$/);
+    const heading = matchNumericHeading(trimmed);
     if (heading) {
       seenContent = true;
       currentEntity = undefined;
