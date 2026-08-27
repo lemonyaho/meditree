@@ -163,44 +163,44 @@ function clinicalSemanticTint(key: string) {
     }
   > = {
     def: {
-      background: "#f4f7fb",
-      border: "#dce4ee",
-      label: "#52687b",
+      background: "#fff5f4",
+      border: "#f1deda",
+      label: "#8a5c56",
     },
     etiol: {
-      background: "#f7f5fb",
-      border: "#e3deed",
-      label: "#6b607d",
+      background: "#fff7f0",
+      border: "#f1e1d1",
+      label: "#886449",
     },
     patho: {
-      background: "#f3f6fc",
-      border: "#dbe2f0",
-      label: "#586a82",
+      background: "#fffbea",
+      border: "#eee3ba",
+      label: "#7d6b35",
     },
     sx: {
-      background: "#fff8ee",
-      border: "#eee0c8",
-      label: "#80643d",
+      background: "#f5faef",
+      border: "#dce9cf",
+      label: "#5f7550",
     },
     imaging: {
-      background: "#f3f8f7",
-      border: "#d9e7e3",
-      label: "#547269",
+      background: "#f0f9f7",
+      border: "#d5e9e4",
+      label: "#4f746b",
     },
     dx: {
-      background: "#f1f8fb",
-      border: "#d7e7ee",
-      label: "#4d6f7d",
+      background: "#f1f8fc",
+      border: "#d8e8f1",
+      label: "#4f7082",
     },
     tx: {
-      background: "#f2f9f5",
-      border: "#d8eadf",
-      label: "#3f6f54",
+      background: "#f3f5fc",
+      border: "#dce1f0",
+      label: "#58698a",
     },
     prog: {
-      background: "#fbf5f7",
-      border: "#ebdce2",
-      label: "#765e67",
+      background: "#f8f3fb",
+      border: "#e7dcf0",
+      label: "#705f82",
     },
   };
 
@@ -1055,6 +1055,15 @@ export function EntityRecallQuiz({
         )
       : current.rows;
 
+  const previousQuestion = () => {
+    if (position <= 0) return;
+
+    setPosition((current) =>
+      Math.max(0, current - 1),
+    );
+    setRevealed(false);
+  };
+
   const nextQuestion = () => {
     const nextPosition = position + 1;
 
@@ -1165,6 +1174,15 @@ export function EntityRecallQuiz({
           {revealed
             ? "정답 숨기기"
             : "정답 보기"}
+        </button>
+
+        <button
+          type="button"
+          onClick={previousQuestion}
+          disabled={position === 0}
+          className="rounded-[10px] border bg-white px-4 py-2.5 text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-35"
+        >
+          ← 이전 문제
         </button>
 
         <button
@@ -1318,6 +1336,15 @@ export function LectureRandomQuiz({
     safeOrder[position % safeOrder.length] ?? 0;
   const current = questions[currentIndex];
 
+  const previousQuestion = () => {
+    if (position <= 0) return;
+
+    setPosition((current) =>
+      Math.max(0, current - 1),
+    );
+    setRevealed(false);
+  };
+
   const nextQuestion = () => {
     const nextPosition = position + 1;
 
@@ -1370,6 +1397,15 @@ export function LectureRandomQuiz({
           {revealed
             ? "정답 숨기기"
             : "정답 보기"}
+        </button>
+
+        <button
+          type="button"
+          onClick={previousQuestion}
+          disabled={position === 0}
+          className="rounded-[10px] border bg-white px-4 py-2.5 text-[14px] font-semibold disabled:cursor-not-allowed disabled:opacity-35"
+        >
+          ← 이전 문제
         </button>
 
         <button
