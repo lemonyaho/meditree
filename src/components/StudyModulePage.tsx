@@ -93,6 +93,10 @@ function FileCard({ href, file, index }: { href: string; file: ContentFile; inde
 
 function LectureRow({ href, file }: { href: string; file: ContentFile }) {
   const led = file.meta.color ? LED[file.meta.color] : { color: "#9aa39e", glow: "rgba(154,163,158,0.12)" };
+  const dateLabel = file.meta.date
+    ? parseLectureDate(file.meta.date)?.label ?? file.meta.date
+    : undefined;
+
   return (
     <Link href={href} className="flex min-h-[72px] items-center justify-between gap-5 rounded-[15px] border border-[#dfe6e2] bg-white px-5 py-3 shadow-[0_7px_20px_rgba(20,42,32,0.03)] transition hover:border-[#cbd8cf]">
       <div className="flex min-w-0 items-center gap-3.5">
@@ -100,6 +104,7 @@ function LectureRow({ href, file }: { href: string; file: ContentFile }) {
         <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
           <strong className="truncate text-[16px] font-semibold">{file.meta.title}</strong>
           {file.meta.professor && <span className="text-[14px] text-[#7c8781]">{file.meta.professor}</span>}
+          {dateLabel && <span className="text-[13px] text-[#9aa39e]">{dateLabel}</span>}
         </div>
       </div>
       <span className="shrink-0 text-[21px]" style={{ color: led.color }}>→</span>
