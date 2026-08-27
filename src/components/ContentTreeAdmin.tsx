@@ -98,43 +98,12 @@ Gram +, Gram - bacteria
 @english Gram-Positive Cocci
 @gram +
 @morph Coccus
-@o2 facultative anaerobe
 
 01 Catalase (+)
-
 01.1 Staphylococcus spp.
-
 01.1.1 Coagulase (+)
 ## Staphylococcus aureus
-
-01.1.2 Coagulase (-)
-## Staphylococcus epidermidis
-## Staphylococcus saprophyticus
-
-02 Catalase (-)
-
-02.1 Streptococcus spp.
-
-02.1.1 β-hemolysis
-
-02.1.1.1 Group A
-## Streptococcus pyogenes
-
-02.1.1.2 Group B
-## Streptococcus agalactiae
-
-02.1.2 α-hemolysis
-
-02.1.2.1 Optochin sensitive
-## Streptococcus pneumoniae
-
-02.1.2.2 Optochin resistant
-## Viridans streptococci
-
-02.2 Enterococcus spp.
-
-## Enterococcus faecalis
-## Enterococcus faecium`;
+@o2 facultative anaerobe`;
   }
 
   if (moduleId === "lectures") {

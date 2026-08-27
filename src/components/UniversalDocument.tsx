@@ -1008,15 +1008,18 @@ export default function UniversalDocument({
       );
   }, []);
 
-  const fileBlocks = normalizedQuery
-    ? parsed.blocks.filter((block) =>
-        `${block.label} ${block.value}`
-          .toLowerCase()
-          .includes(
-            normalizedQuery.toLowerCase(),
-          ),
-      )
-    : parsed.blocks;
+  const fileBlocks =
+    moduleId === "microbiology"
+      ? []
+      : normalizedQuery
+        ? parsed.blocks.filter((block) =>
+            `${block.label} ${block.value}`
+              .toLowerCase()
+              .includes(
+                normalizedQuery.toLowerCase(),
+              ),
+          )
+        : parsed.blocks;
 
   return (
     <section
