@@ -19,11 +19,7 @@ body {
   margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family:
-    Arial,
-    "Apple SD Gothic Neo",
-    "Noto Sans KR",
-    sans-serif;
+  font-family: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
 }
 
 a {
@@ -42,18 +38,15 @@ button {
   cursor: pointer;
 }
 
-summary::-webkit-details-marker {
-  display: none;
+button:disabled {
+  cursor: default;
 }
 
 ::selection {
   background: #dcefd5;
 }
 
-
-summary:focus,
-summary:focus-visible,
-button:focus,
-button:focus-visible {
-  outline: none;
+:focus-visible {
+  outline: 2px solid #9fc9b8;
+  outline-offset: 2px;
 }
