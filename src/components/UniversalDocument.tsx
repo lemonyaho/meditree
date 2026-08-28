@@ -12,6 +12,7 @@ import {
   type TxtBlock,
   type TxtEntity,
   type TxtNode,
+  type TxtTfItem,
 } from "@/lib/universal-txt";
 
 const THEMES: Record<
@@ -97,6 +98,10 @@ function filterNodes(
         block.label,
         block.value,
       ]),
+      ...node.tfItems.flatMap((item) => [
+        "T/F",
+        item.statement,
+      ]),
     ]
       .join(" ")
       .toLowerCase();
@@ -113,42 +118,95 @@ function filterNodes(
   });
 }
 
-const CLINICAL_BLOCK_ORDER = [
-  "def",
-  "etiol",
-  "patho",
-  "sx",
-  "imaging",
-  "dx",
-  "tx",
-  "prog",
-] as const;
+const MODULE_BLOCK_ORDER: Record<
+  ModuleId,
+  string[]
+> = {
+  clinical: [
+    "def",
+    "etiol",
+    "patho",
+    "sx",
+    "imaging",
+    "dx",
+    "tx",
+    "prog",
+  ],
+  lectures: [
+    "def",
+    "etiol",
+    "patho",
+    "sx",
+    "imaging",
+    "dx",
+    "tx",
+    "prog",
+  ],
+  drugs: [
+    "mech",
+    "indi",
+    "contra",
+    "side",
+    "caution",
+  ],
+  microbiology: [
+    "o2",
+    "dz",
+  ],
+};
 
-const CLINICAL_BLOCK_RANK =
-  new Map<string, number>(
-    CLINICAL_BLOCK_ORDER.map(
+function orderBlocksForModule(
+  blocks: TxtBlock[],
+  moduleId?: ModuleId,
+) {
+  if (!moduleId) return blocks;
+
+  const rank = new Map(
+    MODULE_BLOCK_ORDER[moduleId].map(
       (key, index) => [key, index],
     ),
   );
 
-function orderClinicalBlocks(
-  blocks: TxtBlock[],
-) {
   return blocks
-    .map((block, originalIndex) => ({
-      block,
-      originalIndex,
-      rank:
-        CLINICAL_BLOCK_RANK.get(
-          normalizedBlockKey(block.key),
-        ) ?? Number.MAX_SAFE_INTEGER,
-    }))
+    .map((block, originalIndex) => {
+      const key = normalizedBlockKey(block.key);
+      const isMemo = key === "memo";
+      const knownRank = rank.get(key);
+
+      return {
+        block,
+        originalIndex,
+        rank: isMemo
+          ? 20_000
+          : knownRank !== undefined
+            ? knownRank
+            : 10_000,
+      };
+    })
     .sort(
       (a, b) =>
         a.rank - b.rank ||
         a.originalIndex - b.originalIndex,
     )
     .map(({ block }) => block);
+}
+
+function blocksWithoutMemo(
+  blocks: TxtBlock[],
+) {
+  return blocks.filter(
+    (block) =>
+      normalizedBlockKey(block.key) !== "memo",
+  );
+}
+
+function memoBlocks(
+  blocks: TxtBlock[],
+) {
+  return blocks.filter(
+    (block) =>
+      normalizedBlockKey(block.key) === "memo",
+  );
 }
 
 function clinicalSemanticTint(key: string) {
@@ -202,6 +260,11 @@ function clinicalSemanticTint(key: string) {
       border: "#e7dcf0",
       label: "#705f82",
     },
+    memo: {
+      background: "#f5f7f8",
+      border: "#dfe5e7",
+      label: "#627077",
+    },
   };
 
   return palette[normalized] ?? null;
@@ -210,39 +273,78 @@ function clinicalSemanticTint(key: string) {
 function drugSemanticTint(key: string) {
   const normalized = normalizedBlockKey(key);
 
-  if (normalized === "indi") {
-    return {
+  const palette: Record<
+    string,
+    {
+      background: string;
+      border: string;
+      label: string;
+    }
+  > = {
+    mech: {
+      background: "#f2f7fb",
+      border: "#d9e6ef",
+      label: "#4f6e80",
+    },
+    indi: {
       background: "#f2f9f5",
       border: "#d8eadf",
       label: "#3f6f54",
-    };
-  }
-
-  if (normalized === "contra") {
-    return {
+    },
+    contra: {
       background: "#fff4f5",
       border: "#f0dadd",
       label: "#8a5058",
-    };
-  }
-
-  if (normalized === "side") {
-    return {
+    },
+    side: {
       background: "#fff8ee",
       border: "#eee0c6",
       label: "#82643c",
-    };
-  }
-
-  if (normalized === "memo") {
-    return {
+    },
+    caution: {
+      background: "#fffbea",
+      border: "#eee4bd",
+      label: "#796b3e",
+    },
+    memo: {
       background: "#f3f7fb",
       border: "#dbe6f0",
       label: "#4d6981",
-    };
-  }
+    },
+  };
 
-  return null;
+  return palette[normalized] ?? null;
+}
+
+function microbiologySemanticTint(key: string) {
+  const normalized = normalizedBlockKey(key);
+
+  const palette: Record<
+    string,
+    {
+      background: string;
+      border: string;
+      label: string;
+    }
+  > = {
+    o2: {
+      background: "#f1f8fc",
+      border: "#d8e8f1",
+      label: "#4f7082",
+    },
+    dz: {
+      background: "#f2f9f5",
+      border: "#d8eadf",
+      label: "#3f6f54",
+    },
+    memo: {
+      background: "#f5f7f8",
+      border: "#dfe5e7",
+      label: "#627077",
+    },
+  };
+
+  return palette[normalized] ?? null;
 }
 
 function CompositeBlockValue({
@@ -315,6 +417,98 @@ function CompositeBlockValue({
   );
 }
 
+function TfQuizItem({
+  item,
+  largeText = false,
+}: {
+  item: TxtTfItem;
+  largeText?: boolean;
+}) {
+  const [revealed, setRevealed] =
+    useState(false);
+
+  const led = item.answer
+    ? {
+        color: "#4d84d8",
+        glow: "rgba(77,132,216,0.38)",
+        label: "T",
+      }
+    : {
+        color: "#cf6269",
+        glow: "rgba(207,98,105,0.36)",
+        label: "F",
+      };
+
+  return (
+    <button
+      type="button"
+      aria-expanded={revealed}
+      onClick={() =>
+        setRevealed((current) => !current)
+      }
+      className="flex min-h-[58px] w-full items-center gap-3 rounded-[12px] border border-[#dfe6e2] bg-white px-4 py-3 text-left transition-colors hover:bg-[#fafcfb]"
+    >
+      <span className="shrink-0 rounded-full border border-[#d9e3de] bg-[#f5f8f6] px-2.5 py-1 text-[10px] font-bold tracking-[0.08em] text-[#607069]">
+        T/F QUIZ
+      </span>
+
+      <span
+        className={`min-w-0 flex-1 font-medium text-[#26332d] ${
+          largeText
+            ? "text-[17px] leading-7"
+            : "text-[15px] leading-6"
+        }`}
+      >
+        {item.statement}
+      </span>
+
+      {revealed ? (
+        <span className="flex shrink-0 items-center gap-2 font-bold">
+          <span
+            className="h-2.5 w-2.5 rounded-full"
+            style={{
+              background: led.color,
+              boxShadow: `0 0 10px 3px ${led.glow}`,
+            }}
+          />
+          <span
+            className="text-[16px]"
+            style={{ color: led.color }}
+          >
+            {led.label}
+          </span>
+        </span>
+      ) : (
+        <span className="shrink-0 text-[12px] font-semibold text-[#7d8983]">
+          정답 보기
+        </span>
+      )}
+    </button>
+  );
+}
+
+function TfQuizList({
+  items,
+  moduleId,
+}: {
+  items: TxtTfItem[];
+  moduleId?: ModuleId;
+}) {
+  if (!items.length) return null;
+
+  return (
+    <div className="grid gap-2.5">
+      {items.map((item) => (
+        <TfQuizItem
+          key={item.id}
+          item={item}
+          largeText={moduleId === "lectures"}
+        />
+      ))}
+    </div>
+  );
+}
+
 function BlockCards({
   scopeId,
   blocks,
@@ -339,10 +533,10 @@ function BlockCards({
   if (!blocks.length) return null;
 
   const orderedBlocks =
-    moduleId === "clinical" ||
-    moduleId === "lectures"
-      ? orderClinicalBlocks(blocks)
-      : blocks;
+    orderBlocksForModule(
+      blocks,
+      moduleId,
+    );
 
   return (
     <div className="grid gap-2.5">
@@ -356,7 +550,11 @@ function BlockCards({
             : moduleId === "clinical" ||
                 moduleId === "lectures"
               ? clinicalSemanticTint(block.key)
-              : null;
+              : moduleId === "microbiology"
+                ? microbiologySemanticTint(
+                    block.key,
+                  )
+                : null;
 
         return (
           <div
@@ -500,6 +698,48 @@ function EntityCard({
     });
   };
 
+  const entityHeaderContent = (
+    <>
+      <span
+        className={`shrink-0 font-mono font-bold ${
+          moduleId === "lectures"
+            ? "text-[13px]"
+            : "text-[11px]"
+        }`}
+        style={{ color: theme.accent }}
+      >
+        {displayNumber}
+      </span>
+
+      <strong
+        className={`min-w-[130px] flex-1 truncate font-semibold ${
+          moduleId === "lectures"
+            ? "text-[17px]"
+            : "text-[15px]"
+        }`}
+      >
+        {entity.name}
+      </strong>
+
+      {moduleId === "drugs" && (
+        <span className="min-w-[180px] flex-[0_1_42%] border-l border-[#e2e8e4] pl-4 max-[620px]:mt-2 max-[620px]:w-full max-[620px]:basis-full max-[620px]:border-l-0 max-[620px]:border-t max-[620px]:pl-0 max-[620px]:pt-2">
+          <span className="block text-[10px] font-semibold tracking-[0.06em] text-[#8a958f]">
+            상품명
+          </span>
+          {brands.length > 0 ? (
+            <span className="mt-0.5 block truncate text-[13px] font-medium text-[#66736c]">
+              {brands.join(" · ")}
+            </span>
+          ) : (
+            <span className="mt-0.5 block text-[11px] text-[#a0aaa5]">
+              등록된 상품명 없음
+            </span>
+          )}
+        </span>
+      )}
+    </>
+  );
+
   return (
     <article
       className="overflow-hidden rounded-[13px] border bg-white"
@@ -510,40 +750,15 @@ function EntityCard({
           type="button"
           onClick={toggleEntity}
           aria-expanded={isOpen}
-          className="flex min-h-[52px] w-full items-center gap-3 px-4 text-left"
+          className="flex min-h-[56px] w-full flex-wrap items-center gap-3 px-4 py-2 text-left"
           style={{
             background: theme.soft2,
           }}
         >
-          <span
-            className={`shrink-0 font-mono font-bold ${
-              moduleId === "lectures"
-                ? "text-[13px]"
-                : "text-[11px]"
-            }`}
-            style={{ color: theme.accent }}
-          >
-            {displayNumber}
-          </span>
-
-          <strong
-            className={`min-w-0 flex-1 truncate font-semibold ${
-              moduleId === "lectures"
-                ? "text-[17px]"
-                : "text-[15px]"
-            }`}
-          >
-            {entity.name}
-          </strong>
-
-          {moduleId === "drugs" && brands.length > 0 && (
-            <span className="shrink-0 text-right text-[12px] font-medium text-[#7f8a84]">
-              {brands.join(" · ")}
-            </span>
-          )}
+          {entityHeaderContent}
 
           <span
-            className="shrink-0 text-[17px]"
+            className="ml-auto shrink-0 text-[17px]"
             style={{ color: theme.accent }}
           >
             {isOpen ? "↑" : "↓"}
@@ -551,37 +766,12 @@ function EntityCard({
         </button>
       ) : (
         <div
-          className="flex min-h-[52px] items-center gap-3 px-4"
+          className="flex min-h-[56px] w-full flex-wrap items-center gap-3 px-4 py-2"
           style={{
             background: theme.soft2,
           }}
         >
-          <span
-            className={`shrink-0 font-mono font-bold ${
-              moduleId === "lectures"
-                ? "text-[13px]"
-                : "text-[11px]"
-            }`}
-            style={{ color: theme.accent }}
-          >
-            {displayNumber}
-          </span>
-
-          <strong
-            className={`min-w-0 flex-1 truncate font-semibold ${
-              moduleId === "lectures"
-                ? "text-[17px]"
-                : "text-[15px]"
-            }`}
-          >
-            {entity.name}
-          </strong>
-
-          {moduleId === "drugs" && brands.length > 0 && (
-            <span className="shrink-0 text-right text-[12px] font-medium text-[#7f8a84]">
-              {brands.join(" · ")}
-            </span>
-          )}
+          {entityHeaderContent}
         </div>
       )}
 
@@ -652,9 +842,20 @@ function NodeCard({
         )
       : [];
 
+  const beforeMemo = blocksWithoutMemo(
+    node.blocks,
+  );
+  const trailingMemo = memoBlocks(
+    node.blocks,
+  );
+  const hasOwnInfo =
+    beforeMemo.length > 0 ||
+    node.tfItems.length > 0 ||
+    trailingMemo.length > 0;
+
   const hasBody =
     node.children.length > 0 ||
-    node.blocks.length > 0 ||
+    hasOwnInfo ||
     node.entities.length > 0;
 
   const isOpen =
@@ -757,10 +958,10 @@ function NodeCard({
           className="border-t px-4 pb-4 pt-4"
           style={{ borderColor: theme.border }}
         >
-          {node.blocks.length > 0 && (
+          {beforeMemo.length > 0 && (
             <BlockCards
-              scopeId={`node:${node.id}`}
-              blocks={node.blocks}
+              scopeId={`node:${node.id}:main`}
+              blocks={beforeMemo}
               theme={theme}
               openBlocks={openBlocks}
               setOpenBlocks={setOpenBlocks}
@@ -770,9 +971,46 @@ function NodeCard({
             />
           )}
 
+          {node.tfItems.length > 0 && (
+            <div
+              className={
+                beforeMemo.length > 0
+                  ? "mt-3"
+                  : ""
+              }
+            >
+              <TfQuizList
+                items={node.tfItems}
+                moduleId={moduleId}
+              />
+            </div>
+          )}
+
+          {trailingMemo.length > 0 && (
+            <div
+              className={
+                beforeMemo.length > 0 ||
+                node.tfItems.length > 0
+                  ? "mt-3"
+                  : ""
+              }
+            >
+              <BlockCards
+                scopeId={`node:${node.id}:memo`}
+                blocks={trailingMemo}
+                theme={theme}
+                openBlocks={openBlocks}
+                setOpenBlocks={setOpenBlocks}
+                forceOpen={forceOpen}
+                semanticTint={moduleId === "drugs"}
+                moduleId={moduleId}
+              />
+            </div>
+          )}
+
           {node.entities.length > 0 && (
             <div
-              className={`${node.blocks.length ? "mt-4" : ""} grid gap-3`}
+              className={`${hasOwnInfo ? "mt-4" : ""} grid gap-3`}
             >
               {node.entities.map((entity, index) => (
                 <EntityCard
@@ -794,7 +1032,12 @@ function NodeCard({
 
           {node.children.length > 0 && (
             <div
-              className={`${node.blocks.length || node.entities.length ? "mt-4" : ""} grid gap-3`}
+              className={`${
+                hasOwnInfo ||
+                node.entities.length > 0
+                  ? "mt-4"
+                  : ""
+              } grid gap-3`}
             >
               {node.children.map((child) => (
                 <NodeCard
@@ -939,7 +1182,17 @@ type QuizAnswerRow = {
   localValue?: string;
 };
 
+type TfRandomQuizQuestion = {
+  kind: "tf";
+  id: string;
+  sourceTitle: string;
+  prompt: string;
+  statement: string;
+  answer: boolean;
+};
+
 type EntityQuizQuestion = {
+  kind: "entity";
   id: string;
   sourceTitle: string;
   entityName: string;
@@ -979,7 +1232,10 @@ function collectEntityQuizQuestions(
       rows.push({ label: "분류", value: hierarchy.join(" › ") });
     }
 
-    for (const block of entityBlocks) {
+    for (const block of orderBlocksForModule(
+      entityBlocks,
+      moduleId,
+    )) {
       if (!block.value.trim()) continue;
       const key = normalizedBlockKey(block.key);
       if (moduleId === "drugs" && key === "brand") {
@@ -996,6 +1252,7 @@ function collectEntityQuizQuestions(
     }
 
     questions.push({
+      kind: "entity",
       id: `${source.id}:${entity.id}`,
       sourceTitle: source.title,
       entityName: entity.name,
@@ -1042,6 +1299,51 @@ function collectEntityQuizQuestions(
   return questions;
 }
 
+function collectTfQuizQuestions(
+  source: QuizSource,
+): TfRandomQuizQuestion[] {
+  const questions: TfRandomQuizQuestion[] = [];
+
+  const addItems = (
+    items: TxtTfItem[],
+    scope: string,
+  ) => {
+    for (const item of items) {
+      questions.push({
+        kind: "tf",
+        id: `${source.id}:${scope}:${item.id}`,
+        sourceTitle: source.title,
+        prompt: scope
+          ? `${scope} › T/F`
+          : "T/F",
+        statement: item.statement,
+        answer: item.answer,
+      });
+    }
+  };
+
+  addItems(
+    source.parsed.tfItems,
+    source.title,
+  );
+
+  const walk = (
+    nodes: TxtNode[],
+    parents: string[],
+  ) => {
+    for (const node of nodes) {
+      const path = [...parents, node.title];
+      const scope = path.join(" › ");
+
+      addItems(node.tfItems, scope);
+      walk(node.children, path);
+    }
+  };
+
+  walk(source.parsed.nodes, []);
+  return questions;
+}
+
 function randomCue(question: EntityQuizQuestion): QuizCue {
   if (!question.cues.length) return { text: question.entityName, kind: "미생물명" };
   return question.cues[Math.floor(Math.random() * question.cues.length)];
@@ -1056,12 +1358,13 @@ export function EntityRecallQuiz({
 }) {
   const questions = useMemo(
     () =>
-      sources.flatMap((source) =>
-        collectEntityQuizQuestions(
+      sources.flatMap((source) => [
+        ...collectEntityQuizQuestions(
           source,
           moduleId,
         ),
-      ),
+        ...collectTfQuizQuestions(source),
+      ]),
     [sources, moduleId],
   );
 
@@ -1085,8 +1388,10 @@ export function EntityRecallQuiz({
 
     const nextCues: Record<string, QuizCue> = {};
     for (const question of questions) {
-      nextCues[question.id] =
-        randomCue(question);
+      if (question.kind === "entity") {
+        nextCues[question.id] =
+          randomCue(question);
+      }
     }
 
     setCues(nextCues);
@@ -1120,15 +1425,20 @@ export function EntityRecallQuiz({
   const currentIndex =
     safeOrder[position % safeOrder.length] ?? 0;
   const current = questions[currentIndex];
+
   const cue =
-    cues[current.id] ?? randomCue(current);
+    current.kind === "entity"
+      ? cues[current.id] ?? randomCue(current)
+      : undefined;
 
   const visibleRows =
-    cue.kind === "성분명"
-      ? current.rows.filter(
-          (row) => row.label !== "성분명",
-        )
-      : current.rows;
+    current.kind === "entity"
+      ? cue?.kind === "성분명"
+        ? current.rows.filter(
+            (row) => row.label !== "성분명",
+          )
+        : current.rows
+      : [];
 
   const previousQuestion = () => {
     if (position <= 0) return;
@@ -1157,80 +1467,154 @@ export function EntityRecallQuiz({
         RANDOM QUIZ {position + 1} / {questions.length}
       </p>
 
-      <div className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-        <h2 className="text-[clamp(30px,4.8vw,42px)] font-bold tracking-[-0.045em]">
-          {cue.text}
-        </h2>
+      {current.kind === "tf" ? (
+        <>
+          <p className="mt-6 text-[14px] font-semibold tracking-[-0.01em] text-[#718078]">
+            {current.prompt}
+          </p>
 
-        {moduleId === "drugs" &&
-          current.brands.length > 0 && (
-            <span className="text-[clamp(14px,2.2vw,18px)] font-medium text-[#7f8a84]">
-              {current.brands.join(" · ")}
-            </span>
-          )}
-      </div>
+          <div className="mt-3 rounded-[14px] border border-[#dfe6e2] bg-[#fbfcfb] p-5">
+            <h2 className="text-[clamp(26px,4vw,36px)] font-bold leading-[1.4] tracking-[-0.035em]">
+              {current.statement}
+            </h2>
 
-      <div className="mt-6 overflow-hidden rounded-[14px] border border-[#dfe6e2] bg-[#fbfcfb]">
-        {visibleRows.map((row, index) => {
-          const tint =
-            moduleId === "drugs" && row.key
-              ? drugSemanticTint(row.key)
-              : null;
-
-          return (
-          <div
-            key={`${row.label}-${index}`}
-            className="grid min-h-[68px] grid-cols-[170px_minmax(0,1fr)] border-b last:border-b-0 max-[620px]:grid-cols-[118px_minmax(0,1fr)]"
-            style={{
-              borderColor: tint?.border ?? "#edf1ee",
-              background: tint?.background ?? "transparent",
-            }}
-          >
-            <div
-              className="flex items-center border-r px-5 py-4"
-              style={{
-                borderColor: tint?.border ?? "#edf1ee",
-              }}
-            >
-              <div className="min-w-0">
-                <strong
-                  className="block break-keep text-[15px] font-semibold leading-6"
-                  style={{
-                    color: tint?.label ?? "#53615a",
-                  }}
-                >
-                  {row.label}
-                </strong>
-              </div>
-            </div>
-
-            <div className="flex min-w-0 items-center px-5 py-4">
+            <div className="mt-6 min-h-[52px]">
               {revealed ? (
-                <div className="min-w-0 flex-1">
-                  <CompositeBlockValue
-                    value={row.value}
-                    inheritedValue={row.inheritedValue}
-                    localValue={row.localValue}
-                    inheritanceScope={row.inheritanceScope}
+                <div className="flex items-center gap-3">
+                  <span
+                    className="h-3 w-3 rounded-full"
+                    style={{
+                      background: current.answer
+                        ? "#4d84d8"
+                        : "#cf6269",
+                      boxShadow: current.answer
+                        ? "0 0 12px 4px rgba(77,132,216,0.38)"
+                        : "0 0 12px 4px rgba(207,98,105,0.36)",
+                    }}
                   />
+                  <strong
+                    className="text-[26px]"
+                    style={{
+                      color: current.answer
+                        ? "#4d84d8"
+                        : "#cf6269",
+                    }}
+                  >
+                    {current.answer ? "T" : "F"}
+                  </strong>
                 </div>
               ) : (
-                <span
-                  aria-hidden="true"
-                  className="min-h-[24px]"
-                />
+                <span className="text-[14px] text-[#9aa39e]">
+                  T인지 F인지 판단한 뒤 정답을 확인하세요.
+                </span>
               )}
             </div>
           </div>
-          );
-        })}
+        </>
+      ) : (
+        <>
+          <div
+            className={`mt-6 ${
+              moduleId === "drugs"
+                ? "grid grid-cols-[minmax(0,1fr)_minmax(180px,0.8fr)] items-end gap-5 max-[620px]:grid-cols-1"
+                : ""
+            }`}
+          >
+            <h2 className="text-[clamp(30px,4.8vw,42px)] font-bold tracking-[-0.045em]">
+              {cue?.text}
+            </h2>
 
-        {visibleRows.length === 0 && (
-          <div className="p-6 text-[13px] text-[#8a948f]">
-            등록된 정답 항목이 없습니다.
+            {moduleId === "drugs" && (
+              <div className="min-w-0 border-l border-[#e1e7e3] pl-5 max-[620px]:border-l-0 max-[620px]:border-t max-[620px]:pl-0 max-[620px]:pt-3">
+                <span className="block text-[10px] font-semibold tracking-[0.06em] text-[#8a958f]">
+                  상품명
+                </span>
+                {current.brands.length > 0 ? (
+                  <span className="mt-1 block truncate text-[clamp(14px,2.2vw,18px)] font-medium text-[#6f7d76]">
+                    {current.brands.join(" · ")}
+                  </span>
+                ) : (
+                  <span className="mt-1 block text-[12px] text-[#a0aaa5]">
+                    등록된 상품명 없음
+                  </span>
+                )}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+
+          <div className="mt-6 overflow-hidden rounded-[14px] border border-[#dfe6e2] bg-[#fbfcfb]">
+            {visibleRows.map((row, index) => {
+              const tint =
+                moduleId === "drugs" && row.key
+                  ? drugSemanticTint(row.key)
+                  : null;
+
+              return (
+                <div
+                  key={`${row.label}-${index}`}
+                  className="grid min-h-[68px] grid-cols-[170px_minmax(0,1fr)] border-b last:border-b-0 max-[620px]:grid-cols-[118px_minmax(0,1fr)]"
+                  style={{
+                    borderColor:
+                      tint?.border ?? "#edf1ee",
+                    background:
+                      tint?.background ?? "transparent",
+                  }}
+                >
+                  <div
+                    className="flex items-center border-r px-5 py-4"
+                    style={{
+                      borderColor:
+                        tint?.border ?? "#edf1ee",
+                    }}
+                  >
+                    <div className="min-w-0">
+                      <strong
+                        className="block break-keep text-[15px] font-semibold leading-6"
+                        style={{
+                          color:
+                            tint?.label ?? "#53615a",
+                        }}
+                      >
+                        {row.label}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div className="flex min-w-0 items-center px-5 py-4">
+                    {revealed ? (
+                      <div className="min-w-0 flex-1">
+                        <CompositeBlockValue
+                          value={row.value}
+                          inheritedValue={
+                            row.inheritedValue
+                          }
+                          localValue={
+                            row.localValue
+                          }
+                          inheritanceScope={
+                            row.inheritanceScope
+                          }
+                        />
+                      </div>
+                    ) : (
+                      <span
+                        aria-hidden="true"
+                        className="min-h-[24px]"
+                      />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+
+            {visibleRows.length === 0 && (
+              <div className="p-6 text-[13px] text-[#8a948f]">
+                등록된 정답 항목이 없습니다.
+              </div>
+            )}
+          </div>
+        </>
+      )}
 
       {revealed && (
         <p className="mt-2 text-[11px] text-[#9aa39e]">
@@ -1272,12 +1656,17 @@ export function EntityRecallQuiz({
   );
 }
 
-type LectureQuizQuestion = {
+type LectureBlockQuizQuestion = {
+  kind: "block";
   id: string;
   sourceTitle: string;
   prompt: string;
   answer: string;
 };
+
+type LectureQuizQuestion =
+  | LectureBlockQuizQuestion
+  | TfRandomQuizQuestion;
 
 function collectLectureQuizQuestions(
   source: QuizSource,
@@ -1292,10 +1681,11 @@ function collectLectureQuizQuestions(
     if (!block.value.trim()) return;
 
     questions.push({
+      kind: "block",
       id: `${source.id}:${scope}:${block.id}:${index}`,
       sourceTitle: source.title,
       prompt: scope
-        ? `${scope} · ${block.label}`
+        ? `${scope} › ${block.label}`
         : block.label,
       answer: block.value.trim(),
     });
@@ -1304,6 +1694,16 @@ function collectLectureQuizQuestions(
   source.parsed.blocks.forEach((block, index) => {
     addBlock(source.title, block, index);
   });
+
+  questions.push(
+    ...collectTfQuizQuestions({
+      ...source,
+      parsed: {
+        ...source.parsed,
+        nodes: [],
+      },
+    }),
+  );
 
   source.parsed.entities.forEach((entity, entityIndex) => {
     entity.blocks.forEach((block, blockIndex) => {
@@ -1330,6 +1730,17 @@ function collectLectureQuizQuestions(
           index,
         );
       });
+
+      for (const item of node.tfItems) {
+        questions.push({
+          kind: "tf",
+          id: `${source.id}:${scope}:${item.id}`,
+          sourceTitle: source.title,
+          prompt: `${scope} › T/F`,
+          statement: item.statement,
+          answer: item.answer,
+        });
+      }
 
       node.entities.forEach(
         (entity, entityIndex) => {
@@ -1394,7 +1805,7 @@ export function LectureRandomQuiz({
     return (
       <div className="rounded-[15px] border border-dashed bg-white p-8 text-center text-[14px] leading-6 text-[#7d8781]">
         선택 범위에서 퀴즈로 만들 수 있는
-        @정보 블록을 찾지 못했습니다.
+        @정보 블록 또는 T/F 문항을 찾지 못했습니다.
       </div>
     );
   }
@@ -1443,17 +1854,57 @@ export function LectureRandomQuiz({
         {current.prompt}
       </h2>
 
-      <div className="mt-6 min-h-[150px] rounded-[14px] border border-[#dfe6e2] bg-[#fbfcfb] p-5">
-        {revealed ? (
-          <div className="whitespace-pre-wrap text-[17px] leading-8 text-[#53615a]">
-            {current.answer}
+      {current.kind === "tf" ? (
+        <div className="mt-6 min-h-[150px] rounded-[14px] border border-[#dfe6e2] bg-[#fbfcfb] p-5">
+          <div className="text-[clamp(22px,3.6vw,30px)] font-semibold leading-[1.5] tracking-[-0.025em] text-[#26332d]">
+            {current.statement}
           </div>
-        ) : (
-          <span className="text-[15px] text-[#9aa39e]">
-            정답을 떠올린 뒤 확인하세요.
-          </span>
-        )}
-      </div>
+
+          <div className="mt-6 min-h-[46px]">
+            {revealed ? (
+              <div className="flex items-center gap-3">
+                <span
+                  className="h-3 w-3 rounded-full"
+                  style={{
+                    background: current.answer
+                      ? "#4d84d8"
+                      : "#cf6269",
+                    boxShadow: current.answer
+                      ? "0 0 12px 4px rgba(77,132,216,0.38)"
+                      : "0 0 12px 4px rgba(207,98,105,0.36)",
+                  }}
+                />
+                <strong
+                  className="text-[28px]"
+                  style={{
+                    color: current.answer
+                      ? "#4d84d8"
+                      : "#cf6269",
+                  }}
+                >
+                  {current.answer ? "T" : "F"}
+                </strong>
+              </div>
+            ) : (
+              <span className="text-[15px] text-[#9aa39e]">
+                T인지 F인지 판단한 뒤 정답을 확인하세요.
+              </span>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="mt-6 min-h-[150px] rounded-[14px] border border-[#dfe6e2] bg-[#fbfcfb] p-5">
+          {revealed ? (
+            <div className="whitespace-pre-wrap text-[17px] leading-8 text-[#53615a]">
+              {current.answer}
+            </div>
+          ) : (
+            <span className="text-[15px] text-[#9aa39e]">
+              정답을 떠올린 뒤 확인하세요.
+            </span>
+          )}
+        </div>
+      )}
 
       {revealed && sources.length > 1 && (
         <p className="mt-2 text-[12px] text-[#9aa39e]">
@@ -1600,6 +2051,25 @@ export default function UniversalDocument({
           )
         : parsed.blocks;
 
+  const fileTfItems =
+    moduleId === "clinical" ||
+    moduleId === "lectures"
+      ? normalizedQuery
+        ? parsed.tfItems.filter((item) =>
+            item.statement
+              .toLowerCase()
+              .includes(
+                normalizedQuery.toLowerCase(),
+              ),
+          )
+        : parsed.tfItems
+      : [];
+
+  const fileMainBlocks =
+    blocksWithoutMemo(fileBlocks);
+  const fileMemoBlocks =
+    memoBlocks(fileBlocks);
+
   return (
     <section
       className="rounded-[18px] border p-3 shadow-[0_10px_30px_rgba(19,40,31,0.035)]"
@@ -1609,21 +2079,62 @@ export default function UniversalDocument({
         boxShadow: `0 10px 30px ${theme.glow}`,
       }}
     >
-      {fileBlocks.length > 0 && (
+      {(fileMainBlocks.length > 0 ||
+        fileTfItems.length > 0 ||
+        fileMemoBlocks.length > 0) && (
         <div
           className="mb-4 rounded-[15px] border bg-white p-3"
           style={{ borderColor: theme.border }}
         >
-          <BlockCards
-            scopeId="file"
-            blocks={fileBlocks}
-            theme={theme}
-            openBlocks={openBlocks}
-            setOpenBlocks={setOpenBlocks}
-            forceOpen={forceOpen}
-            semanticTint={moduleId === "drugs"}
-            moduleId={moduleId}
-          />
+          {fileMainBlocks.length > 0 && (
+            <BlockCards
+              scopeId="file:main"
+              blocks={fileMainBlocks}
+              theme={theme}
+              openBlocks={openBlocks}
+              setOpenBlocks={setOpenBlocks}
+              forceOpen={forceOpen}
+              semanticTint={moduleId === "drugs"}
+              moduleId={moduleId}
+            />
+          )}
+
+          {fileTfItems.length > 0 && (
+            <div
+              className={
+                fileMainBlocks.length > 0
+                  ? "mt-3"
+                  : ""
+              }
+            >
+              <TfQuizList
+                items={fileTfItems}
+                moduleId={moduleId}
+              />
+            </div>
+          )}
+
+          {fileMemoBlocks.length > 0 && (
+            <div
+              className={
+                fileMainBlocks.length > 0 ||
+                fileTfItems.length > 0
+                  ? "mt-3"
+                  : ""
+              }
+            >
+              <BlockCards
+                scopeId="file:memo"
+                blocks={fileMemoBlocks}
+                theme={theme}
+                openBlocks={openBlocks}
+                setOpenBlocks={setOpenBlocks}
+                forceOpen={forceOpen}
+                semanticTint={moduleId === "drugs"}
+                moduleId={moduleId}
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -1670,7 +2181,8 @@ export default function UniversalDocument({
 
       {filteredNodes.length === 0 &&
         filteredEntities.length === 0 &&
-        fileBlocks.length === 0 && (
+        fileBlocks.length === 0 &&
+        fileTfItems.length === 0 && (
           <div className="p-8 text-center text-[14px] text-[#7d8781]">
             검색 결과가 없습니다.
           </div>

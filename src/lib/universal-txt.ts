@@ -15,6 +15,12 @@ export type TxtBlock = {
   localValue?: string;
 };
 
+export type TxtTfItem = {
+  id: string;
+  statement: string;
+  answer: boolean;
+};
+
 export type TxtEntity = {
   id: string;
   name: string;
@@ -27,6 +33,7 @@ export type TxtNode = {
   title: string;
   depth: number;
   blocks: TxtBlock[];
+  tfItems: TxtTfItem[];
   entities: TxtEntity[];
   children: TxtNode[];
 };
@@ -39,6 +46,7 @@ export type ParsedUniversalTxt = {
   color?: ThemeColor;
   legacyVerified?: boolean;
   blocks: TxtBlock[];
+  tfItems: TxtTfItem[];
   entities: TxtEntity[];
   nodes: TxtNode[];
 };
@@ -251,12 +259,14 @@ export function parseUniversalTxt(
   let seenContent = false;
 
   const fileBlocks: TxtBlock[] = [];
+  const fileTfItems: TxtTfItem[] = [];
   const fileEntities: TxtEntity[] = [];
   const flatNodes: Array<Omit<TxtNode, "children">> = [];
 
   let currentNode: Omit<TxtNode, "children"> | undefined;
   let currentEntity: TxtEntity | undefined;
   let blockIndex = 0;
+  let tfIndex = 0;
   let entityIndex = 0;
 
   const isHeading = (value: string) =>
@@ -319,6 +329,7 @@ export function parseUniversalTxt(
         title: heading[2].trim(),
         depth: number.split(".").length - 1,
         blocks: [],
+        tfItems: [],
         entities: [],
       };
       flatNodes.push(currentNode);
@@ -328,6 +339,36 @@ export function parseUniversalTxt(
 
     if (isAtLine(trimmed)) {
       const body = trimmed.slice(1).trim();
+
+      // @tf is a functional directive, not a normal information block.
+      // Syntax: @tf t statement / @tf f statement
+      const tfMatch = body.match(
+        /^tf\s+(t|f|true|false)\s+(.+)$/i,
+      );
+      if (tfMatch) {
+        seenContent = true;
+        currentEntity = undefined;
+
+        const answerToken =
+          tfMatch[1].toLowerCase();
+        const item: TxtTfItem = {
+          id: `tf-${tfIndex++}`,
+          statement: tfMatch[2].trim(),
+          answer:
+            answerToken === "t" ||
+            answerToken === "true",
+        };
+
+        if (currentNode) {
+          currentNode.tfItems.push(item);
+        } else {
+          fileTfItems.push(item);
+        }
+
+        index += 1;
+        continue;
+      }
+
       const meta = body.match(
         /^([A-Za-z][A-Za-z0-9_-]*)(?:\s+(.*))?$/,
       );
@@ -445,6 +486,7 @@ export function parseUniversalTxt(
     color,
     legacyVerified,
     blocks: fileBlocks,
+    tfItems: fileTfItems,
     entities: fileEntities,
     nodes: buildTree(flatNodes),
   };
@@ -570,26 +612,27 @@ export function createTxtTemplate(
 @english 
 
 01 약물 계열
-@mechanism
+@mech
 
 ## Drugname
 @brand
-@target
 @indi
 @contra
 @side
+@caution
 @memo
 `;
   }
 
   return `# ${title}
 @english 
-@gram 
-@morph 
-@o2 
 
 01 분류
+@o2
+
 ## Genus species
+@dz
+@memo
 `;
 }
 
@@ -618,12 +661,18 @@ export function documentSearchText(
     for (const node of nodes) {
       values.push(node.number, node.title);
       addBlocks(node.blocks);
+      for (const item of node.tfItems) {
+        values.push("T/F", item.statement);
+      }
       addEntities(node.entities);
       walk(node.children);
     }
   };
 
   addBlocks(parsed.blocks);
+  for (const item of parsed.tfItems) {
+    values.push("T/F", item.statement);
+  }
   addEntities(parsed.entities);
   walk(parsed.nodes);
 

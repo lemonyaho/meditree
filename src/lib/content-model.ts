@@ -1,4 +1,4 @@
-export const APP_VERSION = "2.5.0";
+export const APP_VERSION = "2.6.6";
 
 export type ModuleId =
   | "clinical"
@@ -10,44 +10,84 @@ export type ThemeColor = "red" | "yellow" | "blue" | "green";
 
 export type BlockLabelMap = Record<string, string>;
 
-export const BLOCK_LABELS_REVISION = 3;
+export const BLOCK_LABELS_REVISION = 4;
 
-export const DEFAULT_BLOCK_LABELS: Record<ModuleId, BlockLabelMap> = {
-  clinical: {
-    def: "정의",
-    patho: "병리기전",
-    tx: "치료",
-    prog: "예후",
-    etiol: "역학",
-    dx: "진단기준",
-    sx: "증상·징후",
-    imaging: "영상 소견",
-  },
-  lectures: {
-    def: "정의",
-    patho: "병리기전",
-    tx: "치료",
-    prog: "예후",
-    etiol: "역학",
-    dx: "진단기준",
-    sx: "증상·징후",
-    imaging: "영상 소견",
-  },
-  drugs: {
-    mechanism: "기전",
-    brand: "상품명",
-    target: "타겟",
-    indi: "적응증",
-    contra: "금기증",
-    side: "부작용",
-    memo: "메모",
-  },
-  microbiology: {
-    gram: "Gram염색",
-    morph: "형태",
-    o2: "산소요구도",
-  },
+export type SystemBlockDefinition = {
+  key: string;
+  label: string;
+  functional?: boolean;
 };
+
+export const SYSTEM_BLOCK_DEFINITIONS: Record<
+  ModuleId,
+  SystemBlockDefinition[]
+> = {
+  clinical: [
+    { key: "def", label: "정의" },
+    { key: "etiol", label: "역학" },
+    { key: "patho", label: "병리기전" },
+    { key: "sx", label: "증상·징후" },
+    { key: "imaging", label: "영상 소견" },
+    { key: "dx", label: "진단" },
+    { key: "tx", label: "치료" },
+    { key: "prog", label: "예후" },
+    { key: "tf", label: "T/F 문항", functional: true },
+    { key: "memo", label: "특이사항" },
+  ],
+  lectures: [
+    { key: "def", label: "정의" },
+    { key: "etiol", label: "역학" },
+    { key: "patho", label: "병리기전" },
+    { key: "sx", label: "증상·징후" },
+    { key: "imaging", label: "영상 소견" },
+    { key: "dx", label: "진단" },
+    { key: "tx", label: "치료" },
+    { key: "prog", label: "예후" },
+    { key: "tf", label: "T/F 문항", functional: true },
+    { key: "memo", label: "특이사항" },
+  ],
+  drugs: [
+    { key: "brand", label: "상품명" },
+    { key: "mech", label: "기전" },
+    { key: "indi", label: "적응증" },
+    { key: "contra", label: "금기증" },
+    { key: "side", label: "부작용" },
+    { key: "caution", label: "주의사항" },
+    { key: "memo", label: "특이사항" },
+  ],
+  microbiology: [
+    { key: "o2", label: "산소요구도" },
+    { key: "dz", label: "연관질환" },
+    { key: "memo", label: "특이사항" },
+  ],
+};
+
+export const DEFAULT_BLOCK_LABELS: Record<
+  ModuleId,
+  BlockLabelMap
+> = Object.fromEntries(
+  Object.entries(SYSTEM_BLOCK_DEFINITIONS).map(
+    ([moduleId, definitions]) => [
+      moduleId,
+      Object.fromEntries(
+        definitions.map(({ key, label }) => [
+          key,
+          label,
+        ]),
+      ),
+    ],
+  ),
+) as Record<ModuleId, BlockLabelMap>;
+
+export function systemBlockKeys(
+  moduleId: ModuleId,
+) {
+  return new Set(
+    SYSTEM_BLOCK_DEFINITIONS[moduleId].map(
+      ({ key }) => key,
+    ),
+  );
+}
 
 export type FileMeta = {
   title: string;
@@ -279,6 +319,13 @@ function normalizeBlockLabels(
   // 이후 사용자가 삭제/수정한 값은 다시 강제로 복구하지 않는다.
   if (revision < 3 && moduleId === "drugs" && !("memo" in labels)) {
     labels.memo = "메모";
+  }
+
+  // v2.6.0: system blocks are fixed per module.
+  // Custom blocks are preserved, but system keys/labels cannot
+  // be renamed or removed from Admin.
+  for (const definition of SYSTEM_BLOCK_DEFINITIONS[moduleId]) {
+    labels[definition.key] = definition.label;
   }
 
   return {

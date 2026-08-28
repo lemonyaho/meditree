@@ -8,6 +8,7 @@ import AdminFormModal from "@/components/AdminFormModal";
 import { readContentFile, readContentTree, writeContentTree } from "@/components/useContentTree";
 import {
   MODULE_HREFS,
+  SYSTEM_BLOCK_DEFINITIONS,
   ensureTxtName,
   findFolderByPath,
   getContainer,
@@ -74,40 +75,6 @@ function viewUrl(moduleId: ModuleId, path: string[], fileId?: string) {
 }
 
 function moduleTxtExample(moduleId: ModuleId) {
-  if (moduleId === "drugs") {
-    return `# 엽산 합성 저해제
-@english Folic Acid Synthesis Inhibitor
-
-01 Sulfonamide계열
-@mechanism
-DHPS(Dihydropteroate synthetase)에 결합해 엽산 합성을 억제
-
-## Sulfamethoxazole
-@brand
-Bactrim, Septra
-@target
-Gram +, Gram - bacteria
-@indi
-하부 요로 감염 등,
-@contra
-내성균
-@side
-충분한 수분 섭취 필요`;
-  }
-
-  if (moduleId === "microbiology") {
-    return `# 그람양성구균
-@english Gram-Positive Cocci
-@gram +
-@morph Coccus
-
-01 Catalase (+)
-01.1 Staphylococcus spp.
-01.1.1 Coagulase (+)
-## Staphylococcus aureus
-@o2 facultative anaerobe`;
-  }
-
   if (moduleId === "lectures") {
     return `# 감염성 설사 (TBL)
 @english Infectious Diarrhea
@@ -115,28 +82,66 @@ Gram +, Gram - bacteria
 @prof 김봉영
 @color yellow
 
-01 설사
-@def
-1일 3회 이상 unformed stool
-
-02 원인균 추정
-02.1 설사의 양상
+01 원인균 추정
+01.1 설사의 양상
 @염증성 설사
 Shigella, Yerisina, Salmonella, Campylobacter, EHEC, EIEC, Vibrio parahemolyticus, Clostridioides difficile
 @비염증성 설사
 Vibrio cholerae, Clostridium perfringens, Bacillus cereus, Staphylococcus aureus`;
   }
 
-  return `# 급성 설사
-@english Acute Diarrhea
+  if (moduleId === "clinical") {
+    return `# 감염성 설사
+@english Infectious Diarrhea
 
-01 정의
-@def
-1일 3회 이상 unformed stool
+01 원인균 추정
+01.1 설사의 양상
+@염증성 설사
+Shigella, Yerisina, Salmonella, Campylobacter, EHEC, EIEC
+@비염증성 설사
+Vibrio cholerae, Clostridium perfringens, Bacillus cereus`;
+  }
 
-02 임상 양상
-@sx
-복통, 발열, 설사`;
+  if (moduleId === "drugs") {
+    return `# 엽산 합성 저해제
+@english Folate Synthesis Inhibitors 
+
+01 Sulfonamides
+@mech
+PABA 구조 유사체로 DHPS(Dihydropteroate synthase)에 경쟁적 결합
+@side
+알레르기 반응(발진 등), 혈액학적 이상, 결정뇨 및 신장 손상 가능
+
+## Sulfisoxazole
+@indi
+급성 요로감염, 소아 시럽제
+@memo
+수용성이 높아 결정뇨/신장 손상 부작용이 비교적 적음`;
+  }
+
+  return `# 그람양성구균
+@english Gram-Positive Cocci
+
+01 Catalase (+)
+01.1 Staphylococcus spp.
+01.1.1 Coagulase (+)
+## Staphylococcus aureus
+@o2 facultative anaerobe`;
+}
+
+function syntaxDescription(moduleId: ModuleId) {
+  if (
+    moduleId === "clinical" ||
+    moduleId === "lectures"
+  ) {
+    return "숫자는 내용의 계층을 나타내고, @key는 현재 계층에 정보 블록을 추가합니다. @tf t/f 문장은 눌러서 정답을 확인하는 T/F 문항으로 표시됩니다.";
+  }
+
+  if (moduleId === "drugs") {
+    return "숫자는 약물 계열의 분류 계층, ##는 실제 학습 약물입니다. @key는 현재 계층 또는 ## 약물의 정보를 기록합니다.";
+  }
+
+  return "숫자는 미생물의 분류 계층, ##는 실제 학습 미생물입니다. 상위 계층의 @특성은 하위 ##에 상속되며 더 가까운 계층의 값이 우선합니다.";
 }
 
 function normalizeEditableBlockKey(value: string) {
@@ -148,6 +153,100 @@ function normalizeEditableBlockKey(value: string) {
 
 function TxtSyntaxGuide({
   moduleId,
+}: {
+  moduleId: ModuleId;
+}) {
+  return (
+    <section className="rounded-[16px] border border-[#dfe8e3] bg-[#f8faf8] p-4">
+      <strong className="text-[13px] text-[#4f5c55]">
+        TXT 형식 예시
+      </strong>
+      <p className="mt-1 text-[12px] leading-5 text-[#7b8680]">
+        {syntaxDescription(moduleId)}
+      </p>
+      <pre className="mt-3 overflow-x-auto rounded-[11px] border bg-white p-4 font-mono text-[12px] leading-5 text-[#53615a]">
+        {moduleTxtExample(moduleId)}
+      </pre>
+    </section>
+  );
+}
+
+type EditableBlockRow = {
+  id: string;
+  key: string;
+  label: string;
+};
+
+const SYSTEM_ROW_PALETTE = [
+  {
+    background: "#fff5f4",
+    border: "#f1deda",
+    dot: "#c8786f",
+  },
+  {
+    background: "#fff7f0",
+    border: "#f1e1d1",
+    dot: "#c58a59",
+  },
+  {
+    background: "#fffbea",
+    border: "#eee3ba",
+    dot: "#b49a43",
+  },
+  {
+    background: "#f5faef",
+    border: "#dce9cf",
+    dot: "#77965f",
+  },
+  {
+    background: "#f0f9f7",
+    border: "#d5e9e4",
+    dot: "#5e9587",
+  },
+  {
+    background: "#f1f8fc",
+    border: "#d8e8f1",
+    dot: "#668da2",
+  },
+  {
+    background: "#f3f5fc",
+    border: "#dce1f0",
+    dot: "#6b7ea6",
+  },
+  {
+    background: "#f8f3fb",
+    border: "#e7dcf0",
+    dot: "#8870a0",
+  },
+];
+
+function systemRowStyle(
+  key: string,
+  index: number,
+) {
+  if (key === "memo") {
+    return {
+      background: "#f5f7f8",
+      border: "#dfe5e7",
+      dot: "#7d898f",
+    };
+  }
+
+  if (key === "tf") {
+    return {
+      background: "#f5f8fb",
+      border: "#dce6ed",
+      dot: "#5d82a2",
+    };
+  }
+
+  return SYSTEM_ROW_PALETTE[
+    index % SYSTEM_ROW_PALETTE.length
+  ];
+}
+
+function BlockManager({
+  moduleId,
   blockLabels,
   onChangeBlockLabels,
 }: {
@@ -155,146 +254,227 @@ function TxtSyntaxGuide({
   blockLabels: BlockLabelMap;
   onChangeBlockLabels: (next: BlockLabelMap) => void;
 }) {
-  const entries = Object.entries(blockLabels);
+  const systemDefinitions =
+    SYSTEM_BLOCK_DEFINITIONS[moduleId];
+  const systemKeys = new Set(
+    systemDefinitions.map(({ key }) => key),
+  );
 
-  const patchEntry = (
-    oldKey: string,
-    nextKey: string,
-    nextLabel: string,
+  const customFromProps = () =>
+    Object.entries(blockLabels)
+      .filter(([key]) => !systemKeys.has(key))
+      .map(([key, label], index) => ({
+        id: `custom-${moduleId}-${index}-${key}`,
+        key,
+        label,
+      }));
+
+  const [rows, setRows] =
+    useState<EditableBlockRow[]>(
+      customFromProps,
+    );
+
+  useEffect(() => {
+    setRows(customFromProps());
+    // System definitions and stored custom blocks are
+    // re-initialized only when switching module.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moduleId]);
+
+  const commitRows = (
+    nextRows: EditableBlockRow[],
   ) => {
-    const normalizedKey =
-      normalizeEditableBlockKey(nextKey);
-    const label = nextLabel.trimStart();
-    const next: BlockLabelMap = {};
+    setRows(nextRows);
 
-    for (const [key, value] of entries) {
-      if (key === oldKey) continue;
-      next[key] = value;
+    const next: BlockLabelMap = {};
+    for (const definition of systemDefinitions) {
+      next[definition.key] = definition.label;
     }
 
-    if (normalizedKey) {
-      next[normalizedKey] = label;
+    for (const row of nextRows) {
+      const key = normalizeEditableBlockKey(
+        row.key,
+      );
+      const label = row.label.trim();
+      if (
+        !key ||
+        !label ||
+        systemKeys.has(key)
+      ) {
+        continue;
+      }
+      next[key] = label;
     }
 
     onChangeBlockLabels(next);
   };
 
-  const removeEntry = (key: string) => {
-    const next = { ...blockLabels };
-    delete next[key];
-    onChangeBlockLabels(next);
+  const patchRow = (
+    id: string,
+    patch: Partial<
+      Pick<EditableBlockRow, "key" | "label">
+    >,
+  ) => {
+    commitRows(
+      rows.map((row) =>
+        row.id === id
+          ? { ...row, ...patch }
+          : row,
+      ),
+    );
   };
 
   const addEntry = () => {
-    let index = 1;
-    let key = "newblock";
-    while (blockLabels[key]) {
-      index += 1;
-      key = `newblock${index}`;
-    }
+    commitRows([
+      ...rows,
+      {
+        id: `custom-new-${Date.now()}-${rows.length}`,
+        key: "",
+        label: "새 블록",
+      },
+    ]);
+  };
 
-    onChangeBlockLabels({
-      ...blockLabels,
-      [key]: "새 블록",
-    });
+  const removeEntry = (id: string) => {
+    commitRows(
+      rows.filter((row) => row.id !== id),
+    );
   };
 
   return (
-    <section className="rounded-[16px] border border-[#dfe8e3] bg-[#f8faf8] p-4">
-      <div className="grid grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)] gap-4 max-[900px]:grid-cols-1">
-        <div className="min-w-0">
-          <strong className="text-[13px] text-[#4f5c55]">
-            TXT 형식 예시
-          </strong>
-          <p className="mt-1 text-[12px] leading-5 text-[#7b8680]">
-            {moduleId === "microbiology"
-              ? "숫자는 분류 계층, ##는 실제 학습 미생물입니다. TXT 상단이나 숫자 계층에 둔 @특성은 하위 ##에 자동 상속되고, 더 가까운 계층 또는 ##의 값이 우선합니다."
-              : "숫자는 계층, ##는 약물·미생물 개체, @는 현재 계층 또는 ## 개체의 정보 블록입니다."}
-          </p>
-          <pre className="mt-3 overflow-x-auto rounded-[11px] border bg-white p-3 font-mono text-[12px] leading-5 text-[#53615a]">
-            {moduleTxtExample(moduleId)}
-          </pre>
-        </div>
+    <section className="mt-4 rounded-[16px] border bg-white p-3">
+      <div>
+        <strong className="text-[13px] text-[#4f5c55]">
+          시스템 블록
+        </strong>
+        <p className="mt-1 text-[10px] leading-4 text-[#8b9690]">
+          고정 블록은 수정하거나 삭제할 수 없습니다.
+        </p>
+      </div>
 
-        <div className="min-w-0 rounded-[12px] border bg-white p-3">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <strong className="text-[13px] text-[#4f5c55]">
-                등록 블록
-              </strong>
-              <p className="mt-1 text-[11px] leading-5 text-[#89938d]">
-                이 모듈 전체에서 @key가 어떤 이름으로 보일지 정합니다.
-              </p>
+      <div className="mt-3 grid gap-1.5">
+        {systemDefinitions.map(
+          (definition, index) => {
+            const style = systemRowStyle(
+              definition.key,
+              index,
+            );
+
+            return (
+              <div
+                key={definition.key}
+                className="flex min-h-[36px] items-center gap-2 rounded-[9px] border px-2.5"
+                style={{
+                  background: style.background,
+                  borderColor: style.border,
+                }}
+              >
+                <span
+                  className="h-2 w-2 shrink-0 rounded-full"
+                  style={{
+                    background: style.dot,
+                  }}
+                />
+                <span className="font-mono text-[10px] font-semibold text-[#4f6258]">
+                  @{definition.key}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-[#58645e]">
+                  {definition.label}
+                </span>
+                {definition.functional && (
+                  <span className="rounded-full border border-[#d8e4eb] bg-white/75 px-1.5 py-0.5 text-[9px] font-semibold text-[#5d7484]">
+                    기능
+                  </span>
+                )}
+                <span
+                  className="shrink-0 text-[11px]"
+                  title="시스템 고정"
+                  aria-label="시스템 고정"
+                >
+                  🔒
+                </span>
+              </div>
+            );
+          },
+        )}
+      </div>
+
+      <div className="mt-4 flex items-center justify-between gap-2 border-t pt-3">
+        <div>
+          <strong className="text-[12px] text-[#4f5c55]">
+            개별 블록
+          </strong>
+          <p className="mt-0.5 text-[10px] text-[#929c97]">
+            필요한 블록만 직접 추가합니다.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={addEntry}
+          className="shrink-0 rounded-[8px] border border-[#cfe1d8] bg-[#eef6eb] px-2 py-1.5 text-[10px] font-semibold text-[#075f4e]"
+        >
+          + 블록
+        </button>
+      </div>
+
+      <div className="mt-2 grid gap-2">
+        {rows.map((row) => (
+          <div
+            key={row.id}
+            className="grid grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)_28px] items-center gap-1.5"
+          >
+            <div className="flex min-w-0 items-center rounded-[8px] border bg-[#fafcfb] pl-2">
+              <span className="shrink-0 font-mono text-[10px] text-[#168269]">
+                @
+              </span>
+              <input
+                value={row.key}
+                onChange={(event) =>
+                  patchRow(row.id, {
+                    key: event.target.value,
+                  })
+                }
+                className="min-w-0 flex-1 bg-transparent px-1 py-2 font-mono text-[11px] outline-none"
+                aria-label="개별 블록 키"
+                placeholder="key"
+              />
             </div>
+
+            <input
+              value={row.label}
+              onChange={(event) =>
+                patchRow(row.id, {
+                  label: event.target.value,
+                })
+              }
+              className="min-w-0 rounded-[8px] border bg-[#fafcfb] px-2 py-2 text-[11px] outline-none"
+              aria-label="개별 블록 표시명"
+              placeholder="표시명"
+            />
+
             <button
               type="button"
-              onClick={addEntry}
-              className="shrink-0 rounded-[8px] border border-[#cfe1d8] bg-[#eef6eb] px-2.5 py-1.5 text-[11px] font-semibold text-[#075f4e]"
+              onClick={() =>
+                removeEntry(row.id)
+              }
+              className="grid h-7 w-7 place-items-center rounded-[7px] border border-[#efd4d4] bg-white text-[11px] text-[#9b5555]"
+              title="블록 삭제"
             >
-              + 블록
+              ×
             </button>
           </div>
+        ))}
 
-          <div className="mt-3 grid gap-2">
-            {entries.map(([key, label]) => (
-              <div
-                key={key}
-                className="grid grid-cols-[minmax(90px,0.8fr)_minmax(110px,1fr)_30px] items-center gap-1.5"
-              >
-                <div className="flex min-w-0 items-center rounded-[8px] border bg-[#fafcfb] pl-2">
-                  <span className="shrink-0 font-mono text-[11px] text-[#168269]">
-                    @
-                  </span>
-                  <input
-                    value={key}
-                    onChange={(event) =>
-                      patchEntry(
-                        key,
-                        event.target.value,
-                        label,
-                      )
-                    }
-                    className="min-w-0 flex-1 bg-transparent px-1 py-2 font-mono text-[11px] outline-none"
-                    aria-label={`${key} 블록 키`}
-                  />
-                </div>
-
-                <input
-                  value={label}
-                  onChange={(event) =>
-                    patchEntry(
-                      key,
-                      key,
-                      event.target.value,
-                    )
-                  }
-                  className="min-w-0 rounded-[8px] border bg-[#fafcfb] px-2 py-2 text-[11px] outline-none"
-                  aria-label={`${key} 표시명`}
-                />
-
-                <button
-                  type="button"
-                  onClick={() => removeEntry(key)}
-                  className="grid h-[30px] w-[30px] place-items-center rounded-[8px] border border-[#efd4d4] bg-white text-[12px] text-[#9b5555]"
-                  title="블록 삭제"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-
-            {entries.length === 0 && (
-              <div className="rounded-[9px] border border-dashed p-4 text-center text-[11px] text-[#89938d]">
-                등록된 블록이 없습니다. + 블록으로 추가할 수 있습니다.
-              </div>
-            )}
+        {rows.length === 0 && (
+          <div className="rounded-[9px] border border-dashed p-3 text-center text-[10px] leading-4 text-[#929c97]">
+            추가한 개별 블록이 없습니다.
           </div>
-
-          <p className="mt-3 text-[10px] leading-4 text-[#9aa39e]">
-            등록하지 않은 @라벨도 사용할 수 있으며, 그 경우 작성한 라벨이 그대로 표시됩니다.
-          </p>
-        </div>
+        )}
       </div>
+
+      <p className="mt-3 text-[9px] leading-4 text-[#a0a9a4]">
+        시스템 key와 같은 이름은 개별 블록으로 등록되지 않습니다.
+      </p>
     </section>
   );
 }
@@ -902,7 +1082,7 @@ export default function ContentTreeAdmin() {
       )}
 
       {(kind === "files" || (kind === "mixed" && container.files.length > 0)) && (
-        <section className={`grid min-w-0 grid-cols-[260px_minmax(0,1fr)] items-start gap-4 max-[860px]:grid-cols-1 ${kind === "mixed" ? "mt-4" : ""}`}>
+        <section className={`grid min-w-0 grid-cols-[300px_minmax(0,1fr)] items-start gap-4 max-[860px]:grid-cols-1 ${kind === "mixed" ? "mt-4" : ""}`}>
           <aside className="min-w-0 self-start">
             <div className="mb-4 flex flex-wrap items-center gap-2">
               {kind === "files" && (
@@ -1040,13 +1220,17 @@ export default function ContentTreeAdmin() {
                 {filteredFiles.length === 0 && <div className="py-8 text-center text-[12px] text-[#9aa39e]">TXT 없음</div>}
               </div>
             </div>
+
+            <BlockManager
+              moduleId={moduleId}
+              blockLabels={module.blockLabels}
+              onChangeBlockLabels={replaceBlockLabels}
+            />
           </aside>
 
           <div className="min-w-0 space-y-4">
             <TxtSyntaxGuide
               moduleId={moduleId}
-              blockLabels={module.blockLabels}
-              onChangeBlockLabels={replaceBlockLabels}
             />
 
             <div

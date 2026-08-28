@@ -70,7 +70,7 @@ function FolderCard({ href, english, title, description, index }: { href: string
     <Link href={href} className="flex min-h-[178px] flex-col justify-between rounded-[20px] border border-[#dfe6e2] bg-white p-6 shadow-[0_9px_24px_rgba(20,42,32,0.035)] transition hover:-translate-y-0.5 hover:border-[#cbd8cf]">
       <div>
         <div className="flex items-start justify-between gap-4">
-          <span className="text-[12px] font-bold tracking-[0.11em] text-[#168269]">{english || "FOLDER"}</span>
+          <span className="text-[12px] font-normal tracking-[0.11em] text-[#168269]">{english || "FOLDER"}</span>
           <span className="font-mono text-[12px] font-semibold text-[#9aa39e]">{String(index + 1).padStart(2, "0")}</span>
         </div>
         <h2 className="mt-7 text-[23px] font-semibold tracking-[-0.035em]">{title}</h2>
