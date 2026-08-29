@@ -2163,15 +2163,11 @@ export default function UniversalDocument({
   const theme =
     THEMES[parsed.color ?? "green"];
   const forceOpen = Boolean(normalizedQuery);
-  const inheritEntityBlocks =
-    moduleId === "microbiology";
-  const rootInheritedEntityBlocks =
-    inheritEntityBlocks
-      ? inheritedBlocksFrom(
-          parsed.blocks,
-          parsed.title,
-        )
-      : [];
+  // Study/View intentionally shows only blocks written
+  // directly on each ## entity. Hierarchical inheritance is
+  // reserved for Quiz mode.
+  const inheritEntityBlocks = false;
+  const rootInheritedEntityBlocks: TxtBlock[] = [];
 
   useEffect(() => {
     setOpenNodes(new Set());
