@@ -286,9 +286,38 @@ function RelatedReferences({
   );
 }
 
+function VerifiedLegend() {
+  return (
+    <div
+      className="inline-flex min-h-[38px] items-center gap-2 rounded-full border border-[#dbe6f7] bg-[#f7faff] px-3 py-1.5 text-[12px] font-medium text-[#64748b]"
+      title="현재 저장된 TXT 내용까지 검수 완료된 항목"
+    >
+      <span
+        className="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-[#2f80ed] shadow-[0_2px_7px_rgba(47,128,237,0.20)]"
+        aria-hidden="true"
+      >
+        <svg
+          viewBox="0 0 20 20"
+          className="h-[11px] w-[11px]"
+        >
+          <path
+            d="M5.2 10.2 8.3 13.3 14.9 6.7"
+            fill="none"
+            stroke="white"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </span>
+      <span>검수 완료</span>
+    </div>
+  );
+}
+
 function QuizModeTabs({ mode, setMode }: { mode: "study" | "quiz"; setMode: (next: "study" | "quiz") => void }) {
   return (
-    <div className="mb-4 flex gap-2">
+    <div className="flex gap-2">
       <button type="button" onClick={() => setMode("study")} className={`rounded-[10px] border px-4 py-2 text-[13px] font-semibold ${mode === "study" ? "border-[#bcd8cd] bg-[#eef6eb] text-[#075f4e]" : "bg-white"}`}>학습</button>
       <button type="button" onClick={() => setMode("quiz")} className={`rounded-[10px] border px-4 py-2 text-[13px] font-semibold ${mode === "quiz" ? "border-[#bcd8cd] bg-[#eef6eb] text-[#075f4e]" : "bg-white"}`}>퀴즈</button>
     </div>
@@ -579,7 +608,14 @@ export default function StudyModulePage({ moduleId }: { moduleId: ModuleId }) {
             moduleId={moduleId}
             file={selectedFile}
           />
-          {isQuizModule && parsed && <QuizModeTabs mode={mode} setMode={setMode} />}
+          {isQuizModule && parsed && (
+            <div className="mb-4">
+              <QuizModeTabs
+                mode={mode}
+                setMode={setMode}
+              />
+            </div>
+          )}
           {loadError ? (
             <div className="rounded-[15px] border border-[#efd1d1] bg-[#fff6f6] p-6 text-[14px] text-[#9a4f4f]">{loadError}</div>
           ) : content === null ? (
@@ -635,7 +671,18 @@ export default function StudyModulePage({ moduleId }: { moduleId: ModuleId }) {
         meta={pageDescription}
         search={{ value: query, onChange: setQuery, placeholder: mode === "quiz" && isQuizModule ? "퀴즈 범위 검색" : "폴더 · TXT · 제목 검색" }}
       >
-        {isQuizModule && <QuizModeTabs mode={mode} setMode={setMode} />}
+        {isQuizModule && (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <QuizModeTabs
+              mode={mode}
+              setMode={setMode}
+            />
+            {moduleId === "lectures" &&
+              mode === "study" && (
+                <VerifiedLegend />
+              )}
+          </div>
+        )}
 
         {isQuizModule && mode === "quiz" ? (
           <ScopeQuizPanel
