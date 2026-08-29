@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AdminActionRail } from "@/components/ActionRail";
 import AdminFormModal from "@/components/AdminFormModal";
 import { readContentFile, readContentTree, writeContentTree } from "@/components/useContentTree";
@@ -344,10 +344,10 @@ function BlockManager({
   return (
     <section className="mt-4 rounded-[16px] border bg-white p-3">
       <div>
-        <strong className="text-[15px] text-[#4f5c55]">
+        <strong className="text-[16px] text-[#4f5c55]">
           시스템 블록
         </strong>
-        <p className="mt-1 text-[12px] leading-5 text-[#8b9690]">
+        <p className="mt-1 text-[13px] leading-5 text-[#8b9690]">
           고정 블록은 수정하거나 삭제할 수 없습니다.
         </p>
       </div>
@@ -363,22 +363,22 @@ function BlockManager({
             return (
               <div
                 key={definition.key}
-                className="flex min-h-[43px] items-center gap-2.5 rounded-[9px] border px-3"
+                className="flex min-h-[48px] items-center gap-3 rounded-[10px] border px-3.5"
                 style={{
                   background: style.background,
                   borderColor: style.border,
                 }}
               >
                 <span
-                  className="h-2 w-2 shrink-0 rounded-full"
+                  className="h-2.5 w-2.5 shrink-0 rounded-full"
                   style={{
                     background: style.dot,
                   }}
                 />
-                <span className="font-mono text-[12px] font-semibold text-[#4f6258]">
+                <span className="font-mono text-[14px] font-semibold text-[#4f6258]">
                   @{definition.key}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-[#58645e]">
+                <span className="min-w-0 flex-1 truncate text-[14px] font-medium text-[#58645e]">
                   {definition.label}
                 </span>
                 {definition.functional && (
@@ -414,7 +414,7 @@ function BlockManager({
                   </details>
                 )}
                 <span
-                  className="shrink-0 text-[12px]"
+                  className="shrink-0 text-[13px]"
                   title="시스템 고정"
                   aria-label="시스템 고정"
                 >
@@ -428,17 +428,17 @@ function BlockManager({
 
       <div className="mt-4 flex items-center justify-between gap-2 border-t pt-3">
         <div>
-          <strong className="text-[14px] text-[#4f5c55]">
+          <strong className="text-[15px] text-[#4f5c55]">
             개별 블록
           </strong>
-          <p className="mt-1 text-[12px] leading-5 text-[#929c97]">
+          <p className="mt-1 text-[13px] leading-5 text-[#929c97]">
             필요한 블록만 직접 추가합니다.
           </p>
         </div>
         <button
           type="button"
           onClick={addEntry}
-          className="shrink-0 rounded-[8px] border border-[#cfe1d8] bg-[#eef6eb] px-2.5 py-2 text-[11px] font-semibold text-[#075f4e]"
+          className="shrink-0 rounded-[8px] border border-[#cfe1d8] bg-[#eef6eb] px-3 py-2 text-[13px] font-semibold text-[#075f4e]"
         >
           + 블록
         </button>
@@ -451,7 +451,7 @@ function BlockManager({
             className="grid grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)_28px] items-center gap-1.5"
           >
             <div className="flex min-w-0 items-center rounded-[8px] border bg-[#fafcfb] pl-2">
-              <span className="shrink-0 font-mono text-[12px] text-[#168269]">
+              <span className="shrink-0 font-mono text-[14px] text-[#168269]">
                 @
               </span>
               <input
@@ -461,7 +461,7 @@ function BlockManager({
                     key: event.target.value,
                   })
                 }
-                className="min-w-0 flex-1 bg-transparent px-1 py-2.5 font-mono text-[12px] outline-none"
+                className="min-w-0 flex-1 bg-transparent px-1 py-2.5 font-mono text-[14px] outline-none"
                 aria-label="개별 블록 키"
                 placeholder="key"
               />
@@ -474,7 +474,7 @@ function BlockManager({
                   label: event.target.value,
                 })
               }
-              className="min-w-0 rounded-[8px] border bg-[#fafcfb] px-2.5 py-2.5 text-[12px] outline-none"
+              className="min-w-0 rounded-[8px] border bg-[#fafcfb] px-3 py-2.5 text-[14px] outline-none"
               aria-label="개별 블록 표시명"
               placeholder="표시명"
             />
@@ -493,13 +493,13 @@ function BlockManager({
         ))}
 
         {rows.length === 0 && (
-          <div className="rounded-[9px] border border-dashed p-3 text-center text-[11px] leading-5 text-[#929c97]">
+          <div className="rounded-[9px] border border-dashed p-3 text-center text-[12px] leading-5 text-[#929c97]">
             추가한 개별 블록이 없습니다.
           </div>
         )}
       </div>
 
-      <p className="mt-3 text-[10px] leading-4 text-[#a0a9a4]">
+      <p className="mt-3 text-[11px] leading-5 text-[#a0a9a4]">
         시스템 key와 같은 이름은 개별 블록으로 등록되지 않습니다.
       </p>
     </section>
@@ -630,6 +630,123 @@ export default function ContentTreeAdmin() {
     }
     return edits;
   }, [drafts, originals]);
+
+  const hasUnsavedChanges = useMemo(() => {
+    if (!tree || !savedTree) {
+      return Object.keys(pendingEdits).length > 0;
+    }
+
+    return (
+      JSON.stringify(tree) !== savedTree ||
+      Object.keys(pendingEdits).length > 0
+    );
+  }, [tree, savedTree, pendingEdits]);
+
+  const skipNextPopstateGuard = useRef(false);
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+
+    const beforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    const clickGuard = (event: MouseEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      const anchor = target.closest("a[href]");
+      if (!(anchor instanceof HTMLAnchorElement)) return;
+
+      const href = anchor.getAttribute("href");
+      if (
+        !href ||
+        href.startsWith("#") ||
+        anchor.target === "_blank" ||
+        anchor.hasAttribute("download")
+      ) {
+        return;
+      }
+
+      const destination = new URL(
+        anchor.href,
+        window.location.href,
+      );
+
+      if (
+        destination.href === window.location.href
+      ) {
+        return;
+      }
+
+      const leave = window.confirm(
+        "저장하지 않고 나가시겠습니까?",
+      );
+
+      if (!leave) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    const popstateGuard = () => {
+      if (skipNextPopstateGuard.current) {
+        skipNextPopstateGuard.current = false;
+        return;
+      }
+
+      const leave = window.confirm(
+        "저장하지 않고 나가시겠습니까?",
+      );
+
+      if (!leave) {
+        skipNextPopstateGuard.current = true;
+        window.history.forward();
+      }
+    };
+
+    window.addEventListener(
+      "beforeunload",
+      beforeUnload,
+    );
+    document.addEventListener(
+      "click",
+      clickGuard,
+      true,
+    );
+    window.addEventListener(
+      "popstate",
+      popstateGuard,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "beforeunload",
+        beforeUnload,
+      );
+      document.removeEventListener(
+        "click",
+        clickGuard,
+        true,
+      );
+      window.removeEventListener(
+        "popstate",
+        popstateGuard,
+      );
+    };
+  }, [hasUnsavedChanges]);
 
   if (!tree || !module || !container) {
     return <div className="rounded-[16px] border border-dashed bg-white p-8 text-center text-[14px] text-[#7d8781]">콘텐츠 구조 불러오는 중…</div>;
