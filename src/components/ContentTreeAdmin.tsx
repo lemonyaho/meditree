@@ -344,10 +344,10 @@ function BlockManager({
   return (
     <section className="mt-4 rounded-[16px] border bg-white p-3">
       <div>
-        <strong className="text-[13px] text-[#4f5c55]">
+        <strong className="text-[15px] text-[#4f5c55]">
           시스템 블록
         </strong>
-        <p className="mt-1 text-[10px] leading-4 text-[#8b9690]">
+        <p className="mt-1 text-[12px] leading-5 text-[#8b9690]">
           고정 블록은 수정하거나 삭제할 수 없습니다.
         </p>
       </div>
@@ -363,7 +363,7 @@ function BlockManager({
             return (
               <div
                 key={definition.key}
-                className="flex min-h-[36px] items-center gap-2 rounded-[9px] border px-2.5"
+                className="flex min-h-[43px] items-center gap-2.5 rounded-[9px] border px-3"
                 style={{
                   background: style.background,
                   borderColor: style.border,
@@ -375,19 +375,46 @@ function BlockManager({
                     background: style.dot,
                   }}
                 />
-                <span className="font-mono text-[10px] font-semibold text-[#4f6258]">
+                <span className="font-mono text-[12px] font-semibold text-[#4f6258]">
                   @{definition.key}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-[#58645e]">
+                <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-[#58645e]">
                   {definition.label}
                 </span>
                 {definition.functional && (
-                  <span className="rounded-full border border-[#d8e4eb] bg-white/75 px-1.5 py-0.5 text-[9px] font-semibold text-[#5d7484]">
-                    기능
-                  </span>
+                  <details className="group relative shrink-0">
+                    <summary
+                      className="grid h-7 w-7 cursor-pointer list-none place-items-center rounded-full border border-[#d8e4eb] bg-white/85 text-[15px] font-semibold text-[#5d7484] [&::-webkit-details-marker]:hidden"
+                      title="T/F 문항 사용법"
+                      aria-label="T/F 문항 사용법"
+                    >
+                      ⓘ
+                    </summary>
+                    <div className="absolute right-0 top-9 z-30 w-[300px] rounded-[12px] border border-[#dce6e1] bg-white p-4 text-left shadow-[0_12px_32px_rgba(24,45,36,0.14)]">
+                      <strong className="text-[13px] text-[#33433b]">
+                        T/F 문항 사용법
+                      </strong>
+                      <div className="mt-3 space-y-2 font-mono text-[12px] leading-5 text-[#53615a]">
+                        <div>@tf T 문장 → 정답 T</div>
+                        <div>@tf F 문장 → 정답 F</div>
+                        <div className="pt-1">@tfexp 해설</div>
+                      </div>
+                      <p className="mt-2 text-[11px] leading-5 text-[#7c8982]">
+                        @tfexp는 바로 앞 T/F 문항의 선택적 해설입니다.
+                        한 줄 또는 여러 줄로 작성할 수 있고, 정답 공개 시 T/F와 함께 표시됩니다.
+                      </p>
+                      <p className="mt-3 text-[11px] leading-5 text-[#7c8982]">
+                        영문 key와 T/F 표시는 대소문자를 구분하지 않습니다.
+                        예: @Patho = @patho, @TF t = @tf T
+                      </p>
+                      <p className="mt-2 text-[11px] leading-5 text-[#7c8982]">
+                        학습 화면에서는 눌러 정답을 확인하고, 강의 퀴즈에서는 일반 문제와 함께 랜덤 출제하거나 T/F만 선택할 수 있습니다.
+                      </p>
+                    </div>
+                  </details>
                 )}
                 <span
-                  className="shrink-0 text-[11px]"
+                  className="shrink-0 text-[12px]"
                   title="시스템 고정"
                   aria-label="시스템 고정"
                 >
@@ -401,17 +428,17 @@ function BlockManager({
 
       <div className="mt-4 flex items-center justify-between gap-2 border-t pt-3">
         <div>
-          <strong className="text-[12px] text-[#4f5c55]">
+          <strong className="text-[14px] text-[#4f5c55]">
             개별 블록
           </strong>
-          <p className="mt-0.5 text-[10px] text-[#929c97]">
+          <p className="mt-1 text-[12px] leading-5 text-[#929c97]">
             필요한 블록만 직접 추가합니다.
           </p>
         </div>
         <button
           type="button"
           onClick={addEntry}
-          className="shrink-0 rounded-[8px] border border-[#cfe1d8] bg-[#eef6eb] px-2 py-1.5 text-[10px] font-semibold text-[#075f4e]"
+          className="shrink-0 rounded-[8px] border border-[#cfe1d8] bg-[#eef6eb] px-2.5 py-2 text-[11px] font-semibold text-[#075f4e]"
         >
           + 블록
         </button>
@@ -424,7 +451,7 @@ function BlockManager({
             className="grid grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)_28px] items-center gap-1.5"
           >
             <div className="flex min-w-0 items-center rounded-[8px] border bg-[#fafcfb] pl-2">
-              <span className="shrink-0 font-mono text-[10px] text-[#168269]">
+              <span className="shrink-0 font-mono text-[12px] text-[#168269]">
                 @
               </span>
               <input
@@ -434,7 +461,7 @@ function BlockManager({
                     key: event.target.value,
                   })
                 }
-                className="min-w-0 flex-1 bg-transparent px-1 py-2 font-mono text-[11px] outline-none"
+                className="min-w-0 flex-1 bg-transparent px-1 py-2.5 font-mono text-[12px] outline-none"
                 aria-label="개별 블록 키"
                 placeholder="key"
               />
@@ -447,7 +474,7 @@ function BlockManager({
                   label: event.target.value,
                 })
               }
-              className="min-w-0 rounded-[8px] border bg-[#fafcfb] px-2 py-2 text-[11px] outline-none"
+              className="min-w-0 rounded-[8px] border bg-[#fafcfb] px-2.5 py-2.5 text-[12px] outline-none"
               aria-label="개별 블록 표시명"
               placeholder="표시명"
             />
@@ -466,13 +493,13 @@ function BlockManager({
         ))}
 
         {rows.length === 0 && (
-          <div className="rounded-[9px] border border-dashed p-3 text-center text-[10px] leading-4 text-[#929c97]">
+          <div className="rounded-[9px] border border-dashed p-3 text-center text-[11px] leading-5 text-[#929c97]">
             추가한 개별 블록이 없습니다.
           </div>
         )}
       </div>
 
-      <p className="mt-3 text-[9px] leading-4 text-[#a0a9a4]">
+      <p className="mt-3 text-[10px] leading-4 text-[#a0a9a4]">
         시스템 key와 같은 이름은 개별 블록으로 등록되지 않습니다.
       </p>
     </section>

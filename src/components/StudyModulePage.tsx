@@ -215,7 +215,7 @@ function ScopeQuizPanel({
             <h2 className="text-[17px] font-semibold">퀴즈 범위</h2>
             <p className="mt-1 text-[13px] leading-5 text-[#7d8781]">
               {moduleId === "lectures"
-                ? "여러 강의를 동시에 선택할 수 있습니다. 선택 범위의 @정보 블록을 모두 섞어서 랜덤 출제합니다."
+                ? "여러 강의를 동시에 선택할 수 있습니다. 선택 범위의 @정보 블록과 T/F 문항을 섞어서 출제하며, 시작 후 T/F만 따로 선택할 수도 있습니다."
                 : "여러 범위를 동시에 선택할 수 있습니다. 선택 범위의 모든 ## 항목을 한 문제씩 섞어서 출제합니다."}
             </p>
           </div>

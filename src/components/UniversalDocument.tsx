@@ -101,6 +101,7 @@ function filterNodes(
       ...node.tfItems.flatMap((item) => [
         "T/F",
         item.statement,
+        item.explanation ?? "",
       ]),
     ]
       .join(" ")
@@ -446,7 +447,7 @@ function TfQuizItem({
       onClick={() =>
         setRevealed((current) => !current)
       }
-      className="flex min-h-[58px] w-full items-center gap-3 rounded-[12px] border border-[#dfe6e2] bg-white px-4 py-3 text-left transition-colors hover:bg-[#fafcfb]"
+      className="flex min-h-[58px] w-full flex-wrap items-center gap-3 rounded-[12px] border border-[#dfe6e2] bg-white px-4 py-3 text-left transition-colors hover:bg-[#fafcfb]"
     >
       <span className="shrink-0 rounded-full border border-[#d9e3de] bg-[#f5f8f6] px-2.5 py-1 text-[10px] font-bold tracking-[0.08em] text-[#607069]">
         T/F QUIZ
@@ -481,6 +482,17 @@ function TfQuizItem({
       ) : (
         <span className="shrink-0 text-[12px] font-semibold text-[#7d8983]">
           정답 보기
+        </span>
+      )}
+
+      {revealed && item.explanation && (
+        <span className="basis-full border-t border-[#e7ece9] pt-3 text-[13px] font-normal leading-6 text-[#68756e]">
+          <span className="mr-2 font-semibold text-[#56635c]">
+            해설
+          </span>
+          <span className="whitespace-pre-wrap">
+            {item.explanation}
+          </span>
         </span>
       )}
     </button>
@@ -1189,6 +1201,7 @@ type TfRandomQuizQuestion = {
   prompt: string;
   statement: string;
   answer: boolean;
+  explanation?: string;
 };
 
 type EntityQuizQuestion = {
@@ -1318,6 +1331,7 @@ function collectTfQuizQuestions(
           : "T/F",
         statement: item.statement,
         answer: item.answer,
+          explanation: item.explanation,
       });
     }
   };
@@ -1480,28 +1494,41 @@ export function EntityRecallQuiz({
 
             <div className="mt-6 min-h-[52px]">
               {revealed ? (
-                <div className="flex items-center gap-3">
-                  <span
-                    className="h-3 w-3 rounded-full"
-                    style={{
-                      background: current.answer
-                        ? "#4d84d8"
-                        : "#cf6269",
-                      boxShadow: current.answer
-                        ? "0 0 12px 4px rgba(77,132,216,0.38)"
-                        : "0 0 12px 4px rgba(207,98,105,0.36)",
-                    }}
-                  />
-                  <strong
-                    className="text-[26px]"
-                    style={{
-                      color: current.answer
-                        ? "#4d84d8"
-                        : "#cf6269",
-                    }}
-                  >
-                    {current.answer ? "T" : "F"}
-                  </strong>
+                <div>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="h-3 w-3 rounded-full"
+                      style={{
+                        background: current.answer
+                          ? "#4d84d8"
+                          : "#cf6269",
+                        boxShadow: current.answer
+                          ? "0 0 12px 4px rgba(77,132,216,0.38)"
+                          : "0 0 12px 4px rgba(207,98,105,0.36)",
+                      }}
+                    />
+                    <strong
+                      className="text-[26px]"
+                      style={{
+                        color: current.answer
+                          ? "#4d84d8"
+                          : "#cf6269",
+                      }}
+                    >
+                      {current.answer ? "T" : "F"}
+                    </strong>
+                  </div>
+
+                  {current.explanation && (
+                    <div className="mt-4 border-t border-[#e7ece9] pt-4">
+                      <p className="text-[12px] font-semibold text-[#65726b]">
+                        해설
+                      </p>
+                      <div className="mt-1 whitespace-pre-wrap text-[14px] leading-7 text-[#53615a]">
+                        {current.explanation}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <span className="text-[14px] text-[#9aa39e]">
@@ -1739,6 +1766,7 @@ function collectLectureQuizQuestions(
           prompt: `${scope} › T/F`,
           statement: item.statement,
           answer: item.answer,
+          explanation: item.explanation,
         });
       }
 
@@ -1769,7 +1797,10 @@ export function LectureRandomQuiz({
 }: {
   sources: QuizSource[];
 }) {
-  const questions = useMemo(
+  const [questionMode, setQuestionMode] =
+    useState<"all" | "tf">("all");
+
+  const allQuestions = useMemo(
     () =>
       sources.flatMap((source) =>
         collectLectureQuizQuestions(source),
@@ -1777,12 +1808,30 @@ export function LectureRandomQuiz({
     [sources],
   );
 
+  const tfCount = useMemo(
+    () =>
+      allQuestions.filter(
+        (question) => question.kind === "tf",
+      ).length,
+    [allQuestions],
+  );
+
+  const questions = useMemo(
+    () =>
+      questionMode === "tf"
+        ? allQuestions.filter(
+            (question) => question.kind === "tf",
+          )
+        : allQuestions,
+    [allQuestions, questionMode],
+  );
+
   const signature = useMemo(
     () =>
-      questions
+      `${questionMode}|${questions
         .map((question) => question.id)
-        .join("|"),
-    [questions],
+        .join("|")}`,
+    [questions, questionMode],
   );
 
   const [order, setOrder] = useState<number[]>([]);
@@ -1801,11 +1850,30 @@ export function LectureRandomQuiz({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signature]);
 
-  if (!questions.length) {
+  if (!allQuestions.length) {
     return (
       <div className="rounded-[15px] border border-dashed bg-white p-8 text-center text-[14px] leading-6 text-[#7d8781]">
         선택 범위에서 퀴즈로 만들 수 있는
         @정보 블록 또는 T/F 문항을 찾지 못했습니다.
+      </div>
+    );
+  }
+
+  if (!questions.length) {
+    return (
+      <div className="rounded-[18px] border border-[#dfe6e2] bg-white p-6">
+        <div className="rounded-[14px] border border-dashed p-8 text-center">
+          <p className="text-[14px] text-[#7d8781]">
+            선택 범위에 T/F 문항이 없습니다.
+          </p>
+          <button
+            type="button"
+            onClick={() => setQuestionMode("all")}
+            className="mt-4 rounded-[9px] border border-[#cfe1d8] bg-[#eef6eb] px-4 py-2 text-[13px] font-semibold text-[#075f4e]"
+          >
+            전체 문제 보기
+          </button>
+        </div>
       </div>
     );
   }
@@ -1845,10 +1913,38 @@ export function LectureRandomQuiz({
 
   return (
     <div className="rounded-[18px] border border-[#dfe6e2] bg-white p-6">
-      <p className="text-[13px] font-bold tracking-[0.12em] text-[#168269]">
-        RANDOM QUIZ {position + 1} /{" "}
-        {questions.length}
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[13px] font-bold tracking-[0.12em] text-[#168269]">
+          RANDOM QUIZ {position + 1} /{" "}
+          {questions.length}
+        </p>
+
+        <div className="flex items-center gap-1 rounded-[10px] border border-[#dfe6e2] bg-[#fafcfb] p-1">
+          <button
+            type="button"
+            onClick={() => setQuestionMode("all")}
+            className={`rounded-[7px] px-3 py-1.5 text-[12px] font-semibold ${
+              questionMode === "all"
+                ? "bg-white text-[#075f4e] shadow-sm"
+                : "text-[#7f8a84]"
+            }`}
+          >
+            전체
+          </button>
+          <button
+            type="button"
+            onClick={() => setQuestionMode("tf")}
+            disabled={tfCount === 0}
+            className={`rounded-[7px] px-3 py-1.5 text-[12px] font-semibold ${
+              questionMode === "tf"
+                ? "bg-white text-[#075f4e] shadow-sm"
+                : "text-[#7f8a84]"
+            } disabled:cursor-not-allowed disabled:opacity-35`}
+          >
+            T/F만 {tfCount > 0 ? `(${tfCount})` : ""}
+          </button>
+        </div>
+      </div>
 
       <h2 className="mt-6 text-[clamp(28px,4.4vw,38px)] font-bold leading-[1.35] tracking-[-0.035em]">
         {current.prompt}
@@ -1862,28 +1958,41 @@ export function LectureRandomQuiz({
 
           <div className="mt-6 min-h-[46px]">
             {revealed ? (
-              <div className="flex items-center gap-3">
-                <span
-                  className="h-3 w-3 rounded-full"
-                  style={{
-                    background: current.answer
-                      ? "#4d84d8"
-                      : "#cf6269",
-                    boxShadow: current.answer
-                      ? "0 0 12px 4px rgba(77,132,216,0.38)"
-                      : "0 0 12px 4px rgba(207,98,105,0.36)",
-                  }}
-                />
-                <strong
-                  className="text-[28px]"
-                  style={{
-                    color: current.answer
-                      ? "#4d84d8"
-                      : "#cf6269",
-                  }}
-                >
-                  {current.answer ? "T" : "F"}
-                </strong>
+              <div>
+                <div className="flex items-center gap-3">
+                  <span
+                    className="h-3 w-3 rounded-full"
+                    style={{
+                      background: current.answer
+                        ? "#4d84d8"
+                        : "#cf6269",
+                      boxShadow: current.answer
+                        ? "0 0 12px 4px rgba(77,132,216,0.38)"
+                        : "0 0 12px 4px rgba(207,98,105,0.36)",
+                    }}
+                  />
+                  <strong
+                    className="text-[28px]"
+                    style={{
+                      color: current.answer
+                        ? "#4d84d8"
+                        : "#cf6269",
+                    }}
+                  >
+                    {current.answer ? "T" : "F"}
+                  </strong>
+                </div>
+
+                {current.explanation && (
+                  <div className="mt-4 border-t border-[#e7ece9] pt-4">
+                    <p className="text-[13px] font-semibold text-[#65726b]">
+                      해설
+                    </p>
+                    <div className="mt-1 whitespace-pre-wrap text-[17px] leading-8 text-[#53615a]">
+                      {current.explanation}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <span className="text-[15px] text-[#9aa39e]">

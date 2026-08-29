@@ -19,6 +19,7 @@ export type TxtTfItem = {
   id: string;
   statement: string;
   answer: boolean;
+  explanation?: string;
 };
 
 export type TxtEntity = {
@@ -268,6 +269,7 @@ export function parseUniversalTxt(
   let blockIndex = 0;
   let tfIndex = 0;
   let entityIndex = 0;
+  let lastTfItem: TxtTfItem | undefined;
 
   const isHeading = (value: string) =>
     Boolean(matchNumericHeading(value));
@@ -299,6 +301,7 @@ export function parseUniversalTxt(
     const entityMatch = trimmed.match(/^##\s+(.+)$/);
     if (entityMatch) {
       seenContent = true;
+      lastTfItem = undefined;
       const entity: TxtEntity = {
         id: `entity-${entityIndex++}`,
         name: entityMatch[1].trim(),
@@ -312,6 +315,7 @@ export function parseUniversalTxt(
     }
 
     if (trimmed.startsWith("# ")) {
+      lastTfItem = undefined;
       title = trimmed.slice(2).trim() || title;
       currentEntity = undefined;
       index += 1;
@@ -321,6 +325,7 @@ export function parseUniversalTxt(
     const heading = matchNumericHeading(trimmed);
     if (heading) {
       seenContent = true;
+      lastTfItem = undefined;
       currentEntity = undefined;
       const number = heading[1];
       currentNode = {
@@ -339,6 +344,43 @@ export function parseUniversalTxt(
 
     if (isAtLine(trimmed)) {
       const body = trimmed.slice(1).trim();
+
+      // @tfexp is an optional explanation for the immediately
+      // preceding @tf item. It may be inline or multi-line.
+      const tfExpMatch = body.match(
+        /^tfexp(?:\s+(.*))?$/i,
+      );
+      if (tfExpMatch && lastTfItem) {
+        const explanationLines: string[] = [];
+        const inline =
+          tfExpMatch[1]?.trim() ?? "";
+        if (inline) explanationLines.push(inline);
+
+        let cursor = index + 1;
+        while (cursor < lines.length) {
+          const nextTrimmed = lines[cursor].trim();
+          if (
+            nextTrimmed.startsWith("# ") ||
+            isEntity(nextTrimmed) ||
+            isHeading(nextTrimmed) ||
+            isAtLine(nextTrimmed)
+          ) {
+            break;
+          }
+          explanationLines.push(lines[cursor]);
+          cursor += 1;
+        }
+
+        const explanation =
+          explanationLines.join("\n").trim();
+        if (explanation) {
+          lastTfItem.explanation = explanation;
+        }
+
+        lastTfItem = undefined;
+        index = cursor;
+        continue;
+      }
 
       // @tf is a functional directive, not a normal information block.
       // Syntax: @tf t statement / @tf f statement
@@ -365,9 +407,12 @@ export function parseUniversalTxt(
           fileTfItems.push(item);
         }
 
+        lastTfItem = item;
         index += 1;
         continue;
       }
+
+      lastTfItem = undefined;
 
       const meta = body.match(
         /^([A-Za-z][A-Za-z0-9_-]*)(?:\s+(.*))?$/,
@@ -448,6 +493,7 @@ export function parseUniversalTxt(
     }
 
     // @ 없이 직접 쓴 자유 텍스트는 현재 entity/node의 메모.
+    lastTfItem = undefined;
     const freeLines: string[] = [raw];
     let cursor = index + 1;
 
@@ -662,7 +708,7 @@ export function documentSearchText(
       values.push(node.number, node.title);
       addBlocks(node.blocks);
       for (const item of node.tfItems) {
-        values.push("T/F", item.statement);
+        values.push("T/F", item.statement, item.explanation ?? "");
       }
       addEntities(node.entities);
       walk(node.children);
@@ -671,7 +717,7 @@ export function documentSearchText(
 
   addBlocks(parsed.blocks);
   for (const item of parsed.tfItems) {
-    values.push("T/F", item.statement);
+    values.push("T/F", item.statement, item.explanation ?? "");
   }
   addEntities(parsed.entities);
   walk(parsed.nodes);
