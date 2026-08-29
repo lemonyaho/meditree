@@ -101,12 +101,73 @@ function FileCard({ href, file, index }: { href: string; file: ContentFile; inde
 
 function LectureRow({ href, file }: { href: string; file: ContentFile }) {
   const led = file.meta.color ? LED[file.meta.color] : { color: "#9aa39e", glow: "rgba(154,163,158,0.12)" };
+  const [verified, setVerified] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    setVerified(false);
+
+    if (
+      file.meta.verified !== true ||
+      !file.meta.verifiedHash ||
+      !file.objectPath
+    ) {
+      return () => {
+        active = false;
+      };
+    }
+
+    void readContentFile(file.objectPath)
+      .then((content) => {
+        if (!active) return;
+        setVerified(
+          file.meta.verifiedHash ===
+            contentFingerprint(content),
+        );
+      })
+      .catch(() => {
+        if (active) setVerified(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [
+    file.objectPath,
+    file.meta.verified,
+    file.meta.verifiedHash,
+  ]);
+
   return (
     <Link href={href} className="flex min-h-[72px] items-center justify-between gap-5 rounded-[15px] border border-[#dfe6e2] bg-white px-5 py-3 shadow-[0_7px_20px_rgba(20,42,32,0.03)] transition hover:border-[#cbd8cf]">
       <div className="flex min-w-0 items-center gap-3.5">
         <span className="h-[9px] w-[9px] shrink-0 rounded-full" style={{ background: led.color, boxShadow: `0 0 12px 3px ${led.glow}` }} />
         <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
-          <strong className="truncate text-[16px] font-semibold">{file.meta.title}</strong>
+          <span className="flex min-w-0 items-center gap-2">
+            <strong className="truncate text-[16px] font-semibold">{file.meta.title}</strong>
+            {verified && (
+              <span
+                className="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-[#2f80ed] shadow-[0_2px_7px_rgba(47,128,237,0.22)]"
+                title="검수 완료"
+                aria-label="검수 완료"
+              >
+                <svg
+                  viewBox="0 0 20 20"
+                  aria-hidden="true"
+                  className="h-[11px] w-[11px]"
+                >
+                  <path
+                    d="M5.2 10.2 8.3 13.3 14.9 6.7"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            )}
+          </span>
           {file.meta.professor && <span className="text-[14px] text-[#7c8781]">{file.meta.professor}</span>}
         </div>
       </div>
