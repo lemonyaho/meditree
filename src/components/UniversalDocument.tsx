@@ -612,7 +612,10 @@ function BlockCards({
               className={`flex w-full items-center justify-between gap-3 px-4 text-left ${
                 moduleId === "lectures"
                   ? "min-h-[56px]"
-                  : "min-h-[50px]"
+                  : moduleId === "drugs" ||
+                      moduleId === "microbiology"
+                    ? "min-h-[54px]"
+                    : "min-h-[50px]"
               }`}
             >
               <div className="flex min-w-0 items-center gap-2">
@@ -620,7 +623,10 @@ function BlockCards({
                   className={`font-semibold ${
                     moduleId === "lectures"
                       ? "text-[17px]"
-                      : "text-[15px]"
+                      : moduleId === "drugs" ||
+                          moduleId === "microbiology"
+                        ? "text-[17px]"
+                        : "text-[15px]"
                   }`}
                   style={{
                     color: tint?.label ?? "#111713",
@@ -635,7 +641,10 @@ function BlockCards({
                 className={`font-semibold ${
                   moduleId === "lectures"
                     ? "text-[14px]"
-                    : "text-[13px]"
+                    : moduleId === "drugs" ||
+                        moduleId === "microbiology"
+                      ? "text-[14px]"
+                      : "text-[13px]"
                 }`}
                 style={{ color: theme.accent }}
               >
@@ -655,7 +664,11 @@ function BlockCards({
                   inheritedValue={block.inheritedValue}
                   localValue={block.localValue}
                   inheritanceScope={block.inheritanceScope}
-                  largeText={moduleId === "lectures"}
+                  largeText={
+                    moduleId === "lectures" ||
+                    moduleId === "drugs" ||
+                    moduleId === "microbiology"
+                  }
                 />
               </div>
             )}
@@ -739,7 +752,10 @@ function EntityCard({
         className={`shrink-0 font-mono font-bold ${
           moduleId === "lectures"
             ? "text-[13px]"
-            : "text-[11px]"
+            : moduleId === "drugs" ||
+                moduleId === "microbiology"
+              ? "text-[12px]"
+              : "text-[11px]"
         }`}
         style={{ color: theme.accent }}
       >
@@ -750,7 +766,10 @@ function EntityCard({
         className={`min-w-[130px] flex-1 truncate font-semibold ${
           moduleId === "lectures"
             ? "text-[17px]"
-            : "text-[15px]"
+            : moduleId === "drugs" ||
+                moduleId === "microbiology"
+              ? "text-[17px]"
+              : "text-[15px]"
         }`}
       >
         {entity.name}
@@ -937,7 +956,9 @@ function NodeCard({
           <div className="flex min-w-0 items-center gap-3">
             <span
               className={`shrink-0 font-mono font-bold ${
-                moduleId === "lectures"
+                moduleId === "lectures" ||
+                moduleId === "drugs" ||
+                moduleId === "microbiology"
                   ? "text-[13px]"
                   : "text-[12px]"
               }`}
@@ -951,9 +972,14 @@ function NodeCard({
                   ? depth === 0
                     ? "text-[20px]"
                     : "text-[18px]"
-                  : depth === 0
-                    ? "text-[17px]"
-                    : "text-[16px]"
+                  : moduleId === "drugs" ||
+                      moduleId === "microbiology"
+                    ? depth === 0
+                      ? "text-[19px]"
+                      : "text-[18px]"
+                    : depth === 0
+                      ? "text-[17px]"
+                      : "text-[16px]"
               } truncate font-semibold tracking-[-0.015em]`}
             >
               {node.title}
@@ -971,7 +997,9 @@ function NodeCard({
         <div className="flex min-h-[60px] items-center gap-3 px-5">
           <span
             className={`shrink-0 font-mono font-bold ${
-              moduleId === "lectures"
+              moduleId === "lectures" ||
+              moduleId === "drugs" ||
+              moduleId === "microbiology"
                 ? "text-[13px]"
                 : "text-[12px]"
             }`}
@@ -983,7 +1011,10 @@ function NodeCard({
             className={`truncate font-semibold tracking-[-0.015em] ${
               moduleId === "lectures"
                 ? "text-[18px]"
-                : "text-[16px]"
+                : moduleId === "drugs" ||
+                    moduleId === "microbiology"
+                  ? "text-[18px]"
+                  : "text-[16px]"
             }`}
           >
             {node.title}
