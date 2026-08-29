@@ -1860,11 +1860,17 @@ function collectLectureQuizQuestions(
 
 export function LectureRandomQuiz({
   sources,
+  initialQuestionMode = "all",
 }: {
   sources: QuizSource[];
+  initialQuestionMode?: "all" | "tf";
 }) {
   const [questionMode, setQuestionMode] =
-    useState<"all" | "tf">("all");
+    useState<"all" | "tf">(initialQuestionMode);
+
+  useEffect(() => {
+    setQuestionMode(initialQuestionMode);
+  }, [initialQuestionMode]);
 
   const allQuestions = useMemo(
     () =>

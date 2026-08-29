@@ -160,6 +160,8 @@ function ScopeQuizPanel({
   const [sources, setSources] = useState<QuizSource[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [lectureQuestionMode, setLectureQuestionMode] =
+    useState<"all" | "tf">("all");
   const signature = scopes.map((scope) => scope.id).join("|");
 
   useEffect(() => {
@@ -189,6 +191,13 @@ function ScopeQuizPanel({
   const selectAll = () => { setSelectedIds(new Set(scopes.map((scope) => scope.id))); resetLoadedQuiz(); };
   const clearAll = () => { setSelectedIds(new Set()); resetLoadedQuiz(); };
 
+  const changeLectureQuestionMode = (
+    next: "all" | "tf",
+  ) => {
+    setLectureQuestionMode(next);
+    resetLoadedQuiz();
+  };
+
   const startQuiz = async () => {
     if (!selectedFiles.length || loading) return;
     setLoading(true); setError(""); setSources(null);
@@ -217,7 +226,7 @@ function ScopeQuizPanel({
             <h2 className="text-[17px] font-semibold">퀴즈 범위</h2>
             <p className="mt-1 text-[13px] leading-5 text-[#7d8781]">
               {moduleId === "lectures"
-                ? "여러 강의를 동시에 선택할 수 있습니다. 선택 범위의 @정보 블록과 T/F 문항을 섞어서 출제하며, 시작 후 T/F만 따로 선택할 수도 있습니다."
+                ? "여러 강의를 동시에 선택한 뒤 출제 유형을 전체 또는 T/F만으로 정할 수 있습니다. 퀴즈 시작 후에도 유형을 바꿀 수 있습니다."
                 : "여러 범위를 동시에 선택할 수 있습니다. 선택 범위의 모든 ## 항목을 한 문제씩 섞어서 출제합니다."}
             </p>
           </div>
@@ -244,9 +253,60 @@ function ScopeQuizPanel({
 
         {visibleScopes.length === 0 && <div className="mt-4 rounded-[12px] border border-dashed p-6 text-center text-[13px] text-[#8a948f]">검색되는 퀴즈 범위가 없습니다.</div>}
 
-        <div className="mt-4 flex flex-wrap items-center gap-3 border-t pt-4">
+        {moduleId === "lectures" && (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+            <div>
+              <strong className="text-[13px] font-semibold text-[#4f5c55]">
+                출제 유형
+              </strong>
+              <p className="mt-0.5 text-[11px] text-[#8a948f]">
+                선택한 강의 범위에서 어떤 문제를 출제할지 정합니다.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-1 rounded-[10px] border border-[#dfe6e2] bg-[#fafcfb] p-1">
+              <button
+                type="button"
+                onClick={() =>
+                  changeLectureQuestionMode("all")
+                }
+                className={`rounded-[7px] px-3.5 py-2 text-[12px] font-semibold ${
+                  lectureQuestionMode === "all"
+                    ? "bg-white text-[#075f4e] shadow-sm"
+                    : "text-[#7f8a84]"
+                }`}
+              >
+                전체
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  changeLectureQuestionMode("tf")
+                }
+                className={`rounded-[7px] px-3.5 py-2 text-[12px] font-semibold ${
+                  lectureQuestionMode === "tf"
+                    ? "bg-white text-[#075f4e] shadow-sm"
+                    : "text-[#7f8a84]"
+                }`}
+              >
+                T/F만
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className={`mt-4 flex flex-wrap items-center gap-3 ${
+          moduleId === "lectures"
+            ? ""
+            : "border-t pt-4"
+        }`}>
           <button type="button" disabled={!selectedFiles.length || loading} onClick={startQuiz} className="rounded-[10px] border border-[#cfe1d8] bg-[#eef6eb] px-4 py-2.5 text-[14px] font-semibold text-[#075f4e] disabled:cursor-not-allowed disabled:opacity-40">
-            {loading ? "불러오는 중…" : "선택 범위로 퀴즈 시작"}
+            {loading
+              ? "불러오는 중…"
+              : moduleId === "lectures" &&
+                  lectureQuestionMode === "tf"
+                ? "선택 범위로 T/F 퀴즈 시작"
+                : "선택 범위로 퀴즈 시작"}
           </button>
           <span className="text-[12px] text-[#87918c]">선택 {selectedIds.size}범위 · {selectedFiles.length} TXT</span>
         </div>
@@ -256,7 +316,10 @@ function ScopeQuizPanel({
 
       {sources &&
         (moduleId === "lectures" ? (
-          <LectureRandomQuiz sources={sources} />
+          <LectureRandomQuiz
+            sources={sources}
+            initialQuestionMode={lectureQuestionMode}
+          />
         ) : (
           <EntityRecallQuiz
             sources={sources}
