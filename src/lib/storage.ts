@@ -19,6 +19,7 @@ type ManifestFile = {
   name: string;
   path: string;
   meta: ContentFile["meta"];
+  refs?: ContentFile["refs"];
 };
 
 type ManifestFolder = {
@@ -234,6 +235,7 @@ function folderToManifest(
       name: file.name,
       path: fileObjectPath(module, folderIds, file),
       meta: file.meta,
+      refs: file.refs ?? [],
     })),
   };
 }
@@ -261,6 +263,7 @@ function toManifest(tree: ContentTree): StorageManifest {
         name: file.name,
         path: fileObjectPath(module, [], file),
         meta: file.meta,
+        refs: file.refs,
       })),
     };
   }
@@ -285,6 +288,7 @@ function folderFromManifest(folder: ManifestFolder): ContentFolder {
       name: file.name,
       objectPath: file.path,
       meta: file.meta,
+      refs: file.refs ?? [],
     })),
   };
 }
@@ -298,6 +302,8 @@ function manifestToTree(manifest: StorageManifest): ContentTree {
 
   for (const id of MODULE_IDS) {
     const module = manifest.modules[id];
+    if (!module) continue;
+
     raw.modules[id] = {
       id,
       storageRoot: module.storageRoot,
@@ -314,6 +320,7 @@ function manifestToTree(manifest: StorageManifest): ContentTree {
         name: file.name,
         objectPath: file.path,
         meta: file.meta,
+        refs: file.refs ?? [],
       })),
     };
   }
@@ -354,8 +361,10 @@ function collectManifestFiles(manifest: StorageManifest) {
     }
   };
   for (const id of MODULE_IDS) {
-    output.push(...manifest.modules[id].files);
-    walk(manifest.modules[id].folders);
+    const module = manifest.modules[id];
+    if (!module) continue;
+    output.push(...module.files);
+    walk(module.folders);
   }
   return output;
 }

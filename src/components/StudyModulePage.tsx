@@ -14,6 +14,8 @@ import UniversalDocument, {
 import useContentTree, { readContentFile } from "@/components/useContentTree";
 import {
   MODULE_HREFS,
+  collectReverseReferences,
+  findFileLocation,
   findFolderByPath,
   getContainer,
   getFolderTrail,
@@ -22,6 +24,7 @@ import {
   type BlockLabelMap,
   type ContentFile,
   type ContentFolder,
+  type FileLocation,
   type ModuleId,
   type ThemeColor,
 } from "@/lib/content-model";
@@ -132,6 +135,94 @@ function buildQuizScopes(folders: ContentFolder[], files: ContentFile[]): QuizSc
     scopes.push({ id: `file:${file.id}`, label: file.meta.title || file.name, detail: "1 TXT", files: [{ id: file.id, file }] });
   }
   return scopes;
+}
+
+function RelatedReferences({
+  tree,
+  moduleId,
+  file,
+}: {
+  tree: ReturnType<typeof useContentTree>;
+  moduleId: ModuleId;
+  file: ContentFile;
+}) {
+  if (
+    moduleId !== "clinical" &&
+    moduleId !== "cases"
+  ) {
+    return null;
+  }
+
+  const direct = file.refs
+    .map((ref) =>
+      findFileLocation(
+        tree,
+        ref.moduleId,
+        ref.fileId,
+      ),
+    )
+    .filter(
+      (item): item is FileLocation =>
+        Boolean(item),
+    );
+
+  const reverse = collectReverseReferences(
+    tree,
+    moduleId,
+    file.id,
+  );
+
+  const combined = [...direct, ...reverse].filter(
+    (item, index, all) =>
+      all.findIndex(
+        (other) =>
+          other.moduleId === item.moduleId &&
+          other.file.id === item.file.id,
+      ) === index,
+  );
+
+  const relevant = combined.filter(
+    (item) =>
+      moduleId === "cases"
+        ? item.moduleId === "clinical"
+        : item.moduleId === "cases",
+  );
+
+  if (!relevant.length) return null;
+
+  return (
+    <section className="rounded-[15px] border border-[#dbe8e1] bg-[#f8fbf8] p-4">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <strong className="text-[13px] font-semibold text-[#4f6258]">
+          {moduleId === "cases"
+            ? "관련 질환"
+            : "관련 사례"}
+        </strong>
+        <span className="text-[11px] text-[#909a95]">
+          {relevant.length}개 연결
+        </span>
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        {relevant.map((item) => (
+          <Link
+            key={`${item.moduleId}:${item.file.id}`}
+            href={pathHref(
+              item.moduleId,
+              item.path,
+              item.file.id,
+            )}
+            className="inline-flex min-h-[38px] items-center gap-2 rounded-full border border-[#cfe1d8] bg-white px-3.5 py-2 text-[13px] font-semibold text-[#075f4e] transition hover:bg-[#f1f8f3]"
+          >
+            <span>
+              {item.file.meta.title}
+            </span>
+            <span aria-hidden="true">↗</span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 function QuizModeTabs({ mode, setMode }: { mode: "study" | "quiz"; setMode: (next: "study" | "quiz") => void }) {
@@ -422,6 +513,11 @@ export default function StudyModulePage({ moduleId }: { moduleId: ModuleId }) {
           search={{ value: query, onChange: setQuery, placeholder: "이 TXT 안에서 검색" }}
           accent={selectedFile.meta.color ?? "green"}
         >
+          <RelatedReferences
+            tree={tree}
+            moduleId={moduleId}
+            file={selectedFile}
+          />
           {isQuizModule && parsed && <QuizModeTabs mode={mode} setMode={setMode} />}
           {loadError ? (
             <div className="rounded-[15px] border border-[#efd1d1] bg-[#fff6f6] p-6 text-[14px] text-[#9a4f4f]">{loadError}</div>

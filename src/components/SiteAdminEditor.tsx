@@ -33,6 +33,21 @@ function OrderControls({
   );
 }
 
+function adminHomeCardStyle(
+  moduleId: ModuleId,
+) {
+  if (moduleId === "clinical") {
+    return "border-[#c7dfbd] bg-[linear-gradient(145deg,#f1f9ed,#e9f5e3)]";
+  }
+  if (moduleId === "cases") {
+    return "border-[#cee2c7] bg-[linear-gradient(145deg,#f5faef,#edf7e8)]";
+  }
+  if (moduleId === "lectures") {
+    return "border-[#d7e6d0] bg-[linear-gradient(145deg,#f8fbf4,#f1f8ed)]";
+  }
+  return "border-[#e0e6e2] bg-white";
+}
+
 export default function SiteAdminEditor() {
   const [tree, setTree] = useState<ContentTree | null>(null);
   const [saved, setSaved] = useState("");
@@ -230,8 +245,6 @@ export default function SiteAdminEditor() {
     }
   };
 
-  const [featured, ...others] = orderedModules;
-
   return (
     <>
       <section className="rounded-[22px] border border-[#e1e7e3] bg-white p-5 shadow-[0_10px_28px_rgba(19,40,31,0.035)] max-[620px]:p-4">
@@ -259,43 +272,74 @@ export default function SiteAdminEditor() {
           />
         </div>
 
-        <div className="mt-5">
-          {featured && (
-            <article className="relative mb-4 flex min-h-[220px] flex-col justify-between rounded-[24px] border border-[#c8dfbf] bg-[linear-gradient(135deg,#f3faef,#e8f4df)] p-8 shadow-[0_12px_34px_rgba(32,76,48,0.06)] max-[620px]:p-6">
-              <div className="absolute right-5 top-5 flex items-center gap-2">
-                <OrderControls index={0} count={orderedModules.length} onMove={(direction) => patchSite({ moduleOrder: move(tree.site.moduleOrder, 0, direction) })} />
-                <Link href={`/admin/content?module=${featured.id}&mode=manage`} className="flex h-9 items-center rounded-[9px] border border-[#bcd8cd] bg-white/90 px-3 text-[12px] font-semibold text-[#075f4e]">콘텐츠 관리 →</Link>
+        <div className="mt-5 grid grid-cols-3 gap-4 max-[900px]:grid-cols-2 max-[620px]:grid-cols-1">
+          {orderedModules.map((module, index) => (
+            <article
+              key={module.id}
+              className={`relative flex min-h-[220px] flex-col justify-between rounded-[22px] border p-6 shadow-[0_10px_28px_rgba(19,40,31,0.04)] ${adminHomeCardStyle(module.id)}`}
+            >
+              <div className="absolute right-4 top-4 flex items-center gap-1.5">
+                <OrderControls
+                  index={index}
+                  count={orderedModules.length}
+                  onMove={(direction) =>
+                    patchSite({
+                      moduleOrder: move(
+                        tree.site.moduleOrder,
+                        index,
+                        direction,
+                      ),
+                    })
+                  }
+                />
               </div>
-              <div className="pr-[210px] max-[720px]:pr-0 max-[720px]:pt-12">
-                <input value={featured.english} onChange={(e) => patchModule(featured.id, { english: e.target.value })} className={`${editInput} text-[13px] font-bold tracking-[0.13em] text-[#168269]`} aria-label={`${featured.title} 영문명`} />
-                <input value={featured.title} onChange={(e) => patchModule(featured.id, { title: e.target.value })} className={`${editInput} mt-7 text-[31px] font-semibold tracking-[-0.04em]`} aria-label="모듈 제목" />
-                <textarea value={featured.description} onChange={(e) => patchModule(featured.id, { description: e.target.value })} className={`${editInput} mt-3 min-h-[58px] resize-none text-[15px] leading-7 text-[#728078]`} aria-label="모듈 설명" />
-              </div>
-              <span className="self-end text-[28px] text-[#075f4e]">→</span>
-            </article>
-          )}
 
-          <div className="grid grid-cols-3 gap-4 max-[900px]:grid-cols-1">
-            {others.map((module, otherIndex) => {
-              const index = otherIndex + 1;
-              return (
-                <article key={module.id} className="relative flex min-h-[220px] flex-col justify-between rounded-[22px] border border-[#e0e6e2] bg-white p-6 shadow-[0_10px_28px_rgba(19,40,31,0.04)]">
-                  <div className="absolute right-4 top-4 flex items-center gap-1.5">
-                    <OrderControls index={index} count={orderedModules.length} onMove={(direction) => patchSite({ moduleOrder: move(tree.site.moduleOrder, index, direction) })} />
-                  </div>
-                  <div className="pt-9">
-                    <input value={module.english} onChange={(e) => patchModule(module.id, { english: e.target.value })} className={`${editInput} text-[13px] font-bold tracking-[0.12em] text-[#168269]`} aria-label={`${module.title} 영문명`} />
-                    <input value={module.title} onChange={(e) => patchModule(module.id, { title: e.target.value })} className={`${editInput} mt-6 text-[25px] font-semibold tracking-[-0.035em]`} aria-label="모듈 제목" />
-                    <textarea value={module.description} onChange={(e) => patchModule(module.id, { description: e.target.value })} className={`${editInput} mt-2 min-h-[72px] resize-none text-[14px] leading-6 text-[#7a8580]`} aria-label="모듈 설명" />
-                  </div>
-                  <div className="mt-3 flex items-end justify-between gap-3">
-                    <Link href={`/admin/content?module=${module.id}&mode=manage`} className="flex h-9 items-center rounded-[9px] border border-[#cfe1d8] bg-[#eef6eb] px-3 text-[12px] font-semibold text-[#075f4e]">콘텐츠 관리 →</Link>
-                    <span className="text-[25px] text-[#075f4e]">→</span>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+              <div className="pt-9">
+                <input
+                  value={module.english}
+                  onChange={(e) =>
+                    patchModule(module.id, {
+                      english: e.target.value,
+                    })
+                  }
+                  className={`${editInput} text-[13px] font-bold tracking-[0.12em] text-[#168269]`}
+                  aria-label={`${module.title} 영문명`}
+                />
+                <input
+                  value={module.title}
+                  onChange={(e) =>
+                    patchModule(module.id, {
+                      title: e.target.value,
+                    })
+                  }
+                  className={`${editInput} mt-6 text-[25px] font-semibold tracking-[-0.035em]`}
+                  aria-label="모듈 제목"
+                />
+                <textarea
+                  value={module.description}
+                  onChange={(e) =>
+                    patchModule(module.id, {
+                      description: e.target.value,
+                    })
+                  }
+                  className={`${editInput} mt-2 min-h-[72px] resize-none text-[14px] leading-6 text-[#7a8580]`}
+                  aria-label="모듈 설명"
+                />
+              </div>
+
+              <div className="mt-3 flex items-end justify-between gap-3">
+                <Link
+                  href={`/admin/content?module=${module.id}&mode=manage`}
+                  className="flex h-9 items-center rounded-[9px] border border-[#cfe1d8] bg-white/90 px-3 text-[12px] font-semibold text-[#075f4e]"
+                >
+                  콘텐츠 관리 →
+                </Link>
+                <span className="text-[25px] text-[#075f4e]">
+                  →
+                </span>
+              </div>
+            </article>
+          ))}
         </div>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 border-t pt-6 text-[13px] font-normal text-[#929b96]">

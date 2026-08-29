@@ -653,6 +653,27 @@ export function createTxtTemplate(
 `;
   }
 
+  if (moduleId === "cases") {
+    return `# ${title}
+@english 
+
+01 초기 정보
+@case
+
+02 임상적 사고
+@problem
+@ddx
+@workup
+
+03 진단 및 치료
+@dx
+@tx
+@followup
+@pearl
+@memo
+`;
+  }
+
   if (moduleId === "drugs") {
     return `# ${title}
 @english 

@@ -133,6 +133,16 @@ const MODULE_BLOCK_ORDER: Record<
     "tx",
     "prog",
   ],
+  cases: [
+    "case",
+    "problem",
+    "ddx",
+    "workup",
+    "dx",
+    "tx",
+    "followup",
+    "pearl",
+  ],
   lectures: [
     "def",
     "etiol",
@@ -2246,6 +2256,7 @@ export default function UniversalDocument({
 
   const fileTfItems =
     moduleId === "clinical" ||
+    moduleId === "cases" ||
     moduleId === "lectures"
       ? normalizedQuery
         ? parsed.tfItems.filter((item) =>

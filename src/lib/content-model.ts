@@ -1,7 +1,8 @@
-export const APP_VERSION = "2.7.3";
+export const APP_VERSION = "3.0.1";
 
 export type ModuleId =
   | "clinical"
+  | "cases"
   | "lectures"
   | "drugs"
   | "microbiology";
@@ -31,6 +32,18 @@ export const SYSTEM_BLOCK_DEFINITIONS: Record<
     { key: "dx", label: "진단" },
     { key: "tx", label: "치료" },
     { key: "prog", label: "예후" },
+    { key: "tf", label: "T/F 문항", functional: true },
+    { key: "memo", label: "특이사항" },
+  ],
+  cases: [
+    { key: "case", label: "사례 정보" },
+    { key: "problem", label: "문제표현" },
+    { key: "ddx", label: "감별진단" },
+    { key: "workup", label: "검사·평가" },
+    { key: "dx", label: "진단" },
+    { key: "tx", label: "치료" },
+    { key: "followup", label: "경과·재평가" },
+    { key: "pearl", label: "핵심 포인트" },
     { key: "tf", label: "T/F 문항", functional: true },
     { key: "memo", label: "특이사항" },
   ],
@@ -99,11 +112,17 @@ export type FileMeta = {
   verifiedHash?: string;
 };
 
+export type ContentReference = {
+  moduleId: ModuleId;
+  fileId: string;
+};
+
 export type ContentFile = {
   id: string;
   name: string;
   objectPath?: string;
   meta: FileMeta;
+  refs: ContentReference[];
 };
 
 export type ContentFolder = {
@@ -144,6 +163,7 @@ export type ContentTree = {
 
 export const MODULE_IDS: ModuleId[] = [
   "clinical",
+  "cases",
   "lectures",
   "drugs",
   "microbiology",
@@ -151,6 +171,7 @@ export const MODULE_IDS: ModuleId[] = [
 
 export const MODULE_HREFS: Record<ModuleId, string> = {
   clinical: "/clinical",
+  cases: "/cases",
   lectures: "/lectures",
   drugs: "/drugs",
   microbiology: "/microbiology",
@@ -163,7 +184,7 @@ export const DEFAULT_CONTENT_TREE: ContentTree = {
     brandTitle: "MediTree",
     subtitle: "공부한 내용을 하나씩 쌓고, 필요할 때 다시 꺼내보세요.",
     footerCopyright: "©2026 LMYH. All Rights Reserved.",
-    moduleOrder: ["clinical", "lectures", "drugs", "microbiology"],
+    moduleOrder: ["clinical", "cases", "lectures", "drugs", "microbiology"],
   },
   modules: {
     clinical: {
@@ -171,8 +192,20 @@ export const DEFAULT_CONTENT_TREE: ContentTree = {
       storageRoot: "clinical",
       title: "임상 단권화",
       english: "CLINICAL",
-      description: "임상에서 다시 찾아볼 핵심 내용을 질환과 상황 중심으로 정리합니다.",
+      description: "계통별 질환을 임상적으로 정리합니다.",
       blockLabels: { ...DEFAULT_BLOCK_LABELS.clinical },
+      blockLabelsRevision: BLOCK_LABELS_REVISION,
+      customBlockOrder: [],
+      folders: [],
+      files: [],
+    },
+    cases: {
+      id: "cases",
+      storageRoot: "cases",
+      title: "사례 단권화",
+      english: "CASES",
+      description: "사례의 진단·치료 흐름을 정리합니다.",
+      blockLabels: { ...DEFAULT_BLOCK_LABELS.cases },
       blockLabelsRevision: BLOCK_LABELS_REVISION,
       customBlockOrder: [],
       folders: [],
@@ -230,10 +263,40 @@ function normalizeFile(input: unknown): ContentFile | null {
     ? raw.meta as FileMeta
     : { title: raw.name.replace(/\.txt$/i, "") };
 
+  const refs = Array.isArray(raw.refs)
+    ? raw.refs
+        .filter(
+          (ref): ref is ContentReference =>
+            Boolean(
+              ref &&
+              typeof ref === "object" &&
+              typeof (ref as ContentReference).moduleId === "string" &&
+              typeof (ref as ContentReference).fileId === "string" &&
+              MODULE_IDS.includes(
+                (ref as ContentReference).moduleId,
+              ) &&
+              (ref as ContentReference).fileId.trim(),
+            ),
+        )
+        .map((ref) => ({
+          moduleId: ref.moduleId,
+          fileId: ref.fileId.trim(),
+        }))
+        .filter(
+          (ref, index, all) =>
+            all.findIndex(
+              (item) =>
+                item.moduleId === ref.moduleId &&
+                item.fileId === ref.fileId,
+            ) === index,
+        )
+    : [];
+
   return {
     id: raw.id,
     name: raw.name,
     objectPath: typeof raw.objectPath === "string" ? raw.objectPath : undefined,
+    refs,
     meta: {
       title: typeof meta.title === "string" && meta.title.trim()
         ? meta.title.trim()
@@ -389,11 +452,33 @@ export function normalizeContentTree(input: unknown): ContentTree {
   };
 
   const siteRaw = raw.site && typeof raw.site === "object" ? raw.site : {};
-  const order = Array.isArray((siteRaw as SiteSettings).moduleOrder)
+  const storedOrder = Array.isArray(
+    (siteRaw as SiteSettings).moduleOrder,
+  )
     ? (siteRaw as SiteSettings).moduleOrder.filter(
-        (id): id is ModuleId => MODULE_IDS.includes(id as ModuleId),
+        (id): id is ModuleId =>
+          MODULE_IDS.includes(id as ModuleId),
       )
     : [];
+
+  // v3.0.0 migration:
+  // Existing v2 index.json has no cases module.
+  // Insert it beside clinical instead of appending it after tools.
+  const order = [...storedOrder];
+  if (
+    order.length > 0 &&
+    !order.includes("cases")
+  ) {
+    const clinicalIndex =
+      order.indexOf("clinical");
+    order.splice(
+      clinicalIndex >= 0
+        ? clinicalIndex + 1
+        : 0,
+      0,
+      "cases",
+    );
+  }
 
   fallback.site = {
     eyebrow:
@@ -463,6 +548,91 @@ export function normalizeContentTree(input: unknown): ContentTree {
   }
 
   return fallback;
+}
+
+export type FileLocation = {
+  moduleId: ModuleId;
+  path: string[];
+  file: ContentFile;
+};
+
+export function collectModuleFileLocations(
+  module: ContentModule,
+): Array<{ path: string[]; file: ContentFile }> {
+  const output: Array<{
+    path: string[];
+    file: ContentFile;
+  }> = [];
+
+  const walk = (
+    folders: ContentFolder[],
+    path: string[],
+  ) => {
+    for (const folder of folders) {
+      const nextPath = [...path, folder.id];
+      for (const file of folder.files) {
+        output.push({
+          path: nextPath,
+          file,
+        });
+      }
+      walk(folder.folders, nextPath);
+    }
+  };
+
+  for (const file of module.files) {
+    output.push({ path: [], file });
+  }
+  walk(module.folders, []);
+  return output;
+}
+
+export function findFileLocation(
+  tree: ContentTree,
+  moduleId: ModuleId,
+  fileId: string,
+): FileLocation | undefined {
+  const match = collectModuleFileLocations(
+    tree.modules[moduleId],
+  ).find(({ file }) => file.id === fileId);
+
+  return match
+    ? {
+        moduleId,
+        path: match.path,
+        file: match.file,
+      }
+    : undefined;
+}
+
+export function collectReverseReferences(
+  tree: ContentTree,
+  targetModuleId: ModuleId,
+  targetFileId: string,
+): FileLocation[] {
+  const output: FileLocation[] = [];
+
+  for (const moduleId of MODULE_IDS) {
+    for (const location of collectModuleFileLocations(
+      tree.modules[moduleId],
+    )) {
+      if (
+        location.file.refs.some(
+          (ref) =>
+            ref.moduleId === targetModuleId &&
+            ref.fileId === targetFileId,
+        )
+      ) {
+        output.push({
+          moduleId,
+          path: location.path,
+          file: location.file,
+        });
+      }
+    }
+  }
+
+  return output;
 }
 
 export type ContentContainer = {

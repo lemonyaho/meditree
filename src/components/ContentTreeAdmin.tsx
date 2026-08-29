@@ -9,6 +9,7 @@ import { readContentFile, readContentTree, writeContentTree } from "@/components
 import {
   MODULE_HREFS,
   SYSTEM_BLOCK_DEFINITIONS,
+  collectModuleFileLocations,
   ensureTxtName,
   findFolderByPath,
   getContainer,
@@ -102,6 +103,33 @@ Shigella, Yerisina, Salmonella, Campylobacter, EHEC, EIEC
 Vibrio cholerae, Clostridium perfringens, Bacillus cereus`;
   }
 
+  if (moduleId === "cases") {
+    return `# 발열과 저혈압으로 내원한 환자
+@english Fever and Hypotension
+
+01 초기 정보
+@case
+72세 남자, 발열과 의식저하로 내원
+
+02 임상적 사고
+@problem
+감염이 의심되는 저혈압 환자
+@ddx
+Septic shock, hypovolemic shock
+@workup
+Blood culture, lactate, 감염원 평가
+
+03 진단 및 치료
+@dx
+Septic shock
+@tx
+Crystalloid, empirical antibiotics, norepinephrine
+@followup
+MAP와 lactate 재평가
+@pearl
+초기 평가와 치료를 병렬적으로 진행`;
+  }
+
   if (moduleId === "drugs") {
     return `# 엽산 합성 저해제
 @english Folate Synthesis Inhibitors 
@@ -137,11 +165,15 @@ function syntaxDescription(moduleId: ModuleId) {
     return "숫자는 내용의 계층을 나타내고, @key는 현재 계층에 정보 블록을 추가합니다. @tf t/f 문장은 눌러서 정답을 확인하는 T/F 문항으로 표시됩니다.";
   }
 
+  if (moduleId === "cases") {
+    return "숫자는 사례가 진행되는 흐름을 나타내고, @case·@problem·@ddx·@workup·@dx·@tx 등으로 임상적 사고 과정을 정리합니다.";
+  }
+
   if (moduleId === "drugs") {
     return "숫자는 약물 계열의 분류 계층, ##는 실제 학습 약물입니다. @key는 현재 계층 또는 ## 약물의 정보를 기록합니다.";
   }
 
-  return "숫자는 미생물의 분류 계층, ##는 실제 학습 미생물입니다. 상위 계층의 @특성은 하위 ##에 상속되며 더 가까운 계층의 값이 우선합니다.";
+  return "숫자는 미생물의 분류 계층, ##는 실제 학습 미생물입니다. 학습 화면은 직접 작성한 정보만 표시하고, 퀴즈에서는 상위 계층의 @특성을 상속합니다.";
 }
 
 function normalizeEditableBlockKey(value: string) {
@@ -611,7 +643,11 @@ export default function ContentTreeAdmin() {
   const router = useRouter();
   const moduleParam = params.get("module") as ModuleId | null;
   const moduleId: ModuleId =
-    moduleParam === "clinical" || moduleParam === "lectures" || moduleParam === "drugs" || moduleParam === "microbiology"
+    moduleParam === "clinical" ||
+    moduleParam === "cases" ||
+    moduleParam === "lectures" ||
+    moduleParam === "drugs" ||
+    moduleParam === "microbiology"
       ? moduleParam
       : "lectures";
   const path = parsePathParam(params.get("path"));
@@ -630,6 +666,9 @@ export default function ContentTreeAdmin() {
   const [notice, setNotice] = useState("");
   const [structureDirty, setStructureDirty] =
     useState(false);
+  const [refPickerOpen, setRefPickerOpen] =
+    useState(false);
+  const [refQuery, setRefQuery] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -657,6 +696,11 @@ export default function ContentTreeAdmin() {
   }, [requestedFileId, manageMode, container?.files]);
 
   const selectedFile = container?.files.find((file) => file.id === selectedId);
+
+  useEffect(() => {
+    setRefPickerOpen(false);
+    setRefQuery("");
+  }, [moduleId, pathParam(path), selectedFile?.id]);
 
   useEffect(() => {
     let active = true;
@@ -912,6 +956,92 @@ export default function ContentTreeAdmin() {
       .includes(q);
   });
 
+  const referenceTargetModuleId:
+    | "clinical"
+    | "cases"
+    | null =
+    moduleId === "clinical"
+      ? "cases"
+      : moduleId === "cases"
+        ? "clinical"
+        : null;
+
+  const referenceCandidates =
+    referenceTargetModuleId
+      ? collectModuleFileLocations(
+          tree.modules[referenceTargetModuleId],
+        )
+      : [];
+
+  const visibleReferenceCandidates =
+    referenceCandidates.filter(({ file }) => {
+      const q = refQuery.trim().toLowerCase();
+      if (!q) return true;
+      return `${file.meta.title} ${file.meta.english ?? ""} ${file.name}`
+        .toLowerCase()
+        .includes(q);
+    });
+
+  const addReference = (
+    targetModuleId: ModuleId,
+    targetFileId: string,
+  ) => {
+    if (!selectedFile) return;
+
+    replaceContainer((current) => ({
+      ...current,
+      files: current.files.map((file) =>
+        file.id === selectedFile.id
+          ? {
+              ...file,
+              refs: [
+                ...file.refs.filter(
+                  (ref) =>
+                    !(
+                      ref.moduleId ===
+                        targetModuleId &&
+                      ref.fileId ===
+                        targetFileId
+                    ),
+                ),
+                {
+                  moduleId: targetModuleId,
+                  fileId: targetFileId,
+                },
+              ],
+            }
+          : file,
+      ),
+    }));
+  };
+
+  const removeReference = (
+    targetModuleId: ModuleId,
+    targetFileId: string,
+  ) => {
+    if (!selectedFile) return;
+
+    replaceContainer((current) => ({
+      ...current,
+      files: current.files.map((file) =>
+        file.id === selectedFile.id
+          ? {
+              ...file,
+              refs: file.refs.filter(
+                (ref) =>
+                  !(
+                    ref.moduleId ===
+                      targetModuleId &&
+                    ref.fileId ===
+                      targetFileId
+                  ),
+              ),
+            }
+          : file,
+      ),
+    }));
+  };
+
   const selectFile = (id: string) => {
     setSelectedId(id);
     router.replace(adminUrl(moduleId, path, { mode: "manage", fileId: id }));
@@ -974,6 +1104,7 @@ export default function ContentTreeAdmin() {
     const file: ContentFile = {
       id,
       name: displayName,
+      refs: [],
       meta: {
         ...metadataFromTxt(content, title),
         verified: false,
@@ -1575,6 +1706,167 @@ export default function ContentTreeAdmin() {
                       Export TXT ↓
                     </button>
                   </div>
+
+                  {referenceTargetModuleId && (
+                    <div className="border-b border-[#e7ece9] bg-[#fbfcfb] px-5 py-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <strong className="text-[14px] text-[#4f5c55]">
+                            {moduleId === "cases"
+                              ? "관련 질환"
+                              : "관련 사례"}
+                          </strong>
+                          <p className="mt-0.5 text-[11px] text-[#8a948f]">
+                            stable file ID로 연결되어 파일 이름이 바뀌어도 참조가 유지됩니다.
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setRefPickerOpen(
+                              (current) => !current,
+                            )
+                          }
+                          className="rounded-[9px] border border-[#cfe1d8] bg-[#eef6eb] px-3 py-2 text-[12px] font-semibold text-[#075f4e]"
+                        >
+                          + 참조
+                        </button>
+                      </div>
+
+                      {selectedFile.refs.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {selectedFile.refs.map((ref) => {
+                            const target =
+                              collectModuleFileLocations(
+                                tree.modules[ref.moduleId],
+                              ).find(
+                                ({ file }) =>
+                                  file.id === ref.fileId,
+                              );
+
+                            return (
+                              <span
+                                key={`${ref.moduleId}:${ref.fileId}`}
+                                className="inline-flex items-center gap-2 rounded-full border border-[#d7e5de] bg-white px-3 py-1.5 text-[12px] text-[#53615a]"
+                              >
+                                <span className="max-w-[220px] truncate">
+                                  {target?.file.meta.title ??
+                                    "삭제되었거나 찾을 수 없는 참조"}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    removeReference(
+                                      ref.moduleId,
+                                      ref.fileId,
+                                    )
+                                  }
+                                  className="text-[#9a5c5c]"
+                                  aria-label="참조 제거"
+                                  title="참조 제거"
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {refPickerOpen && (
+                        <div className="mt-3 rounded-[12px] border border-[#dfe6e2] bg-white p-3">
+                          <input
+                            value={refQuery}
+                            onChange={(event) =>
+                              setRefQuery(
+                                event.target.value,
+                              )
+                            }
+                            placeholder={
+                              referenceTargetModuleId ===
+                              "clinical"
+                                ? "임상 질환 검색"
+                                : "사례 검색"
+                            }
+                            className="w-full rounded-[9px] border border-[#dfe6e2] bg-[#fafcfb] px-3 py-2.5 text-[14px] outline-none focus:border-[#9fc9b8]"
+                          />
+
+                          <div className="mt-2 grid max-h-[260px] gap-1.5 overflow-y-auto">
+                            {visibleReferenceCandidates.map(
+                              ({ path: targetPath, file }) => {
+                                const linked =
+                                  selectedFile.refs.some(
+                                    (ref) =>
+                                      ref.moduleId ===
+                                        referenceTargetModuleId! &&
+                                      ref.fileId === file.id,
+                                  );
+
+                                return (
+                                  <button
+                                    key={file.id}
+                                    type="button"
+                                    onClick={() =>
+                                      linked
+                                        ? removeReference(
+                                            referenceTargetModuleId!,
+                                            file.id,
+                                          )
+                                        : addReference(
+                                            referenceTargetModuleId!,
+                                            file.id,
+                                          )
+                                    }
+                                    className={`flex min-h-[46px] items-center justify-between gap-3 rounded-[9px] border px-3 py-2 text-left ${
+                                      linked
+                                        ? "border-[#bfd8ce] bg-[#f0f7ed]"
+                                        : "border-[#e4e9e6] bg-white"
+                                    }`}
+                                  >
+                                    <span className="min-w-0">
+                                      <strong className="block truncate text-[13px]">
+                                        {file.meta.title}
+                                      </strong>
+                                      <span className="mt-0.5 block truncate text-[10px] text-[#929c97]">
+                                        {[
+                                          tree.modules[
+                                            referenceTargetModuleId!
+                                          ].title,
+                                          ...getFolderTrail(
+                                            tree.modules[
+                                              referenceTargetModuleId!
+                                            ],
+                                            targetPath,
+                                          ).map(
+                                            (folder) =>
+                                              folder.name,
+                                          ),
+                                        ].join(" › ")}
+                                      </span>
+                                    </span>
+                                    <span className="shrink-0 text-[11px] font-semibold text-[#168269]">
+                                      {linked
+                                        ? "연결됨"
+                                        : "연결"}
+                                    </span>
+                                  </button>
+                                );
+                              },
+                            )}
+
+                            {visibleReferenceCandidates.length ===
+                              0 && (
+                              <div className="rounded-[9px] border border-dashed p-5 text-center text-[12px] text-[#929c97]">
+                                연결할 TXT가 없습니다.
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <textarea
                     value={drafts[selectedFile.id] ?? ""}
                     onChange={(event) => updateDraft(selectedFile, event.target.value)}
