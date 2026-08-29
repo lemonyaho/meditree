@@ -146,11 +146,13 @@ function QuizModeTabs({ mode, setMode }: { mode: "study" | "quiz"; setMode: (nex
 function ScopeQuizPanel({
   moduleId,
   blockLabels,
+  customBlockOrder,
   scopes,
   searchQuery,
 }: {
   moduleId: "lectures" | "drugs" | "microbiology";
   blockLabels: BlockLabelMap;
+  customBlockOrder: string[];
   scopes: QuizScope[];
   searchQuery: string;
 }) {
@@ -259,6 +261,7 @@ function ScopeQuizPanel({
           <EntityRecallQuiz
             sources={sources}
             moduleId={moduleId}
+            customBlockOrder={customBlockOrder}
           />
         ))}
     </div>
@@ -376,6 +379,9 @@ export default function StudyModulePage({ moduleId }: { moduleId: ModuleId }) {
               <DocumentQuiz
                 parsed={parsed}
                 moduleId={entityQuizModuleId!}
+                customBlockOrder={
+                  module.customBlockOrder
+                }
               />
             )
           ) : (
@@ -384,6 +390,9 @@ export default function StudyModulePage({ moduleId }: { moduleId: ModuleId }) {
               query={query}
               blockLabels={module.blockLabels}
               moduleId={moduleId}
+              customBlockOrder={
+                module.customBlockOrder
+              }
             />
           )}
         </StudyShell>
@@ -409,7 +418,15 @@ export default function StudyModulePage({ moduleId }: { moduleId: ModuleId }) {
         {isQuizModule && <QuizModeTabs mode={mode} setMode={setMode} />}
 
         {isQuizModule && mode === "quiz" ? (
-          <ScopeQuizPanel moduleId={quizModuleId!} blockLabels={module.blockLabels} scopes={quizScopes} searchQuery={query} />
+          <ScopeQuizPanel
+            moduleId={quizModuleId!}
+            blockLabels={module.blockLabels}
+            customBlockOrder={
+              module.customBlockOrder
+            }
+            scopes={quizScopes}
+            searchQuery={query}
+          />
         ) : (
           <>
             {folders.length > 0 && (

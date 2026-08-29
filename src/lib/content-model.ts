@@ -1,4 +1,4 @@
-export const APP_VERSION = "2.6.12";
+export const APP_VERSION = "2.7.0";
 
 export type ModuleId =
   | "clinical"
@@ -123,6 +123,7 @@ export type ContentModule = {
   description: string;
   blockLabels: BlockLabelMap;
   blockLabelsRevision: number;
+  customBlockOrder: string[];
   folders: ContentFolder[];
   files: ContentFile[];
 };
@@ -173,6 +174,7 @@ export const DEFAULT_CONTENT_TREE: ContentTree = {
       description: "임상에서 다시 찾아볼 핵심 내용을 질환과 상황 중심으로 정리합니다.",
       blockLabels: { ...DEFAULT_BLOCK_LABELS.clinical },
       blockLabelsRevision: BLOCK_LABELS_REVISION,
+      customBlockOrder: [],
       folders: [],
       files: [],
     },
@@ -184,6 +186,7 @@ export const DEFAULT_CONTENT_TREE: ContentTree = {
       description: "강의별 핵심 구조와 내용을 한곳에서 정리합니다.",
       blockLabels: { ...DEFAULT_BLOCK_LABELS.lectures },
       blockLabelsRevision: BLOCK_LABELS_REVISION,
+      customBlockOrder: [],
       folders: [],
       files: [],
     },
@@ -195,6 +198,7 @@ export const DEFAULT_CONTENT_TREE: ContentTree = {
       description: "약물 계열과 세부 정보를 계층적으로 연결해 학습합니다.",
       blockLabels: { ...DEFAULT_BLOCK_LABELS.drugs },
       blockLabelsRevision: BLOCK_LABELS_REVISION,
+      customBlockOrder: [],
       folders: [],
       files: [],
     },
@@ -206,6 +210,7 @@ export const DEFAULT_CONTENT_TREE: ContentTree = {
       description: "미생물의 분류와 핵심 특성을 계층적으로 정리하고 학습합니다.",
       blockLabels: { ...DEFAULT_BLOCK_LABELS.microbiology },
       blockLabelsRevision: BLOCK_LABELS_REVISION,
+      customBlockOrder: [],
       folders: [],
       files: [],
     },
@@ -334,6 +339,47 @@ function normalizeBlockLabels(
   };
 }
 
+function normalizeCustomBlockOrder(
+  input: unknown,
+  labels: BlockLabelMap,
+  moduleId: ModuleId,
+) {
+  const systemKeys = systemBlockKeys(moduleId);
+  const customKeys = Object.keys(labels).filter(
+    (key) => !systemKeys.has(key),
+  );
+
+  const requested = Array.isArray(input)
+    ? input
+        .filter(
+          (value): value is string =>
+            typeof value === "string",
+        )
+        .map((value) =>
+          value.trim().replace(/^@+/, ""),
+        )
+        .filter(Boolean)
+    : [];
+
+  const ordered: string[] = [];
+  for (const key of requested) {
+    if (
+      customKeys.includes(key) &&
+      !ordered.includes(key)
+    ) {
+      ordered.push(key);
+    }
+  }
+
+  for (const key of customKeys) {
+    if (!ordered.includes(key)) {
+      ordered.push(key);
+    }
+  }
+
+  return ordered;
+}
+
 export function normalizeContentTree(input: unknown): ContentTree {
   const fallback = cloneDefaultContentTree();
   if (!input || typeof input !== "object") return fallback;
@@ -395,6 +441,12 @@ export function normalizeContentTree(input: unknown): ContentTree {
         return {
           blockLabels: normalizedBlocks.labels,
           blockLabelsRevision: normalizedBlocks.revision,
+          customBlockOrder: normalizeCustomBlockOrder(
+            (moduleRaw as Partial<ContentModule>)
+              .customBlockOrder,
+            normalizedBlocks.labels,
+            id,
+          ),
         };
       })(),
       folders: Array.isArray(moduleRaw.folders)

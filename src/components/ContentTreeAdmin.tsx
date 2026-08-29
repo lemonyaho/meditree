@@ -248,11 +248,16 @@ function systemRowStyle(
 function BlockManager({
   moduleId,
   blockLabels,
-  onChangeBlockLabels,
+  customBlockOrder,
+  onChangeBlockConfig,
 }: {
   moduleId: ModuleId;
   blockLabels: BlockLabelMap;
-  onChangeBlockLabels: (next: BlockLabelMap) => void;
+  customBlockOrder: string[];
+  onChangeBlockConfig: (
+    next: BlockLabelMap,
+    customOrder: string[],
+  ) => void;
 }) {
   const systemDefinitions =
     SYSTEM_BLOCK_DEFINITIONS[moduleId];
@@ -260,14 +265,30 @@ function BlockManager({
     systemDefinitions.map(({ key }) => key),
   );
 
-  const customFromProps = () =>
-    Object.entries(blockLabels)
-      .filter(([key]) => !systemKeys.has(key))
-      .map(([key, label], index) => ({
-        id: `custom-${moduleId}-${index}-${key}`,
-        key,
-        label,
-      }));
+  const customFromProps = () => {
+    const customEntries = Object.entries(
+      blockLabels,
+    ).filter(([key]) => !systemKeys.has(key));
+
+    const byKey = new Map(customEntries);
+    const orderedKeys = [
+      ...customBlockOrder.filter((key) =>
+        byKey.has(key),
+      ),
+      ...customEntries
+        .map(([key]) => key)
+        .filter(
+          (key) =>
+            !customBlockOrder.includes(key),
+        ),
+    ];
+
+    return orderedKeys.map((key, index) => ({
+      id: `custom-${moduleId}-${index}-${key}`,
+      key,
+      label: byKey.get(key) ?? key,
+    }));
+  };
 
   const [rows, setRows] =
     useState<EditableBlockRow[]>(
@@ -306,7 +327,18 @@ function BlockManager({
       next[key] = label;
     }
 
-    onChangeBlockLabels(next);
+    const customOrder = nextRows
+      .map((row) =>
+        normalizeEditableBlockKey(row.key),
+      )
+      .filter(
+        (key, index, all) =>
+          Boolean(key) &&
+          !systemKeys.has(key) &&
+          all.indexOf(key) === index,
+      );
+
+    onChangeBlockConfig(next, customOrder);
   };
 
   const patchRow = (
@@ -339,6 +371,13 @@ function BlockManager({
     commitRows(
       rows.filter((row) => row.id !== id),
     );
+  };
+
+  const moveEntry = (
+    index: number,
+    direction: -1 | 1,
+  ) => {
+    commitRows(move(rows, index, direction));
   };
 
   return (
@@ -432,7 +471,7 @@ function BlockManager({
             개별 블록
           </strong>
           <p className="mt-1 text-[13px] leading-5 text-[#929c97]">
-            필요한 블록만 직접 추가합니다.
+            필요한 블록을 추가하고 ↑ ↓로 표시 순서를 정합니다.
           </p>
         </div>
         <button
@@ -445,10 +484,10 @@ function BlockManager({
       </div>
 
       <div className="mt-2 grid gap-2">
-        {rows.map((row) => (
+        {rows.map((row, index) => (
           <div
             key={row.id}
-            className="grid grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)_28px] items-center gap-1.5"
+            className="grid grid-cols-[minmax(0,0.75fr)_minmax(0,1fr)_30px_30px_30px] items-center gap-1.5"
           >
             <div className="flex min-w-0 items-center rounded-[8px] border bg-[#fafcfb] pl-2">
               <span className="shrink-0 font-mono text-[14px] text-[#168269]">
@@ -481,10 +520,36 @@ function BlockManager({
 
             <button
               type="button"
+              disabled={index === 0}
+              onClick={() =>
+                moveEntry(index, -1)
+              }
+              className="grid h-[30px] w-[30px] place-items-center rounded-[7px] border bg-white text-[12px] text-[#5e6c65] disabled:cursor-default disabled:opacity-25"
+              title="위로"
+              aria-label={`${row.label} 위로`}
+            >
+              ↑
+            </button>
+
+            <button
+              type="button"
+              disabled={index === rows.length - 1}
+              onClick={() =>
+                moveEntry(index, 1)
+              }
+              className="grid h-[30px] w-[30px] place-items-center rounded-[7px] border bg-white text-[12px] text-[#5e6c65] disabled:cursor-default disabled:opacity-25"
+              title="아래로"
+              aria-label={`${row.label} 아래로`}
+            >
+              ↓
+            </button>
+
+            <button
+              type="button"
               onClick={() =>
                 removeEntry(row.id)
               }
-              className="grid h-7 w-7 place-items-center rounded-[7px] border border-[#efd4d4] bg-white text-[11px] text-[#9b5555]"
+              className="grid h-[30px] w-[30px] place-items-center rounded-[7px] border border-[#efd4d4] bg-white text-[12px] text-[#9b5555]"
               title="블록 삭제"
             >
               ×
@@ -500,6 +565,7 @@ function BlockManager({
       </div>
 
       <p className="mt-3 text-[11px] leading-5 text-[#a0a9a4]">
+        ↑ ↓ 순서는 View와 Quiz에 적용되며 TXT 원문 순서는 바뀌지 않습니다.
         시스템 key와 같은 이름은 개별 블록으로 등록되지 않습니다.
       </p>
     </section>
@@ -810,11 +876,16 @@ export default function ContentTreeAdmin() {
     );
   };
 
-  const replaceBlockLabels = (blockLabels: BlockLabelMap) => {
+  const replaceBlockConfig = (
+    blockLabels: BlockLabelMap,
+    customBlockOrder: string[],
+  ) => {
     replaceModule({
       ...module,
       blockLabels,
-      blockLabelsRevision: module.blockLabelsRevision,
+      customBlockOrder,
+      blockLabelsRevision:
+        module.blockLabelsRevision,
     });
   };
 
@@ -1289,7 +1360,7 @@ export default function ContentTreeAdmin() {
       )}
 
       {(kind === "files" || (kind === "mixed" && container.files.length > 0)) && (
-        <section className={`grid min-w-0 grid-cols-[300px_minmax(0,1fr)] items-start gap-4 max-[860px]:grid-cols-1 ${kind === "mixed" ? "mt-4" : ""}`}>
+        <section className={`grid min-w-0 grid-cols-[360px_minmax(0,1fr)] items-start gap-4 max-[860px]:grid-cols-1 ${kind === "mixed" ? "mt-4" : ""}`}>
           <aside className="min-w-0 self-start">
             <div className="mb-4 flex flex-wrap items-center gap-2">
               {kind === "files" && (
@@ -1431,7 +1502,12 @@ export default function ContentTreeAdmin() {
             <BlockManager
               moduleId={moduleId}
               blockLabels={module.blockLabels}
-              onChangeBlockLabels={replaceBlockLabels}
+              customBlockOrder={
+                module.customBlockOrder
+              }
+              onChangeBlockConfig={
+                replaceBlockConfig
+              }
             />
           </aside>
 

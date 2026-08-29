@@ -159,12 +159,25 @@ const MODULE_BLOCK_ORDER: Record<
 function orderBlocksForModule(
   blocks: TxtBlock[],
   moduleId?: ModuleId,
+  customBlockOrder: string[] = [],
 ) {
   if (!moduleId) return blocks;
 
-  const rank = new Map(
-    MODULE_BLOCK_ORDER[moduleId].map(
+  const systemOrder =
+    MODULE_BLOCK_ORDER[moduleId];
+
+  const systemRank = new Map(
+    systemOrder.map(
       (key, index) => [key, index],
+    ),
+  );
+
+  const customRank = new Map(
+    customBlockOrder.map(
+      (key, index) => [
+        normalizedBlockKey(key),
+        systemOrder.length + index,
+      ],
     ),
   );
 
@@ -172,16 +185,21 @@ function orderBlocksForModule(
     .map((block, originalIndex) => {
       const key = normalizedBlockKey(block.key);
       const isMemo = key === "memo";
-      const knownRank = rank.get(key);
+      const knownSystemRank =
+        systemRank.get(key);
+      const knownCustomRank =
+        customRank.get(key);
 
       return {
         block,
         originalIndex,
         rank: isMemo
           ? 20_000
-          : knownRank !== undefined
-            ? knownRank
-            : 10_000,
+          : knownSystemRank !== undefined
+            ? knownSystemRank
+            : knownCustomRank !== undefined
+              ? knownCustomRank
+              : 10_000,
       };
     })
     .sort(
@@ -530,6 +548,7 @@ function BlockCards({
   forceOpen,
   semanticTint = false,
   moduleId,
+  customBlockOrder = [],
 }: {
   scopeId: string;
   blocks: TxtBlock[];
@@ -541,6 +560,7 @@ function BlockCards({
   forceOpen: boolean;
   semanticTint?: boolean;
   moduleId?: ModuleId;
+  customBlockOrder?: string[];
 }) {
   if (!blocks.length) return null;
 
@@ -548,6 +568,7 @@ function BlockCards({
     orderBlocksForModule(
       blocks,
       moduleId,
+      customBlockOrder,
     );
 
   return (
@@ -656,12 +677,14 @@ function EntityCard({
   setOpenBlocks,
   forceOpen,
   moduleId,
+  customBlockOrder,
 }: {
   entity: TxtEntity;
   displayNumber: string;
   inheritedBlocks: TxtBlock[];
   theme: Theme;
   moduleId?: ModuleId;
+  customBlockOrder?: string[];
   openEntities: Set<string>;
   setOpenEntities: React.Dispatch<
     React.SetStateAction<Set<string>>
@@ -801,6 +824,7 @@ function EntityCard({
             forceOpen={forceOpen}
             semanticTint={moduleId === "drugs"}
             moduleId={moduleId}
+            customBlockOrder={customBlockOrder}
           />
         </div>
       )}
@@ -822,6 +846,7 @@ function NodeCard({
   inheritEntityBlocks,
   inheritedEntityBlocks,
   moduleId,
+  customBlockOrder,
 }: {
   node: TxtNode;
   depth: number;
@@ -842,6 +867,7 @@ function NodeCard({
   inheritEntityBlocks: boolean;
   inheritedEntityBlocks: TxtBlock[];
   moduleId?: ModuleId;
+  customBlockOrder?: string[];
 }) {
   const nextInheritedEntityBlocks =
     inheritEntityBlocks
@@ -980,6 +1006,7 @@ function NodeCard({
               forceOpen={forceOpen}
               semanticTint={moduleId === "drugs"}
               moduleId={moduleId}
+              customBlockOrder={customBlockOrder}
             />
           )}
 
@@ -1016,6 +1043,7 @@ function NodeCard({
                 forceOpen={forceOpen}
                 semanticTint={moduleId === "drugs"}
                 moduleId={moduleId}
+                customBlockOrder={customBlockOrder}
               />
             </div>
           )}
@@ -1037,6 +1065,7 @@ function NodeCard({
                   setOpenBlocks={setOpenBlocks}
                   forceOpen={forceOpen}
                   moduleId={moduleId}
+                  customBlockOrder={customBlockOrder}
                 />
               ))}
             </div>
@@ -1067,6 +1096,7 @@ function NodeCard({
                   inheritEntityBlocks={inheritEntityBlocks}
                   inheritedEntityBlocks={nextInheritedEntityBlocks}
                   moduleId={moduleId}
+                  customBlockOrder={customBlockOrder}
                 />
               ))}
             </div>
@@ -1217,6 +1247,7 @@ type EntityQuizQuestion = {
 function collectEntityQuizQuestions(
   source: QuizSource,
   moduleId: "drugs" | "microbiology",
+  customBlockOrder: string[] = [],
 ): EntityQuizQuestion[] {
   const questions: EntityQuizQuestion[] = [];
 
@@ -1248,6 +1279,7 @@ function collectEntityQuizQuestions(
     for (const block of orderBlocksForModule(
       entityBlocks,
       moduleId,
+      customBlockOrder,
     )) {
       if (!block.value.trim()) continue;
       const key = normalizedBlockKey(block.key);
@@ -1366,9 +1398,11 @@ function randomCue(question: EntityQuizQuestion): QuizCue {
 export function EntityRecallQuiz({
   sources,
   moduleId,
+  customBlockOrder = [],
 }: {
   sources: QuizSource[];
   moduleId: "drugs" | "microbiology";
+  customBlockOrder?: string[];
 }) {
   const questions = useMemo(
     () =>
@@ -1376,10 +1410,11 @@ export function EntityRecallQuiz({
         ...collectEntityQuizQuestions(
           source,
           moduleId,
+          customBlockOrder,
         ),
         ...collectTfQuizQuestions(source),
       ]),
-    [sources, moduleId],
+    [sources, moduleId, customBlockOrder],
   );
 
   const signature = useMemo(
@@ -2059,11 +2094,25 @@ export function LectureRandomQuiz({
 export function DocumentQuiz({
   parsed,
   moduleId = "drugs",
+  customBlockOrder = [],
 }: {
   parsed: ParsedUniversalTxt;
   moduleId?: "drugs" | "microbiology";
+  customBlockOrder?: string[];
 }) {
-  return <EntityRecallQuiz moduleId={moduleId} sources={[{ id: "current", title: parsed.title, parsed }]} />;
+  return (
+    <EntityRecallQuiz
+      moduleId={moduleId}
+      customBlockOrder={customBlockOrder}
+      sources={[
+        {
+          id: "current",
+          title: parsed.title,
+          parsed,
+        },
+      ]}
+    />
+  );
 }
 
 export default function UniversalDocument({
@@ -2071,11 +2120,13 @@ export default function UniversalDocument({
   query,
   blockLabels = {},
   moduleId,
+  customBlockOrder = [],
 }: {
   content: string;
   query: string;
   blockLabels?: BlockLabelMap;
   moduleId?: ModuleId;
+  customBlockOrder?: string[];
 }) {
   const parsed = useMemo(
     () => parseUniversalTxt(content, blockLabels),
@@ -2205,6 +2256,7 @@ export default function UniversalDocument({
               forceOpen={forceOpen}
               semanticTint={moduleId === "drugs"}
               moduleId={moduleId}
+              customBlockOrder={customBlockOrder}
             />
           )}
 
@@ -2241,6 +2293,7 @@ export default function UniversalDocument({
                 forceOpen={forceOpen}
                 semanticTint={moduleId === "drugs"}
                 moduleId={moduleId}
+                customBlockOrder={customBlockOrder}
               />
             </div>
           )}
@@ -2262,6 +2315,7 @@ export default function UniversalDocument({
               setOpenBlocks={setOpenBlocks}
               forceOpen={forceOpen}
               moduleId={moduleId}
+              customBlockOrder={customBlockOrder}
             />
           ))}
         </div>
@@ -2284,6 +2338,7 @@ export default function UniversalDocument({
             inheritEntityBlocks={inheritEntityBlocks}
             inheritedEntityBlocks={rootInheritedEntityBlocks}
             moduleId={moduleId}
+            customBlockOrder={customBlockOrder}
           />
         ))}
       </div>

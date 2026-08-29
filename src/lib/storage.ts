@@ -38,6 +38,7 @@ type ManifestModule = {
   description: string;
   blockLabels: ContentModule["blockLabels"];
   blockLabelsRevision?: number;
+  customBlockOrder?: string[];
   folders: ManifestFolder[];
   files: ManifestFile[];
 };
@@ -251,6 +252,7 @@ function toManifest(tree: ContentTree): StorageManifest {
       description: module.description,
       blockLabels: module.blockLabels,
       blockLabelsRevision: module.blockLabelsRevision,
+      customBlockOrder: module.customBlockOrder,
       folders: module.folders.map((folder) =>
         folderToManifest(module, folder, []),
       ),
@@ -304,6 +306,8 @@ function manifestToTree(manifest: StorageManifest): ContentTree {
       description: module.description,
       blockLabels: module.blockLabels,
       blockLabelsRevision: module.blockLabelsRevision ?? 0,
+      customBlockOrder:
+        module.customBlockOrder ?? [],
       folders: module.folders.map(folderFromManifest),
       files: module.files.map((file) => ({
         id: file.id,
