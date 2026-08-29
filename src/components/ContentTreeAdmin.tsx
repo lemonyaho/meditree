@@ -553,7 +553,6 @@ export default function ContentTreeAdmin() {
   const manageMode = true;
 
   const [tree, setTree] = useState<ContentTree | null>(null);
-  const [savedTree, setSavedTree] = useState("");
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [originals, setOriginals] = useState<Record<string, string>>({});
   const [selectedId, setSelectedId] = useState<string | undefined>(requestedFileId ?? undefined);
@@ -563,13 +562,14 @@ export default function ContentTreeAdmin() {
   const [verifyPromptOpen, setVerifyPromptOpen] =
     useState(false);
   const [notice, setNotice] = useState("");
+  const [structureDirty, setStructureDirty] =
+    useState(false);
 
   useEffect(() => {
     let active = true;
     void readContentTree().then((current) => {
       if (!active) return;
       setTree(current);
-      setSavedTree(JSON.stringify(current));
     });
     return () => {
       active = false;
@@ -631,23 +631,32 @@ export default function ContentTreeAdmin() {
     return edits;
   }, [drafts, originals]);
 
-  const hasUnsavedChanges = useMemo(() => {
-    if (!tree || !savedTree) {
-      return Object.keys(pendingEdits).length > 0;
-    }
-
-    return (
-      JSON.stringify(tree) !== savedTree ||
-      Object.keys(pendingEdits).length > 0
-    );
-  }, [tree, savedTree, pendingEdits]);
+  // v2.6.11:
+  // Warn only after a real user edit:
+  // - structural/admin edits set structureDirty
+  // - TXT edits are tracked by pendingEdits
+  // Merely opening or navigating Admin pages does not mark dirty.
+  const hasUnsavedChanges =
+    structureDirty ||
+    Object.keys(pendingEdits).length > 0;
 
   const skipNextPopstateGuard = useRef(false);
+  const allowNextUnload = useRef(false);
 
   useEffect(() => {
     if (!hasUnsavedChanges) return;
 
+    const confirmLeave = () =>
+      window.confirm(
+        "저장하지 않은 변경사항이 있습니다. 저장하지 않고 나가시겠습니까?",
+      );
+
     const beforeUnload = (event: BeforeUnloadEvent) => {
+      if (allowNextUnload.current) {
+        allowNextUnload.current = false;
+        return;
+      }
+
       event.preventDefault();
       event.returnValue = "";
     };
@@ -685,20 +694,21 @@ export default function ContentTreeAdmin() {
         window.location.href,
       );
 
-      if (
-        destination.href === window.location.href
-      ) {
+      if (destination.href === window.location.href) {
         return;
       }
 
-      const leave = window.confirm(
-        "저장하지 않고 나가시겠습니까?",
-      );
+      event.preventDefault();
+      event.stopPropagation();
 
-      if (!leave) {
-        event.preventDefault();
-        event.stopPropagation();
+      if (!confirmLeave()) {
+        return;
       }
+
+      // A full navigation guarantees the discarded local Admin state
+      // cannot leak into another query/path of the same Next.js route.
+      allowNextUnload.current = true;
+      window.location.assign(destination.href);
     };
 
     const popstateGuard = () => {
@@ -707,14 +717,16 @@ export default function ContentTreeAdmin() {
         return;
       }
 
-      const leave = window.confirm(
-        "저장하지 않고 나가시겠습니까?",
-      );
-
-      if (!leave) {
+      if (!confirmLeave()) {
         skipNextPopstateGuard.current = true;
         window.history.forward();
+        return;
       }
+
+      // popstate has already moved the browser history entry.
+      // Reload that destination to discard all local unsaved Admin state.
+      allowNextUnload.current = true;
+      window.location.reload();
     };
 
     window.addEventListener(
@@ -752,8 +764,32 @@ export default function ContentTreeAdmin() {
     return <div className="rounded-[16px] border border-dashed bg-white p-8 text-center text-[14px] text-[#7d8781]">콘텐츠 구조 불러오는 중…</div>;
   }
 
-  const replaceModule = (nextModule: ContentModule) => {
-    setTree((current) => current ? { ...current, modules: { ...current.modules, [moduleId]: nextModule } } : current);
+  const replaceModule = (
+    nextModule: ContentModule,
+    markDirty = true,
+  ) => {
+    if (
+      JSON.stringify(module) ===
+      JSON.stringify(nextModule)
+    ) {
+      return;
+    }
+
+    if (markDirty) {
+      setStructureDirty(true);
+    }
+
+    setTree((current) =>
+      current
+        ? {
+            ...current,
+            modules: {
+              ...current.modules,
+              [moduleId]: nextModule,
+            },
+          }
+        : current,
+    );
   };
 
   const replaceBlockLabels = (blockLabels: BlockLabelMap) => {
@@ -764,8 +800,14 @@ export default function ContentTreeAdmin() {
     });
   };
 
-  const replaceContainer = (updater: Parameters<typeof updateContainer>[2]) => {
-    replaceModule(updateContainer(module, path, updater));
+  const replaceContainer = (
+    updater: Parameters<typeof updateContainer>[2],
+    markDirty = true,
+  ) => {
+    replaceModule(
+      updateContainer(module, path, updater),
+      markDirty,
+    );
   };
 
   const orderedFiles =
@@ -939,25 +981,28 @@ export default function ContentTreeAdmin() {
     const parsedMeta =
       metadataFromTxt(cleanContent, fallbackTitle);
 
-    replaceContainer((current) => ({
-      ...current,
-      files: current.files.map((item) =>
-        item.id === file.id
-          ? {
-              ...item,
-              name: explicitTitle
-                ? ensureTxtName(explicitTitle)
-                : item.name,
-              meta: {
-                ...parsedMeta,
-                verified: item.meta.verified,
-                verifiedHash:
-                  item.meta.verifiedHash,
-              },
-            }
-          : item,
-      ),
-    }));
+    replaceContainer(
+      (current) => ({
+        ...current,
+        files: current.files.map((item) =>
+          item.id === file.id
+            ? {
+                ...item,
+                name: explicitTitle
+                  ? ensureTxtName(explicitTitle)
+                  : item.name,
+                meta: {
+                  ...parsedMeta,
+                  verified: item.meta.verified,
+                  verifiedHash:
+                    item.meta.verifiedHash,
+                },
+              }
+            : item,
+        ),
+      }),
+      false,
+    );
   };
 
   const performSave = async (
@@ -1043,7 +1088,7 @@ export default function ContentTreeAdmin() {
       );
 
       setTree(result.tree);
-      setSavedTree(JSON.stringify(result.tree));
+      setStructureDirty(false);
       setOriginals((current) => ({
         ...current,
         ...cleanEdits,
