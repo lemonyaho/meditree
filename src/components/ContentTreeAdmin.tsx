@@ -643,6 +643,24 @@ export default function ContentTreeAdmin() {
   const skipNextPopstateGuard = useRef(false);
   const allowNextUnload = useRef(false);
 
+  const navigateAway = (href: string) => {
+    if (!hasUnsavedChanges) {
+      router.push(href);
+      return;
+    }
+
+    const leave = window.confirm(
+      "저장하지 않은 변경사항이 있습니다. 저장하지 않고 나가시겠습니까?",
+    );
+
+    if (!leave) return;
+
+    allowNextUnload.current = true;
+    window.location.assign(
+      new URL(href, window.location.href).href,
+    );
+  };
+
   useEffect(() => {
     if (!hasUnsavedChanges) return;
 
@@ -1498,7 +1516,17 @@ export default function ContentTreeAdmin() {
         </section>
       )}
 
-      <AdminActionRail saving={saving} onSave={() => void save()} parentHref={parentAdminHref} viewHref={currentViewHref} />
+      <AdminActionRail
+        saving={saving}
+        onSave={() => void save()}
+        parentHref={parentAdminHref}
+        viewHref={currentViewHref}
+        onNavigate={
+          hasUnsavedChanges
+            ? navigateAway
+            : undefined
+        }
+      />
 
       {verifyPromptOpen && (
         <div className="fixed inset-0 z-[260] flex items-center justify-center bg-black/20 px-4">

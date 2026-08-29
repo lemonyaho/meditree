@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AdminActionRail } from "@/components/ActionRail";
 import { readContentTree, writeContentTree } from "@/components/useContentTree";
 import { APP_VERSION, type ContentTree, type ModuleId } from "@/lib/content-model";
@@ -55,6 +55,149 @@ export default function SiteAdminEditor() {
     () => (tree ? tree.site.moduleOrder.map((id) => tree.modules[id]) : []),
     [tree],
   );
+
+  const hasUnsavedChanges = Boolean(
+    tree &&
+      saved &&
+      JSON.stringify(tree) !== saved,
+  );
+
+  const skipNextPopstateGuard = useRef(false);
+  const allowNextUnload = useRef(false);
+
+  const navigateAway = (href: string) => {
+    if (!hasUnsavedChanges) {
+      window.location.assign(
+        new URL(href, window.location.href).href,
+      );
+      return;
+    }
+
+    const leave = window.confirm(
+      "저장하지 않은 변경사항이 있습니다. 저장하지 않고 나가시겠습니까?",
+    );
+
+    if (!leave) return;
+
+    allowNextUnload.current = true;
+    window.location.assign(
+      new URL(href, window.location.href).href,
+    );
+  };
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+
+    const beforeUnload = (event: BeforeUnloadEvent) => {
+      if (allowNextUnload.current) {
+        allowNextUnload.current = false;
+        return;
+      }
+
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    const clickGuard = (event: MouseEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      const anchor = target.closest("a[href]");
+      if (!(anchor instanceof HTMLAnchorElement)) return;
+
+      const href = anchor.getAttribute("href");
+      if (
+        !href ||
+        href.startsWith("#") ||
+        anchor.target === "_blank" ||
+        anchor.hasAttribute("download")
+      ) {
+        return;
+      }
+
+      const destination = new URL(
+        anchor.href,
+        window.location.href,
+      );
+
+      if (destination.href === window.location.href) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const leave = window.confirm(
+        "저장하지 않은 변경사항이 있습니다. 저장하지 않고 나가시겠습니까?",
+      );
+
+      if (!leave) return;
+
+      allowNextUnload.current = true;
+      window.location.assign(destination.href);
+    };
+
+    const popstateGuard = () => {
+      if (skipNextPopstateGuard.current) {
+        skipNextPopstateGuard.current = false;
+        return;
+      }
+
+      const leave = window.confirm(
+        "저장하지 않은 변경사항이 있습니다. 저장하지 않고 나가시겠습니까?",
+      );
+
+      if (!leave) {
+        skipNextPopstateGuard.current = true;
+        window.history.forward();
+        return;
+      }
+
+      allowNextUnload.current = true;
+      window.location.reload();
+    };
+
+    window.addEventListener(
+      "beforeunload",
+      beforeUnload,
+    );
+    document.addEventListener(
+      "click",
+      clickGuard,
+      true,
+    );
+    window.addEventListener(
+      "popstate",
+      popstateGuard,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "beforeunload",
+        beforeUnload,
+      );
+      document.removeEventListener(
+        "click",
+        clickGuard,
+        true,
+      );
+      window.removeEventListener(
+        "popstate",
+        popstateGuard,
+      );
+    };
+  }, [hasUnsavedChanges]);
 
   if (!tree) {
     return <div className="rounded-[16px] border border-dashed bg-white p-8 text-center text-[14px] text-[#7d8781]">설정 불러오는 중…</div>;
@@ -166,7 +309,16 @@ export default function SiteAdminEditor() {
         </div>
       </section>
 
-      <AdminActionRail saving={saving} onSave={() => void save()} viewHref="/" />
+      <AdminActionRail
+        saving={saving}
+        onSave={() => void save()}
+        viewHref="/"
+        onNavigate={
+          hasUnsavedChanges
+            ? navigateAway
+            : undefined
+        }
+      />
 
       {notice && (
         <div className="fixed bottom-6 left-1/2 z-[220] -translate-x-1/2 rounded-[12px] border bg-white px-4 py-3 text-[13px] font-semibold shadow-[0_12px_34px_rgba(20,38,30,0.12)]">{notice}</div>

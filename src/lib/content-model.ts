@@ -1,4 +1,4 @@
-export const APP_VERSION = "2.6.11";
+export const APP_VERSION = "2.6.12";
 
 export type ModuleId =
   | "clinical"

@@ -81,21 +81,32 @@ export function AdminActionRail({
   onSave,
   viewHref,
   parentHref,
+  onNavigate,
 }: {
   saving: boolean;
   onSave: () => void;
   viewHref: string;
   parentHref?: string;
+  onNavigate?: (href: string) => void;
 }) {
   const router = useRouter();
+
+  const navigate = (href: string) => {
+    if (onNavigate) {
+      onNavigate(href);
+      return;
+    }
+
+    router.push(href);
+  };
   return (
     <aside className={railClass} aria-label="관리자 빠른 이동">
-      <button type="button" onClick={() => router.push("/")} className={baseButton} title="홈" aria-label="홈"><HomeIcon /></button>
-      <button type="button" disabled={!parentHref} onClick={() => parentHref && router.push(parentHref)} className={baseButton} title="상위 관리자 페이지" aria-label="상위 관리자 페이지"><ParentIcon /></button>
+      <button type="button" onClick={() => navigate("/")} className={baseButton} title="홈" aria-label="홈"><HomeIcon /></button>
+      <button type="button" disabled={!parentHref} onClick={() => parentHref && navigate(parentHref)} className={baseButton} title="상위 관리자 페이지" aria-label="상위 관리자 페이지"><ParentIcon /></button>
       <button type="button" disabled={saving} onClick={onSave} className="grid h-[58px] w-[58px] place-items-center border-b border-[#075f4e] bg-[#075f4e] text-white transition hover:bg-[#064f42] disabled:opacity-70 max-[720px]:border-b-0 max-[720px]:border-r" title={saving ? "저장 중" : "저장"} aria-label={saving ? "저장 중" : "저장"}>
         {saving ? <span className="text-[12px] font-bold">•••</span> : <SaveIcon />}
       </button>
-      <button type="button" onClick={() => router.push(viewHref)} className="grid h-[58px] w-[58px] place-items-center bg-[#eef6eb] text-[#075f4e] transition hover:bg-[#e5f1e1]" title="View" aria-label="View"><ViewIcon /></button>
+      <button type="button" onClick={() => navigate(viewHref)} className="grid h-[58px] w-[58px] place-items-center bg-[#eef6eb] text-[#075f4e] transition hover:bg-[#e5f1e1]" title="View" aria-label="View"><ViewIcon /></button>
     </aside>
   );
 }
